@@ -1,0 +1,9 @@
+<library path="lib/librviz_3d_nav_goal_tool">
+
+  <class type="rviz::Goal3DTool" base_class_type="rviz::Tool">
+    <description>
+      This is a RViz plugin tool for 3d navigation goal.
+    </description>
+  </class>
+
+</library>

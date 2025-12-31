@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>rviz-3d-nav-goal-tool</name>
+  <version>0.0.0</version>
+  <description>
+    The rviz-3d-nav-goal-tool package is a RViz plugin tool for 3d navigation goal.
+  </description>
+
+  <maintainer email="jianle001@e.ntu.edu.sg">Bruce Chan Jian Le</maintainer>
+  <license>BSD</license>
+  <url type="website">https://github.com/BruceChanJianLe/rviz-3d-nav-goal-tool</url>
+  <url type="website">https://github.com/HKUST-Aerial-Robotics/plan_utils</url>
+
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>pluginlib</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>rviz</build_depend>
+
+  <build_export_depend>pluginlib</build_export_depend>
+  <build_export_depend>roscpp</build_export_depend>
+  <build_export_depend>rospy</build_export_depend>
+  <build_export_depend>rviz</build_export_depend>
+
+  <exec_depend>pluginlib</exec_depend>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>rviz</exec_depend>
+
+
+  <export>
+    <rviz plugin="${prefix}/rviz_plugin.xml"/>
+  </export>
+
+</package>
