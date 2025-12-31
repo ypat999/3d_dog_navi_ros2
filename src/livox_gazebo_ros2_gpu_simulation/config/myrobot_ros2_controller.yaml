@@ -1,0 +1,56 @@
+# 控制器管理器配置（ROS 2中用于管理各类控制器的核心组件）
+controller_manager:
+  # 控制器管理器的ROS参数配置块
+  ros__parameters:
+    # 控制器的更新频率，单位为Hz（此处表示每秒更新200次）
+    update_rate: 200 
+    # 是否使用仿真时间（true表示使用仿真时间，通常在gazebo等仿真环境中启用）
+    use_sim_time: true  
+    
+    # 定义一个名为myrobot_joint_state_broadcaster的控制器（关节状态广播器）
+    myrobot_joint_state_broadcaster:
+      # 指定该控制器的类型：关节状态广播器（ROS 2标准控制器，用于发布关节状态信息）
+      type: joint_state_broadcaster/JointStateBroadcaster
+      # 该控制器是否使用仿真时间（与全局保持一致，启用仿真时间）
+      use_sim_time: true
+      
+    # 定义一个名为myrobot_velocity_controller的控制器（关节组速度控制器）
+    myrobot_velocity_controller:
+      # 指定该控制器的类型：关节组速度控制器（ROS 2标准控制器，用于控制一组关节的速度）
+      type: velocity_controllers/JointGroupVelocityController
+      # 该控制器是否使用仿真时间（与全局保持一致，启用仿真时间）
+      use_sim_time: true
+
+
+# 对名为myrobot_joint_state_broadcaster的控制器进行详细参数配置
+myrobot_joint_state_broadcaster:
+  # 该控制器的ROS参数配置块
+  ros__parameters:
+    
+    # 需要广播状态的关节列表（指定要监控的关节名称）
+    joints:
+      - ahead_left_wheel_joint   # 前轮左关节
+      - ahead_right_wheel_joint  # 前轮右关节
+      - behind_left_wheel_joint   # 后轮左关节
+      - behind_right_wheel_joint  # 后轮右关节
+    
+    # 需要广播的关节状态接口（指定要发布的关节状态类型）
+    state_interfaces:
+      - position  # 关节位置（角度/位移）
+      - velocity  # 关节速度（角速度/线速度）
+
+# 对名为myrobot_velocity_controller的控制器进行详细参数配置
+myrobot_velocity_controller:
+  # 该控制器的ROS参数配置块
+  ros__parameters:
+    
+    # 需要控制的关节列表（指定要控制的关节名称）
+    joints:
+      - ahead_left_wheel_joint   # 前轮左关节
+      - ahead_right_wheel_joint  # 前轮右关节
+      - behind_left_wheel_joint   # 后轮左关节
+      - behind_right_wheel_joint  # 后轮右关节
+    
+    # 需要使用的命令接口（指定要发送的控制命令类型）
+    command_interfaces:
+      - velocity  # 关节速度（角速度/线速度）

@@ -1,0 +1,227 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- =============== 颜色定义 =============== -->
+    <xacro:property name="red"    value="1.0 0.0 0.0 1.0"/>
+    <xacro:property name="green"  value="0.0 1.0 0.0 1.0"/>
+    <xacro:property name="blue"   value="0.0 0.0 1.0 1.0"/>
+    <xacro:property name="gray"   value="0.5 0.5 0.5 1.0"/>
+    <xacro:property name="white"  value="1.0 1.0 1.0 1.0"/>
+    <xacro:property name="white_tou"  value="1.0 1.0 1.0 0.5"/>
+    <xacro:property name="black"  value="0.0 0.0 0.0 1.0"/>
+    <xacro:property name="yellow"  value="1.0 1.0 0.0 1.0"/>
+    
+
+    <!-- =============== 圆柱体 xacro =============== -->
+    <xacro:macro name="cylinder_xacro" params="
+    name length radius color 
+    self_xyz:='0 0 0' self_rpy:='0 0 0'
+    xyz:='0 0 0' rpy:='0 0 0' axis_xyz:='0 0 0' axis_rpy:='0 0 0'
+    is_child:=true type:=fixed parent_link:='base_link'">
+        <link name="${name}">
+            <visual>
+                <origin xyz="${self_xyz}" rpy="${self_rpy}"/>
+                <geometry>
+                    
+                    <cylinder length="${length}" radius="${radius}"/>
+                </geometry>
+                <material name="${name}_mat">
+                    <color rgba="${color}"/>
+                </material>
+            </visual>
+            <collision>
+                <origin xyz="${self_xyz}" rpy="${self_rpy}"/>
+                <geometry>
+                    <cylinder length="${length}" radius="${radius}"/>
+                </geometry>
+                 <material name="${name}_mat">
+                    <color rgba="${color}"/>
+                </material>
+            </collision>
+            <inertial>
+                <mass value="1.0"/>
+                <origin xyz="0 0 0"/>
+                <inertia ixx="0.01" ixy="0.0" ixz="0.0"
+                         iyy="0.01" iyz="0.0"
+                         izz="0.01"/>
+            </inertial>
+
+
+
+        </link>
+
+        <xacro:if value="${is_child}">
+            <joint name="${name}_joint" type="${type}">
+                <parent link="${parent_link}"/>
+                <child link="${name}"/>
+                <origin xyz="${xyz}" rpy="${rpy}"/>
+
+
+                <xacro:if value="${type == 'continuous'}">
+                    <axis xyz="${axis_xyz}" />
+                </xacro:if>
+                
+            </joint>
+        </xacro:if>
+    </xacro:macro>
+
+
+    <!-- =============== 球体 xacro =============== -->
+    <xacro:macro name="sphere_xacro" params="
+    name radius color 
+    self_xyz:='0 0 0' self_rpy:='0 0 0'
+    xyz:='0 0 0' rpy:='0 0 0' axis_xyz:='0 0 0' axis_rpy:='0 0 0'
+    is_child:=true type:=fixed parent_link:='base_link'">
+        <link name="${name}">
+            <visual>
+             <origin xyz="${self_xyz}" rpy="${self_rpy}"/>
+                <geometry>
+                   
+                    <sphere radius="${radius}"/>
+                </geometry>
+                <material name="${name}_mat">
+                    <color rgba="${color}"/>
+                </material>
+            </visual>
+            <collision>
+             <origin xyz="${self_xyz}" rpy="${self_rpy}"/>
+                <geometry>
+                    
+                    <sphere radius="${radius}"/>
+                </geometry>
+                 <material name="${name}_mat">
+                    <color rgba="${color}"/>
+                </material>
+            </collision>
+            <inertial>
+                <mass value="1.0"/>
+                <origin xyz="0 0 0"/>
+                <inertia ixx="0.01" ixy="0.0" ixz="0.0"
+                         iyy="0.01" iyz="0.0"
+                         izz="0.01"/>
+            </inertial>
+
+        </link>
+
+        <xacro:if value="${is_child}">
+            <joint name="${name}_joint" type="${type}">
+                <parent link="${parent_link}"/>
+                <child link="${name}"/>
+                <origin xyz="${xyz}" rpy="${rpy}"/>
+                <xacro:if value="${type == 'continuous'}">
+                    <axis xyz="${axis_xyz}"/>
+                </xacro:if>
+            </joint>
+        </xacro:if>
+    </xacro:macro>
+
+
+    <!-- =============== 立方体 Link =============== -->
+    <xacro:macro name="box_xacro" params="
+    name length width height color 
+    self_xyz:='0 0 0' self_rpy:='0 0 0'
+    xyz:='0 0 0' rpy:='0 0 0'
+    is_child:=true type:=fixed parent_link:='base_link' ">
+        <link name="${name}">
+            <visual>
+            <origin xyz="${self_xyz}" rpy="${self_rpy}"/>
+                <geometry>
+                    
+                    <box size="${length} ${width} ${height}"/>
+                </geometry>
+                <material name="${name}_mat">
+                    <color rgba="${color}"/>
+                </material>
+            </visual>
+            <collision>
+            <origin xyz="${self_xyz}" rpy="${self_rpy}"/>
+                <geometry>
+                    
+                    <box size="${length} ${width} ${height}"/>
+                </geometry>
+                 <material name="${name}_mat">
+                    <color rgba="${color}"/>
+                </material>
+            </collision>
+            <inertial>
+                <mass value="1.0"/>
+                <origin xyz="0 0 0"/>
+                <inertia ixx="0.01" ixy="0.0" ixz="0.0"
+                         iyy="0.01" iyz="0.0"
+                         izz="0.01"/>
+            </inertial>
+
+
+        </link>
+
+        <xacro:if value="${is_child}">
+            <joint name="${name}_joint" type="${type}">
+                <parent link="${parent_link}"/>
+                <child link="${name}"/>
+                <origin xyz="${xyz}" rpy="${rpy}"/>
+                <xacro:if value="${type == 'continuous'}">
+                    <axis xyz="${axis_xyz}"/>
+                </xacro:if>
+            </joint>
+        </xacro:if>
+    </xacro:macro>
+
+    <!-- =============== Mesh xacro =============== -->
+    <xacro:macro name="mesh_xacro" params="
+    name mesh_path 
+    self_xyz:='0 0 0' self_rpy:='0 0 0'
+    xyz:='0 0 0' rpy:='0 0 0' 
+    scale:='1 1 1' color:='0.7 0.7 0.7 1.0' 
+    is_child:=true parent_link:='base_link'">
+        <link name="${name}">
+            <visual>
+                <!-- <origin xyz="${xyz}" rpy="${rpy}"/> -->
+                <origin xyz="${self_xyz}" rpy="${self_rpy}"/>
+                <geometry>
+                
+                    <mesh filename="${mesh_path}" scale="${scale}"/>
+                </geometry>
+                <material name="${name}_mat">
+                    <color rgba="${color}"/>
+                </material>
+            </visual>
+            <collision>
+                <origin xyz="${self_xyz}" rpy="${self_rpy}"/>
+                <geometry>
+                    <box size="0.1 0.1 0.1"/>
+                </geometry>
+                 <material name="${name}_mat">
+                    <color rgba="${color}"/>
+                </material>
+            </collision>
+            <inertial>
+                <mass value="0.1"/>
+                <origin xyz="0 0 0"/>
+                <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+                         iyy="0.001" iyz="0.0"
+                         izz="0.001"/>
+            </inertial>
+
+
+        </link>
+
+        <xacro:if value="${is_child}">
+            <joint name="${name}_joint" type="fixed">
+                <parent link="${parent_link}"/>
+                <child link="${name}"/>
+                <origin xyz="${xyz}" rpy="${rpy}"/>
+
+            </joint>
+        </xacro:if>
+    </xacro:macro>
+
+
+
+    
+
+
+
+
+
+
+</robot>

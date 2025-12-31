@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<library path="lib/liblivox_sim_gpu_laser">
+  <class name="livox_sim_gpu_laser/GazeboRosLaser" type="gazebo::GazeboRosLaser">
+    <description>Livox Sim GPU Laser plugin for Gazebo ROS2</description>
+  </class>
+</library>

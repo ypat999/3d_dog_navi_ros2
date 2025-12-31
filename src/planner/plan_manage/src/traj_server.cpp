@@ -1,58 +1,30 @@
-/**
- * @file traj_server.cpp
- * @brief 轨迹服务器节点，用于接收和处理B样条轨迹，并生成速度命令
- */
-#include "bspline_opt/uniform_bspline.h"            // 奥迪ometry消息类型  // 均匀B样条优化库
-#include "nav_msgs/Odometry.h"
-#include "ego_planner/Bspline.h"
-#include "quadrotor_msgs/PositionCommand.h"
-#include "std_msgs/Empty.h"
-#include "visualization_msgs/Marker.h"
-#include <ros/ros.h>
+#include "bspline_opt/uniform_bspline.h"
+#include "nav_msgs/msg/odometry.hpp"
+#include "traj_utils/msg/bspline.hpp"
+#include "quadrotor_msgs/msg/position_command.hpp"
+#include "std_msgs/msg/empty.hpp"
+#include "visualization_msgs/msg/marker.hpp"
+#include <rclcpp/rclcpp.hpp>
 
-#include <Eigen/Core>
-#include <Eigen/Dense>
-#include <Eigen/Geometry>
+rclcpp::Publisher<quadrotor_msgs::msg::PositionCommand>::SharedPtr pos_cmd_pub;
 
-#include <geometry_msgs/PoseStamped.h>
-#include <nav_msgs/Path.h>
-#include <std_msgs/Int16.h>
-
-#include <boost/bind.hpp>   // 将tf监听绑定到ROS回调函数
-#include <tf/transform_listener.h>
-
-ros::Publisher pos_vel_pub;
-std::string odom_topic;
+quadrotor_msgs::msg::PositionCommand cmd;
+double pos_gain[3] = {0, 0, 0};
+double vel_gain[3] = {0, 0, 0};
 
 using ego_planner::UniformBspline;
-using namespace std;
 
 bool receive_traj_ = false;
 vector<UniformBspline> traj_;
 double traj_duration_;
-ros::Time start_time_;
+rclcpp::Time start_time_;
+int traj_id_;
 
 // yaw control
-double last_yaw_=0, last_yaw_dot_=0;
+double last_yaw_, last_yaw_dot_;
 double time_forward_;
 
-geometry_msgs::Pose odom2map_Pose;
-Eigen::Vector3d end_pt_,end_euler_; // goal state
-
-ros::Publisher control_point_state_pub_;
-nav_msgs::Odometry control_point_state;
-
-std::pair<double, double> calculate_yaw(double t_cur);
-double LimitSpeed(const double vel_input,const double upper,const double lower);
-void odometryCallback(const nav_msgs::OdometryConstPtr &msg,tf::TransformListener* tf_listener_ptr);
-
-// PID parameters
-double kp_yaw_, ki_yaw_, kd_yaw_;
-double yaw_error_integral_ = 0.0;
-double last_yaw_error_ = 0.0;
-
-//触发路径规划的回调函数
-void bsplineCallback(ego_planner::BsplineConstPtr msg)
+void bsplineCallback(traj_utils::msg::Bspline::ConstPtr msg)
 {
   // parse pos traj
 
@@ -74,12 +46,20 @@ void bsplineCallback(ego_planner::BsplineConstPtr msg)
   UniformBspline pos_traj(pos_pts, msg->order, 0.1);
   pos_traj.setKnot(knots);
 
+  // parse yaw traj
+
+  // Eigen::MatrixXd yaw_pts(msg->yaw_pts.size(), 1);
+  // for (int i = 0; i < msg->yaw_pts.size(); ++i) {
+  //   yaw_pts(i, 0) = msg->yaw_pts[i];
+  // }
+
+  // UniformBspline yaw_traj(yaw_pts, msg->order, msg->yaw_dt);
+
   start_time_ = msg->start_time;
+  traj_id_ = msg->traj_id;
 
   traj_.clear();
   traj_.push_back(pos_traj);
-
-
   traj_.push_back(traj_[0].getDerivative());
   traj_.push_back(traj_[1].getDerivative());
 
@@ -88,132 +68,125 @@ void bsplineCallback(ego_planner::BsplineConstPtr msg)
   receive_traj_ = true;
 }
 
-
-double LimitSpeed(const double vel_input,const double upper,const double lower)
+std::pair<double, double> calculate_yaw(double t_cur, Eigen::Vector3d &pos, rclcpp::Time &time_now, rclcpp::Time &time_last)
 {
-  double vel_output;
-  if(vel_input > upper) vel_output = upper;
-  else if(vel_input < lower) vel_output = lower;
-  else vel_output = vel_input;
-
-  return vel_output;
-}
-
-
-void odometryCallback(const nav_msgs::OdometryConstPtr &msg,tf::TransformListener* tf_listener_ptr)
-{
-    try
-    {
-      // 则当前odom_pos_为base与map的关系
-      tf::StampedTransform transform_odom2map;
-      transform_odom2map.setIdentity();//将变换矩阵初始化为单位阵
-
-      //将当前位姿从odom坐标系转换到map坐标，如果存在tf变换关系的话
-      if (tf_listener_ptr->waitForTransform("map", msg->header.frame_id, ros::Time(0), ros::Duration(3.0)));
-      tf_listener_ptr->lookupTransform("map", msg->header.frame_id,
-                                  ros::Time(0), transform_odom2map);
-      // 位置变换    
-      tf::Point pt_odom(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z);
-      tf::Point pt_map = transform_odom2map * pt_odom;
-
-      odom2map_Pose.position.x = pt_map.x();
-      odom2map_Pose.position.y = pt_map.y();
-      odom2map_Pose.position.z = pt_map.z();                 
-      // 速度变换（线速度需要旋转到 map 坐标系）
-      tf::Quaternion q_odom(msg->pose.pose.orientation.x,
-                      msg->pose.pose.orientation.y,
-                      msg->pose.pose.orientation.z,
-                      msg->pose.pose.orientation.w);
-      tf::Quaternion q_map = transform_odom2map.getRotation() * q_odom;
-      odom2map_Pose.orientation.x = q_map.x();
-      odom2map_Pose.orientation.y = q_map.y();
-      odom2map_Pose.orientation.z = q_map.z();
-      odom2map_Pose.orientation.w = q_map.w();
-    }
-    catch(const std::exception& e)
-    {
-      std::cerr << e.what() << '\n';
-      return;
-    }
-
-}
-
-
-
-std::pair<double, double> calculate_yaw(double t_cur)
-{
-  double yaw_diff=0;
-  double min_close_distance=1.0;
   constexpr double PI = 3.1415926;
-  //获取当前机器人偏航角，与当前位置
-  double yaw_robot = tf::getYaw(odom2map_Pose.orientation);
-  double yaw_control_point = tf::getYaw(control_point_state.pose.pose.orientation);
+  constexpr double YAW_DOT_MAX_PER_SEC = PI;
+  // constexpr double YAW_DOT_DOT_MAX_PER_SEC = PI;
+  std::pair<double, double> yaw_yawdot(0, 0);
+  double yaw = 0;
+  double yawdot = 0;
 
-  Eigen::Vector3d current_pos=Eigen::Vector3d(odom2map_Pose.position.x,odom2map_Pose.position.y,odom2map_Pose.position.z);
+  Eigen::Vector3d dir = t_cur + time_forward_ <= traj_duration_ ? traj_[0].evaluateDeBoorT(t_cur + time_forward_) - pos : traj_[0].evaluateDeBoorT(traj_duration_) - pos;
+  double yaw_temp = dir.norm() > 0.1 ? atan2(dir(1), dir(0)) : last_yaw_;
+  double max_yaw_change = YAW_DOT_MAX_PER_SEC * (time_now - time_last).seconds();
+  if (yaw_temp - last_yaw_ > PI)
+  {
+    if (yaw_temp - last_yaw_ - 2 * PI < -max_yaw_change)
+    {
+      yaw = last_yaw_ - max_yaw_change;
+      if (yaw < -PI)
+        yaw += 2 * PI;
 
-  //当位置接近于目标，使用终点的偏航角
-  yaw_diff=((end_pt_ - current_pos).norm()<min_close_distance? end_euler_(2):yaw_control_point) - yaw_robot;
+      yawdot = -YAW_DOT_MAX_PER_SEC;
+    }
+    else
+    {
+      yaw = yaw_temp;
+      if (yaw - last_yaw_ > PI)
+        yawdot = -YAW_DOT_MAX_PER_SEC;
+      else
+        yawdot = (yaw_temp - last_yaw_) / (time_now - time_last).seconds();
+    }
+  }
+  else if (yaw_temp - last_yaw_ < -PI)
+  {
+    if (yaw_temp - last_yaw_ + 2 * PI > max_yaw_change)
+    {
+      yaw = last_yaw_ + max_yaw_change;
+      if (yaw > PI)
+        yaw -= 2 * PI;
 
-  // cout<<"distance to goal:"<< (end_pt_ - current_pos).norm()<<endl;
-  // cout<<"end_euler_(2)"<< end_euler_(2)*180/3.14 <<endl;
-  while (yaw_diff > PI)  yaw_diff -= 2 * PI;
-  while (yaw_diff < -PI) yaw_diff += 2 * PI;
+      yawdot = YAW_DOT_MAX_PER_SEC;
+    }
+    else
+    {
+      yaw = yaw_temp;
+      if (yaw - last_yaw_ < -PI)
+        yawdot = YAW_DOT_MAX_PER_SEC;
+      else
+        yawdot = (yaw_temp - last_yaw_) / (time_now - time_last).seconds();
+    }
+  }
+  else
+  {
+    if (yaw_temp - last_yaw_ < -max_yaw_change)
+    {
+      yaw = last_yaw_ - max_yaw_change;
+      if (yaw < -PI)
+        yaw += 2 * PI;
 
-  // PID控制计算
-  yaw_error_integral_ += yaw_diff * (t_cur+1e-6);//計算角度誤差積分
-  double yaw_error_derivative = (yaw_diff - last_yaw_error_) / (t_cur+1e-6);//計算微分
-  double yaw_rate = kp_yaw_ * yaw_diff + 
-                   ki_yaw_ * yaw_error_integral_ + 
-                   kd_yaw_ * yaw_error_derivative;
-  
-  last_yaw_error_ = yaw_diff;
-  yaw_rate = LimitSpeed(yaw_rate, 1.0, -1.0);//除以 时间差 得到 角速度
+      yawdot = -YAW_DOT_MAX_PER_SEC;
+    }
+    else if (yaw_temp - last_yaw_ > max_yaw_change)
+    {
+      yaw = last_yaw_ + max_yaw_change;
+      if (yaw > PI)
+        yaw -= 2 * PI;
 
-  //计算角速度速度
-  // cout<<"angular PID veloctiy"<< "  " <<yaw_rate*180/3.14<<endl;
-  // cout<<"angular diff"<< "  " <<yaw_diff*180/3.14<<endl;
-  // cout<<"angular veloctiy"<< "  " <<yaw_diff*180/3.14/ (t_cur+1e-6)<<endl;
-  // cout << "future_yaw  " << yaw_control_point*180/3.14 << " current_yaw " <<yaw_robot*180/3.14 << endl;
+      yawdot = YAW_DOT_MAX_PER_SEC;
+    }
+    else
+    {
+      yaw = yaw_temp;
+      if (yaw - last_yaw_ > PI)
+        yawdot = -YAW_DOT_MAX_PER_SEC;
+      else if (yaw - last_yaw_ < -PI)
+        yawdot = YAW_DOT_MAX_PER_SEC;
+      else
+        yawdot = (yaw_temp - last_yaw_) / (time_now - time_last).seconds();
+    }
+  }
 
-  return {yaw_diff,yaw_rate};// 角度差值  角速度
+  if (fabs(yaw - last_yaw_) <= max_yaw_change)
+    yaw = 0.5 * last_yaw_ + 0.5 * yaw; // nieve LPF
+  yawdot = 0.5 * last_yaw_dot_ + 0.5 * yawdot;
+  last_yaw_ = yaw;
+  last_yaw_dot_ = yawdot;
+
+  yaw_yawdot.first = yaw;
+  yaw_yawdot.second = yawdot;
+
+  return yaw_yawdot;
 }
 
-void waypointCallback(const nav_msgs::PathConstPtr &msg)
-{
-  if (msg->poses[0].pose.position.z < -0.1)
-    return;
-  end_pt_ << msg->poses.back().pose.position.x, msg->poses.back().pose.position.y, msg->poses.back().pose.position.z; //twilight: goal height
-  Eigen::Quaterniond end_qtn_ = Eigen::Quaterniond(
-    msg->poses.back().pose.orientation.w,  // 实部 w
-    msg->poses.back().pose.orientation.x,  // 虚部 x
-    msg->poses.back().pose.orientation.y,  // 虚部 y
-    msg->poses.back().pose.orientation.z   // 虚部 z
-  );
-  end_euler_ =end_qtn_.matrix().eulerAngles(0,1,2);
-}
-
-
-void cmdCallback(const ros::TimerEvent &e)
+void cmdCallback()
 {
   /* no publishing before receive traj_ */
   if (!receive_traj_)
     return;
-  geometry_msgs::Twist robotVelocity_BASE_frame;
 
-  ros::Time time_now = ros::Time::now();
-  double t_cur = (time_now - start_time_).toSec();
-  // cout<<"t_cur: "<<t_cur<<endl;
-  //向前预测时间段
-  Eigen::Vector3d pos(Eigen::Vector3d::Zero()), vel(Eigen::Vector3d::Zero()), acc(Eigen::Vector3d::Zero());
+  // 统一时间源
+  rclcpp::Clock clock(RCL_ROS_TIME);  
+  rclcpp::Time time_now = clock.now();
+  double t_cur = (time_now - start_time_).seconds();
+
+  Eigen::Vector3d pos(Eigen::Vector3d::Zero()), vel(Eigen::Vector3d::Zero()), acc(Eigen::Vector3d::Zero()), pos_f;
   std::pair<double, double> yaw_yawdot(0, 0);
-  static ros::Time time_last = ros::Time::now();
+
+  static rclcpp::Time time_last = clock.now();
   if (t_cur < traj_duration_ && t_cur >= 0.0)
   {
     pos = traj_[0].evaluateDeBoorT(t_cur);
     vel = traj_[1].evaluateDeBoorT(t_cur);
     acc = traj_[2].evaluateDeBoorT(t_cur);
+
     /*** calculate yaw ***/
-    
+    yaw_yawdot = calculate_yaw(t_cur, pos, time_now, time_last);
+    /*** calculate yaw ***/
+
+    double tf = min(traj_duration_, t_cur + 2.0);
+    pos_f = traj_[0].evaluateDeBoorT(tf);
   }
   else if (t_cur >= traj_duration_)
   {
@@ -221,8 +194,11 @@ void cmdCallback(const ros::TimerEvent &e)
     pos = traj_[0].evaluateDeBoorT(traj_duration_);
     vel.setZero();
     acc.setZero();
+
     yaw_yawdot.first = last_yaw_;
     yaw_yawdot.second = 0;
+
+    pos_f = pos;
   }
   else
   {
@@ -230,125 +206,70 @@ void cmdCallback(const ros::TimerEvent &e)
   }
   time_last = time_now;
 
-  // ------------ estimation q from traj ------------- // 
-  control_point_state.header.frame_id = "map";
-  static double yaw_estimate_from_traj = 0;
-  // vy/vx 得到预测偏航角
-  if(vel.norm()>0.1)//设置一个关于矢量速度的低通滤波，在突然暂停的情况下保持yaw的旋转角
-  yaw_estimate_from_traj=std::atan2(vel(1),vel(0)+1e-6);
-  
-  //构建一个欧拉角的（3，1）变量
-  Eigen::Vector3d eulerAngle(yaw_estimate_from_traj,0,0);
-  //利用tf的四元数类，转欧拉角为四元数
-  tf::Quaternion qtn;
-  qtn.setRPY(eulerAngle[2],eulerAngle[1],eulerAngle[0]);// 设置偏航值，俯仰值，翻滚值，单位是弧度
-  // cout << "yaw_estimate_from_traj: " << yaw_estimate_from_traj*180/PI << endl;
-  control_point_state.pose.pose.position.x = pos(0);
-  control_point_state.pose.pose.position.y = pos(1);
-  control_point_state.pose.pose.position.z = pos(2);
-  control_point_state.pose.pose.orientation.x = qtn.getX();
-  control_point_state.pose.pose.orientation.y = qtn.getY();
-  control_point_state.pose.pose.orientation.z = qtn.getZ();
-  control_point_state.pose.pose.orientation.w = qtn.getW();
-  //可视化转向角度
-  control_point_state_pub_.publish(control_point_state);
-  yaw_yawdot = calculate_yaw(t_cur);
-  // ------------ trans vel ------------- // 
+  cmd.header.stamp = time_now;
+  cmd.header.frame_id = "world";
+  cmd.trajectory_flag = quadrotor_msgs::msg::PositionCommand::TRAJECTORY_STATUS_READY;
+  cmd.trajectory_id = traj_id_;
 
-  geometry_msgs::Twist velWorld;
-  
-  velWorld.angular.x = 0;
-  velWorld.angular.y = 0;
-  velWorld.angular.z = yaw_yawdot.second;
+  cmd.position.x = pos(0);
+  cmd.position.y = pos(1);
+  cmd.position.z = pos(2);
 
-  if (abs(yaw_yawdot.first)<0.785)
-  {
-    /* code */
-    velWorld.linear.x = vel(0);
-    velWorld.linear.y = vel(1);
-    velWorld.linear.z = 0;
-  }else{
-    velWorld.linear.x = 0;
-    velWorld.linear.y = 0;
-    velWorld.linear.z = 0;
-  }
+  cmd.velocity.x = vel(0);
+  cmd.velocity.y = vel(1);
+  cmd.velocity.z = vel(2);
 
-  // transform velocity to base
-  Eigen::Matrix<double, 3, 1> baseLinearVelWorldCur;
-  Eigen::Matrix<double, 3, 1> baseLinearVelBodyCur;
-  Eigen::Quaterniond baseOriWorldCur;
-  Eigen::Matrix<double, 3, 1> baseAngularVelWorldCur;
-  Eigen::Matrix<double, 3, 1> baseAngularVelBodyCur;
-  
-  // cout << "position: " << basePosWorldCur[0] << "  " << basePosWorldCur[1] << "  " << basePosWorldCur[2] <<endl;
-  baseOriWorldCur.w() = odom2map_Pose.orientation.w;
-  baseOriWorldCur.x() = odom2map_Pose.orientation.x;
-  baseOriWorldCur.y() = odom2map_Pose.orientation.y;
-  baseOriWorldCur.z() = odom2map_Pose.orientation.z;
+  cmd.acceleration.x = acc(0);
+  cmd.acceleration.y = acc(1);
+  cmd.acceleration.z = acc(2);
 
-  baseLinearVelWorldCur[0]  = velWorld.linear.x;
-  baseLinearVelWorldCur[1]  = velWorld.linear.y;
-  baseLinearVelWorldCur[2]  = velWorld.linear.z;
-  baseAngularVelWorldCur[0] = velWorld.angular.x;
-  baseAngularVelWorldCur[1] = velWorld.angular.y;
-  baseAngularVelWorldCur[2] = velWorld.angular.z;
+  cmd.yaw = yaw_yawdot.first;
+  cmd.yaw_dot = yaw_yawdot.second;
 
-  baseLinearVelBodyCur = baseOriWorldCur.toRotationMatrix().transpose() * baseLinearVelWorldCur;
-  baseAngularVelBodyCur = baseOriWorldCur.toRotationMatrix().transpose() * baseAngularVelWorldCur;
+  last_yaw_ = cmd.yaw;
 
-  // write to cmd vel
-  robotVelocity_BASE_frame.linear.x = baseLinearVelBodyCur[0];
-  robotVelocity_BASE_frame.linear.y = baseLinearVelBodyCur[1];
-  robotVelocity_BASE_frame.linear.z = 0;
-
-  robotVelocity_BASE_frame.angular.x = 0;
-  robotVelocity_BASE_frame.angular.y = 0;
-  robotVelocity_BASE_frame.angular.z = baseAngularVelBodyCur[2];
-
-  // cout << "current_pos: " << odom2map_Pose.position.x<<"   "<<odom2map_Pose.position.y <<endl;
-  // cout << "future_pos: " << control_point_state.pose.pose.position.x<<"   "<<control_point_state.pose.pose.position.y <<endl;
-  // cout << "velocity: " << robotVelocity_BASE_frame.linear.x << "  " << robotVelocity_BASE_frame.angular.y <<endl;
-  // cout << "yaw_velocity: " << robotVelocity_BASE_frame.angular.z<<endl;
-
-  pos_vel_pub.publish(robotVelocity_BASE_frame);
-
+  pos_cmd_pub->publish(cmd);
 }
-
-
-
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "traj_server");
-  ros::NodeHandle node;// public
-  ros::NodeHandle nh("~");// private
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("traj_server");
 
-  tf::TransformListener tf_listener_;
+  auto bspline_sub = node->create_subscription<traj_utils::msg::Bspline>(
+      "planning/bspline",
+      10,
+      bsplineCallback);
 
-  nh.param("traj_server/kp_yaw", kp_yaw_, 1.5);
-  nh.param("traj_server/ki_yaw", ki_yaw_, 0.0);
-  nh.param("traj_server/kd_yaw", kd_yaw_, 0.0);
+  pos_cmd_pub = node->create_publisher<quadrotor_msgs::msg::PositionCommand>(
+      "/position_cmd",
+      50);
 
-  nh.param<std::string>("odometry_topic", odom_topic, "default_string");
-  nh.param("traj_server/time_forward", time_forward_, -1.0);
+  auto cmd_timer = node->create_wall_timer(
+      std::chrono::milliseconds(10),
+      cmdCallback);
 
-  ros::Subscriber bspline_sub = node.subscribe("planning/bspline", 10, bsplineCallback);
+  /* control parameter */
+  cmd.kx[0] = pos_gain[0];
+  cmd.kx[1] = pos_gain[1];
+  cmd.kx[2] = pos_gain[2];
 
-  ros::Subscriber odom_sub = node.subscribe<nav_msgs::Odometry>(odom_topic, 10, boost::bind(odometryCallback, _1, &tf_listener_));
+  cmd.kv[0] = vel_gain[0];
+  cmd.kv[1] = vel_gain[1];
+  cmd.kv[2] = vel_gain[2];
 
-  pos_vel_pub = node.advertise<geometry_msgs::Twist>("/cmd_vel", 50);
+  node->declare_parameter("traj_server/time_forward", -1.0);
+  node->get_parameter("traj_server/time_forward", time_forward_);
 
-  ros::Timer cmd_timer = node.createTimer(ros::Duration(0.1), cmdCallback);
+  last_yaw_ = 0.0;
+  last_yaw_dot_ = 0.0;
 
-  ros::Subscriber waypoint_sub_ = node.subscribe("/waypoint_generator/waypoints", 1, waypointCallback);
+  rclcpp::sleep_for(std::chrono::seconds(1));
 
-  control_point_state_pub_ = node.advertise<nav_msgs::Odometry>("/control_point_state_", 10);
+  RCLCPP_WARN(node->get_logger(), "[Traj server]: ready.");
 
-  ros::Duration(1.0).sleep();
-
-  ROS_WARN("[Traj server]: ready.");
-
-  ros::spin();
+  rclcpp::spin(node);
+  rclcpp::shutdown();
 
   return 0;
 }
