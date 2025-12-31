@@ -73,6 +73,13 @@ private:
 	GridNodePtr ***GridNodeMap_;
 	std::priority_queue<GridNodePtr, std::vector<GridNodePtr>, NodeComparator> openSet_;
 
+	// ========== AIR/GROUND MODE PARAMETERS ==========
+	int XY_EXTEND_{1};  // XY search range in ground mode
+	int Z_EXTEND_{1};   // Z search range (kept small for ground mode)
+	bool enable_ground_mode_{false};  // Enable ground mode
+	double z_direction_penalty_{0.5};  // Penalty for Z direction in heuristic
+	// ========== END OF AIR/GROUND MODE PARAMETERS ==========
+
 	int rounds_{0};
 
 public:

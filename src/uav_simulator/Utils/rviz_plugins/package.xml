@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>rviz_plugins</name>
+  <version>0.1.0</version>
+  <description>Additional plugins for rviz</description>
+  <maintainer email="eeshaojie@ust.hk">Shaojie Shen</maintainer>
+  <maintainer email="wwuar@connect.ust.hk">william.wu</maintainer>
+  <license>LGPLv3</license>
+  <url>http://ros.org/wiki/rviz_plugins</url>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rviz2</depend>
+  <depend>rclcpp</depend>
+  <depend>multi_map_server</depend>
+  <depend>qtbase5-dev</depend>
+  <depend>message_runtime</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+    <rviz plugin="${prefix}/plugin_description.xml"/>
+  </export>
+</package>

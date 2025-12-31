@@ -1,5 +1,0 @@
-build
-
-*.o
-.vscode
-.clang-format

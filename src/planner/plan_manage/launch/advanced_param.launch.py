@@ -47,6 +47,14 @@ def generate_launch_description():
     obj_num_set = LaunchConfiguration('obj_num_set', default=10)
     
     drone_id = LaunchConfiguration('drone_id', default=0)
+    
+    # ========== AIR/GROUND MODE PARAMETERS ==========
+    enable_ground_mode = LaunchConfiguration('enable_ground_mode', default=False)
+    xy_extend = LaunchConfiguration('xy_extend', default=5)
+    z_extend = LaunchConfiguration('z_extend', default=1)
+    z_penalty_weight = LaunchConfiguration('z_penalty_weight', default=1.2)
+    xy_gradient_weight = LaunchConfiguration('xy_gradient_weight', default=1.0)
+    # ========== END OF AIR/GROUND MODE PARAMETERS ==========
 
     # DeclareLaunchArguments
     map_size_x_arg = DeclareLaunchArgument('map_size_x_', default_value=map_size_x, description='Map size along X')
@@ -85,6 +93,14 @@ def generate_launch_description():
     use_distinctive_trajs_arg = DeclareLaunchArgument('use_distinctive_trajs', default_value=use_distinctive_trajs, description='Use distinctive trajectories')
     obj_num_set_arg = DeclareLaunchArgument('obj_num_set', default_value=obj_num_set, description='Number of objects')
     drone_id_arg = DeclareLaunchArgument('drone_id', default_value=drone_id, description='Drone ID')
+    
+    # ========== AIR/GROUND MODE ARGUMENTS ==========
+    enable_ground_mode_arg = DeclareLaunchArgument('enable_ground_mode', default_value=enable_ground_mode, description='Enable ground mode (restrict to horizontal movement)')
+    xy_extend_arg = DeclareLaunchArgument('xy_extend', default_value=xy_extend, description='XY search range in ground mode')
+    z_extend_arg = DeclareLaunchArgument('z_extend', default_value=z_extend, description='Z search range in ground mode')
+    z_penalty_weight_arg = DeclareLaunchArgument('z_penalty_weight', default_value=z_penalty_weight, description='Penalty weight for Z-direction movement')
+    xy_gradient_weight_arg = DeclareLaunchArgument('xy_gradient_weight', default_value=xy_gradient_weight, description='Weight for XY gradients')
+    # ========== END OF AIR/GROUND MODE ARGUMENTS ==========
 
     # Ego Planner Node
     ego_planner_node = Node(
@@ -193,6 +209,11 @@ def generate_launch_description():
             {'optimization/swarm_clearance': 0.5},
             {'optimization/max_vel': max_vel},
             {'optimization/max_acc': max_acc},
+            # ========== AIR/GROUND MODE PARAMETERS ==========
+            {'optimization/enable_ground_mode': enable_ground_mode},
+            {'optimization/z_penalty_weight': z_penalty_weight},
+            {'optimization/xy_gradient_weight': xy_gradient_weight},
+            # ========== END OF AIR/GROUND MODE PARAMETERS ==========
 
             # B-Spline parameters
             {'bspline/limit_vel': max_vel},
@@ -246,6 +267,14 @@ def generate_launch_description():
     ld.add_action(use_distinctive_trajs_arg)
     ld.add_action(obj_num_set_arg)
     ld.add_action(drone_id_arg)
+    
+    # ========== AIR/GROUND MODE ARGUMENTS ==========
+    ld.add_action(enable_ground_mode_arg)
+    ld.add_action(xy_extend_arg)
+    ld.add_action(z_extend_arg)
+    ld.add_action(z_penalty_weight_arg)
+    ld.add_action(xy_gradient_weight_arg)
+    # ========== END OF AIR/GROUND MODE ARGUMENTS ==========
 
 
     # Add Node

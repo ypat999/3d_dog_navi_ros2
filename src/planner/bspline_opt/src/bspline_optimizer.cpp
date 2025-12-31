@@ -19,6 +19,12 @@ namespace ego_planner
     node->declare_parameter("optimization/max_acc", -1.0);
 
     node->declare_parameter("optimization/order", 3);
+    
+    // ========== AIR/GROUND MODE PARAMETERS ==========
+    node->declare_parameter("optimization/enable_ground_mode", false);
+    node->declare_parameter("optimization/z_penalty_weight", 1.2);
+    node->declare_parameter("optimization/xy_gradient_weight", 1.0);
+    // ========== END OF AIR/GROUND MODE PARAMETERS ==========
 
     node->get_parameter("optimization/lambda_smooth", lambda1_);
     node->get_parameter("optimization/lambda_collision", lambda2_);
@@ -31,6 +37,12 @@ namespace ego_planner
     node->get_parameter("optimization/max_acc", max_acc_);
 
     node->get_parameter("optimization/order", order_);
+    
+    // ========== AIR/GROUND MODE PARAMETERS ==========
+    node->get_parameter("optimization/enable_ground_mode", enable_ground_mode_);
+    node->get_parameter("optimization/z_penalty_weight", z_penalty_weight_);
+    node->get_parameter("optimization/xy_gradient_weight", xy_gradient_weight_);
+    // ========== END OF AIR/GROUND MODE PARAMETERS ==========
   }
 
   void BsplineOptimizer::setEnvironment(const GridMap::Ptr &map)
@@ -501,9 +513,21 @@ namespace ego_planner
     bool occ, last_occ = false;
     // 标识片段的起点和终点是否找到
     bool flag_got_start = false, flag_got_end = false, flag_got_end_maybe = false;
-    int i_end = (int)init_points.cols() - order_ - ((int)init_points.cols() - 2 * order_) / 3; // only check closed 2/3 points.
+    // ========== BSPLINE CORE MODIFICATION: ONLY CHECK LATER 3/4 CONTROL POINTS ==========
+    int N = init_points.cols();  // 总控制点数量
+    int i_start, i_end;
+    if (enable_ground_mode_) {
+        i_start = order_ + 3 * (N - 2 * order_) / 4;  // 后3/4的起始位置
+        i_end = N - order_;  // 后3/4的结束位置（避免越界）
+        // 确保起始位置合法（至少大于order_，小于i_end）
+        i_start = std::max(i_start, order_);
+        i_end = std::min(i_end, N - order_);
+    } else {
+        i_end = (int)init_points.cols() - order_ - ((int)init_points.cols() - 2 * order_) / 3; // only check closed 2/3 points.
+        i_start = order_;
+    }
     // 遍历所有点
-    for (int i = order_; i <= i_end; ++i)
+    for (int i = i_start; i <= i_end; ++i)
     {
       // cout << " *" << i-1 << "*" ;
       //  相邻两个点之间进行线性插值并检测障碍物
@@ -961,44 +985,73 @@ namespace ego_planner
 
   void BsplineOptimizer::calcDistanceCostRebound(const Eigen::MatrixXd &q, double &cost,
                                                  Eigen::MatrixXd &gradient, int iter_num, double smoothness_cost)
-  {
-    cost = 0.0;
-    int end_idx = q.cols() - order_;
-    double demarcation = cps_.clearance;
-    double a = 3 * demarcation, b = -3 * pow(demarcation, 2), c = pow(demarcation, 3);
-
-    force_stop_type_ = DONT_STOP;
-    if (iter_num > 3 && smoothness_cost / (cps_.size - 2 * order_) < 0.1) // 0.1 is an experimental value that indicates the trajectory is smooth enough.
     {
-      check_collision_and_rebound();
-    }
+      cost = 0.0;
+      int end_idx = q.cols() - order_;
+      double demarcation = cps_.clearance;
+      double a = 3 * demarcation, b = -3 * pow(demarcation, 2), c = pow(demarcation, 3);
 
-    /*** calculate distance cost and gradient ***/
-    for (auto i = order_; i < end_idx; ++i)
-    {
-      for (size_t j = 0; j < cps_.direction[i].size(); ++j)
-      {
-        double dist = (cps_.points.col(i) - cps_.base_point[i][j]).dot(cps_.direction[i][j]);
-        double dist_err = cps_.clearance - dist;
-        Eigen::Vector3d dist_grad = cps_.direction[i][j];
+      // ========== BSPLINE OPTIMIZATION MODIFICATION: ENHANCE XY PRIORITY, SUPPRESS Z DIRECTION ==========
+       const double xy_gradient_weight = enable_ground_mode_ ? xy_gradient_weight_ : 1.0; // XY方向梯度权重
+       
+       force_stop_type_ = DONT_STOP;
+       if (iter_num > 3 && smoothness_cost / (cps_.size - 2 * order_) < 0.1) // 0.1 is an experimental value that indicates the trajectory is smooth enough.
+       {
+         check_collision_and_rebound();
+       }
 
-        if (dist_err < 0)
-        {
-          /* do nothing */
-        }
-        else if (dist_err < demarcation)
-        {
-          cost += pow(dist_err, 3);
-          gradient.col(i) += -3.0 * dist_err * dist_err * dist_grad;
-        }
-        else
-        {
-          cost += a * dist_err * dist_err + b * dist_err + c;
-          gradient.col(i) += -(2.0 * a * dist_err + b) * dist_grad;
-        }
-      }
+       /*** calculate distance cost and gradient ***/
+       for (auto i = order_; i < end_idx; ++i)
+       {
+         for (size_t j = 0; j < cps_.direction[i].size(); ++j)
+         {
+           double dist = (cps_.points.col(i) - cps_.base_point[i][j]).dot(cps_.direction[i][j]);
+           double dist_err = cps_.clearance - dist;
+           Eigen::Vector3d dist_grad = cps_.direction[i][j];
+
+           // ========== BSPLINE CORE MODIFICATION 1: SPLIT XY/Z GRADIENT, DISABLE Z DIRECTION ==========
+           Eigen::Vector3d dist_grad_xy = dist_grad;
+           if (enable_ground_mode_) {
+             dist_grad_xy(2) = 0;  // 强制Z方向梯度为0，仅保留XY分量
+             if (dist_grad_xy.norm() > 1e-6) {
+               dist_grad_xy.normalize(); // 重新归一化XY梯度，保证方向一致
+             }
+           }
+
+           // ========== BSPLINE CORE MODIFICATION 2: DISTINGUISH XY/Z DISTANCE ERROR, PENALIZE Z DIRECTION ==========
+           double dist_err_final = dist_err;
+           // 若避障方向以Z为主（Z分量占比>0.5），则超高倍惩罚
+           if (enable_ground_mode_ && abs(dist_grad(2)) > 0.5) {
+             dist_err_final *= z_penalty_weight_ + 1e-6;
+           }
+
+           if (dist_err_final < 0)
+           {
+             /* do nothing */
+           }
+           else if (dist_err_final < demarcation)
+           {
+             cost += pow(dist_err_final, 3);
+             // ========== BSPLINE CORE MODIFICATION 3: USE XY GRADIENT ONLY, ENHANCE WEIGHT ==========
+             if (enable_ground_mode_) {
+               gradient.col(i) += -3.0 * dist_err_final * dist_err_final * dist_grad_xy * xy_gradient_weight;
+             } else {
+               gradient.col(i) += -3.0 * dist_err * dist_err * dist_grad;
+             }
+           }
+           else
+           {
+             cost += a * dist_err_final * dist_err_final + b * dist_err_final + c;
+             // ========== BSPLINE CORE MODIFICATION 3: USE XY GRADIENT ONLY, ENHANCE WEIGHT ==========
+             if (enable_ground_mode_) {
+               gradient.col(i) += -(2.0 * a * dist_err_final + b) * dist_grad_xy * xy_gradient_weight;
+             } else {
+               gradient.col(i) += -(2.0 * a * dist_err + b) * dist_grad;
+             }
+           }
+         }
+       }
     }
-  }
 
   void BsplineOptimizer::calcFitnessCost(const Eigen::MatrixXd &q, double &cost, Eigen::MatrixXd &gradient)
   {

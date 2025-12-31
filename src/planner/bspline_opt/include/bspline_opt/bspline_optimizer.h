@@ -160,6 +160,12 @@ namespace ego_planner
     double lambda3_;               // feasibility weight
     double lambda4_;               // curve fitting
 
+    // ========== AIR/GROUND MODE PARAMETERS ==========
+    bool enable_ground_mode_;      // Enable ground mode (restrict to horizontal movement)
+    double z_penalty_weight_;      // Penalty weight for Z-direction movement
+    double xy_gradient_weight_;    // Weight for XY gradients
+    // ========== END OF AIR/GROUND MODE PARAMETERS ==========
+
     int a;
     //
     double dist0_, swarm_clearance_; // safe distance
