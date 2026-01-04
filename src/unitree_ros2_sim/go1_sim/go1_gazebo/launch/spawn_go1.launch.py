@@ -5,7 +5,7 @@ from ament_index_python.packages import get_package_share_directory
 from launch_ros.actions import Node
 from launch import LaunchDescription
 from launch.substitutions import LaunchConfiguration
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, RegisterEventHandler
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, RegisterEventHandler, ExecuteProcess, TimerAction
 from launch.event_handlers import OnProcessExit, OnProcessStart
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
@@ -13,6 +13,9 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 
 def generate_launch_description():
+    # Disable audio completely to prevent ALSA errors
+    os.environ['GAZEBO_AUDIO'] = '0'
+    os.environ['ALSOFT_DRIVERS'] = 'null'
     
     world_file_name = LaunchConfiguration('world_file_name')
     urdf_file = LaunchConfiguration('urdf_file')
@@ -20,7 +23,7 @@ def generate_launch_description():
 
     world_file_name_arg = DeclareLaunchArgument(
         'world_file_name',
-        default_value='test_latest.world'
+        default_value='Building.world' #'test_latest.world'
     )
 
     urdf_file_arg = DeclareLaunchArgument(
@@ -45,19 +48,14 @@ def generate_launch_description():
     
     
     # Run the spawner node from the gazebo_ros package. The entity name doesn't really matter if you only have a single robot.
-    spawn_robot = Node(
-        package='gazebo_ros',
-        executable='spawn_entity.py',
-        name='spawn_entity',
-        output='screen',
-        arguments=['-entity',
-                   robot_name,
-                   '-x', str(position[0]), '-y', str(position[1]
-                                                     ), '-z', str(position[2]),
-                   '-R', str(orientation[0]), '-P', str(orientation[1]
-                                                        ), '-Y', str(orientation[2]),
-                   '-topic', '/robot_description'
-                   ]
+    # Use ExecuteProcess with delay to ensure Gazebo is fully started
+    spawn_robot = ExecuteProcess(
+        cmd=['ros2', 'run', 'gazebo_ros', 'spawn_entity.py',
+             '-entity', robot_name,
+             '-x', str(position[0]), '-y', str(position[1]), '-z', str(position[2]),
+             '-R', str(orientation[0]), '-P', str(orientation[1]), '-Y', str(orientation[2]),
+             '-topic', '/robot_description'],
+        output='screen'
     )
 
     odom_tf_publisher_node = Node(
@@ -139,8 +137,16 @@ def generate_launch_description():
             world_file_name_arg,
             urdf_file_arg,
             start_world,
-            spawn_robot,
-            launch_ros2_control,
+            # Delay spawn_robot by 10 seconds to ensure Gazebo is fully started
+            TimerAction(
+                period=10.0,
+                actions=[spawn_robot]
+            ),
+            # Delay controller launch by 15 seconds to ensure robot is spawned
+            TimerAction(
+                period=15.0,
+                actions=[launch_ros2_control]
+            ),
             visualize_robot,
             odom_tf_publisher_node,
             # static_map_publisher_node

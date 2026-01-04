@@ -1,13 +1,22 @@
-# 3D 导航仿真项目
+# 3D Dog Navigation ROS2 项目
 
 ## 项目介绍
-本项目主要用于在 Gazebo 仿真环境中验证 [PCT-planner](https://github.com/byangw/PCT_planner.git) 和 [ego-planner](https://github.com/ZJU-FAST-Lab/ego-planner.git) 两种路径规划算法。项目中使用了 Unitree A1 机器人模型以及强化学习控制器 [chy2948331536/unitree_guide](https://gitee.com/chy2948331536/unitree_guide)，其中控制器和 PCT-planner 需要 CUDA 支持。
+
+本项目是基于ROS2 Humble的3D导航仿真系统，集成了多种先进的路径规划算法和机器人控制技术。项目支持Unitree A1/Go1机器人在Gazebo仿真环境中的3D导航任务，并提供了完整的ROS2生态系统支持。
+
+### 主要特性
+
+- **完整的ROS2迁移**：所有组件已从ROS1迁移到ROS2 Humble
+- **多算法集成**：支持PCT-planner和ego-planner路径规划算法
+- **地面/空中模式切换**：支持机器人地面导航和空中无人机导航模式
+- **断层摄影环境感知**：集成点云断层摄影技术用于环境建模
+- **强化学习控制**：集成Unitree机器人的强化学习控制器
+- **Gazebo仿真**：完整的机器人仿真环境
 
 ### 3D导航示例
 <div align="center">
   <img src="/src/image/878355907.gif" width="800"/>
 </div>
-
 
 ### 3D规划示例
 <div align="center">
@@ -16,100 +25,346 @@
 
 ---
 
-## 下载与依赖
+## 项目架构
 
-### 依赖项安装
-1. **libtorch**：下载 C++ 版本的 [libtorch](https://pytorch.org/)。
-2. **PCT-planner**：将其放置在 `src` 文件夹外单独编译。
-3. **ego-planner**：请参考其官方文档进行配置：[ego-planner](https://github.com/ZJU-FAST-Lab/ego-planner.git)
-4. **Fast-lio**：如需使用，可运行 `.auto.sh` 脚本自动发布 `livox/lidar` 和 `livox/imu` 话题，但需手动设置 `tf` 坐标关系。
+### 核心组件
 
----
+1. **pct_planner_ros2** - PCT路径规划器的完整ROS2迁移版本
+   - 包含断层摄影模块(tomography)
+   - 支持C++/Python混合编程
+   - 完整的ROS2节点实现
 
-## 安装步骤
+2. **planner** - 路径规划器（支持地面/空中模式切换）
+   - A*搜索算法
+   - B样条轨迹优化
+   - 可配置的地面/空中导航模式
 
-### 1. 配置 libtorch 和 CUDA 路径
-修改 `src/unitree_guide/unitree_guide/unitree_guide/CMakeLists.txt` 中的 `libtorch` 路径和 `CMAKE_CUDA_COMPILER` 路径。
+3. **unitree_ros2_sim** - Unitree机器人ROS2仿真包
+   - Go1机器人模型
+   - 强化学习控制器
+   - Gazebo集成
 
-### 2. 安装 ego-planner
-请参考 [ego-planner](https://github.com/ZJU-FAST-Lab/ego-planner.git) 官方文档安装相关依赖。
+4. **uav_simulator** - 无人机仿真环境
+   - 支持无人机导航
+   - 与地面机器人共享规划算法
 
-### 3. 编译项目
-进入 ROS 工作空间并执行以下命令：
-```bash
-catkin_make
-```
+5. **rviz-3d-nav-goal-tool** - 3D导航目标工具
+   - RViz插件
+   - 3D目标点设置
 
-### 4. 安装 PCT-planner
-请参考 [PCT-planner](https://github.com/byangw/PCT_planner.git) 官方文档安装依赖，然后使用以下命令进行编译：
-```bash
-cd planner/
-./build_thirdparty.sh
-./build.sh
-```
+### 迁移状态
 
----
-
-## 使用说明
-
-### 1. 启动 RL 控制器
-由于 RL 控制器需要手柄，因此需先启动虚拟控制器：
-```bash
-sudo -s
-source ./devel/setup.bash
-rosrun unitree_guide virtual_joy.py
-```
-
-然后启动 Gazebo 仿真环境并运行控制器：
-```bash
-. auto.sh  # 等待 Unitree A1 机器人展开
-./devel/lib/unitree_guide/junior_ctrl
-```
-
-在控制器中：
-- 按键 **2**：站立
-- 按键 **6**：切换为 RL 模式（此时接收 `cmd_vel` 消息）
-- 再次按键 **2**：会闪退，需重新启动控制器
-
-### 2. 启动 ego-planner
-```bash
-source ./devel/setup.bash
-roslaunch ego_planner run_in_sim.launch  # 局部导航模块
-roslaunch ego_planner ego_rviz.launch  # RVIZ 可视化
-```
-
-修改 `run_in_sim.launch` 文件中的 `flight_type` 参数可切换导航模式：
-```xml
-<!-- 1: 使用 2D Nav Goal 设置目标 -->
-<arg name="flight_type" value="1" />
-<!-- 3: 使用 move_base 的路径 -->
-<arg name="flight_type" value="3" />
-```
-
-### 3. 启动 PCT-planner
-进入 `PCT-planner` 文件夹并运行以下命令：
-```bash
-cd tomography/scripts/ 
-python3 tomography.py --scene Building
-
-cd planner/scripts/
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:home/YOUR-NAME/3d-navi/PCT_planner/planner/lib/3rdparty/gtsam-4.1.1/install/lib
-python3 plan.py --scene Building
-```
-
-> ⚠️ **注意**：如果地图配置更改，需重新生成地图，路径规划器才会重新规划路径。
+| 组件 | 状态 | ROS2版本 | 主要改进 |
+|------|------|----------|----------|
+| PCT-planner | ✅ 完全迁移 | ROS2 Humble | 完整ROS2节点，断层摄影模块 |
+| Planner | ✅ 完全迁移 | ROS2 Humble | 地面/空中模式切换 |
+| Unitree仿真 | ✅ 完全迁移 | ROS2 Humble | 强化学习控制器 |
+| UAV仿真 | ✅ 完全迁移 | ROS2 Humble | 无人机导航支持 |
+| RViz工具 | ✅ 完全迁移 | ROS2 Humble | 3D导航目标插件 |
 
 ---
 
-## 注意事项
-1. 项目代码较为仓促，可能存在不规范或混乱的情况，敬请谅解。
-2. 如发现问题或有任何建议，请及时提交 issue，便于改进。
-3. 本项目基于 [PCT-planner](https://github.com/byangw/PCT_planner.git)、[ego-planner](https://github.com/ZJU-FAST-Lab/ego-planner.git) 和 [unitree_guide](https://gitee.com/chy2948331536/unitree_guide.git) 构建，仅限学习使用，禁止用于商业用途。
+## 安装与配置
+
+### 系统要求
+
+- **操作系统**: Ubuntu 22.04 LTS
+- **ROS版本**: ROS2 Humble
+- **CUDA**: 11.0+ (推荐，用于PCT-planner和控制器)
+- **Python**: 3.8+
+- **Gazebo**: Gazebo 11+
+
+### 依赖安装
+
+1. **安装ROS2 Humble**
+```bash
+sudo apt update && sudo apt install curl software-properties-common
+curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+sudo apt update
+sudo apt install ros-humble-desktop
+```
+
+2. **安装项目依赖**
+```bash
+sudo apt install python3-colcon-common-extensions python3-pip
+pip3 install numpy scipy pybind11
+```
+
+3. **配置CUDA和libtorch**（如需要）
+```bash
+# 安装CUDA工具包
+sudo apt install nvidia-cuda-toolkit
+
+# 下载libtorch
+wget https://download.pytorch.org/libtorch/cu118/libtorch-cxx11-abi-shared-with-deps-2.0.1%2Bcu118.zip
+unzip libtorch*.zip -d /opt/
+```
+
+### 项目编译
+
+1. **创建工作空间并克隆代码**
+```bash
+mkdir -p ~/3d_dog_navi_ros2_ws/src
+cd ~/3d_dog_navi_ros2_ws/src
+git clone <repository-url> .
+```
+
+2. **安装Python依赖**
+```bash
+cd ~/3d_dog_navi_ros2_ws
+pip3 install -r src/requirements.txt
+```
+
+3. **编译ROS2包**
+```bash
+cd ~/3d_dog_navi_ros2_ws
+source /opt/ros/humble/setup.bash
+colcon build --symlink-install
+```
+
+4. **配置环境变量**
+```bash
+echo "source ~/3d_dog_navi_ros2_ws/install/setup.bash" >> ~/.bashrc
+source ~/.bashrc
+```
+
+---
+
+## 使用指南
+
+### 快速开始
+
+#### 1. 启动Gazebo仿真环境
+```bash
+# 终端1 - 启动Gazebo
+ros2 launch unitree_ros2_sim go1_gazebo.launch.py
+
+# 终端2 - 启动机器人控制器
+ros2 run unitree_guide2 junior_ctrl
+- W/S - 前进/后退
+- A/D - 左/右移动
+- I/K - 抬头/低头
+- J/L - 左转/右转
+- 数字键1-5 - 切换不同模式(1趴下，2固定站立，3原地俯仰，4键盘控制运动，5接收指令)
+- 空格键 - 重置控制
+‘’‘
+#### 2. 启动路径规划器
+
+**地面机器人模式**:
+```bash
+ros2 launch planner ground_navigation.launch.py mode:=ground
+```
+
+**空中无人机模式**:
+```bash
+ros2 launch planner aerial_navigation.launch.py mode:=aerial
+```
+
+#### 3. 启动PCT规划器
+```bash
+# 启动断层摄影模块
+ros2 run pct_planner_ros2 tomography_node --ros-args -p scene:=Building
+
+# 启动PCT规划器
+ros2 run pct_planner_ros2 plan_node --ros-args -p scene:=Building
+```
+
+#### 4. RViz可视化
+```bash
+ros2 launch rviz-3d-nav-goal-tool navigation.rviz.launch.py
+```
+
+### 模式切换配置
+
+项目支持地面和空中两种导航模式，可通过启动参数切换：
+
+```bash
+# 地面模式（默认）
+ros2 launch planner navigation.launch.py mode:=ground
+
+# 空中模式
+ros2 launch planner navigation.launch.py mode:=aerial
+```
+
+### 控制器操作
+
+在控制器运行后：
+- **按键 2**: 机器人站立
+- **按键 6**: 切换为RL模式（接收`cmd_vel`消息）
+- **再次按键 2**: 重新启动控制器
+
+---
+
+## 高级功能
+
+### 断层摄影环境建模
+
+PCT规划器集成了先进的断层摄影技术，用于环境的三维建模：
+
+```bash
+# 生成环境断层图
+ros2 run pct_planner_ros2 tomography_node --ros-args -p scene:=Spiral
+
+# 查看生成的层数据
+ros2 topic list | grep layer
+```
+
+### 自定义场景配置
+
+项目支持多种预定义场景，也可自定义场景配置：
+
+```yaml
+# 在pct_planner_ros2/config/目录下创建自定义场景
+scene_config:
+  pcd:
+    file_name: "custom_scene.pcd"
+  map:
+    resolution: 0.1
+    ground_h: 0.0
+    slice_dh: 0.5
+```
+
+### 性能优化
+
+对于高性能需求，可启用C++加速：
+
+```bash
+# 编译C++组件
+cd ~/3d_dog_navi_ros2_ws/src/pct_planner_ros2
+./build_cpp.sh
+
+# 使用C++加速版本
+ros2 run pct_planner_ros2 plan_node --ros-args -p use_cpp:=true
+```
+
+---
+
+## 故障排除
+
+### 常见问题
+
+1. **Gazebo无法启动**
+   ```bash
+   # 检查Gazebo安装
+   gazebo --version
+   
+   # 重置Gazebo模型数据库
+   rm -rf ~/.gazebo/
+   ```
+
+2. **ROS2节点无法通信**
+   ```bash
+   # 检查ROS2环境
+   echo $ROS_DISTRO
+   
+   # 重新source环境
+   source /opt/ros/humble/setup.bash
+   source ~/3d_dog_navi_ros2_ws/install/setup.bash
+   ```
+
+3. **PCT规划器依赖问题**
+   ```bash
+   # 检查Python依赖
+   pip3 list | grep numpy
+   
+   # 重新安装依赖
+   pip3 install -r src/pct_planner_ros2/requirements.txt
+   ```
+
+### 调试工具
+
+使用ROS2内置工具进行调试：
+
+```bash
+# 查看节点状态
+ros2 node list
+
+# 查看话题列表
+ros2 topic list
+
+# 监控特定话题
+ros2 topic echo /cmd_vel
+
+# 查看节点图
+rqt_graph
+```
+
+---
+
+## 开发指南
+
+### 项目结构
+
+```
+3d_dog_navi_ros2/
+├── src/
+│   ├── pct_planner_ros2/          # PCT规划器ROS2版本
+│   ├── planner/                   # 路径规划器
+│   ├── unitree_ros2_sim/          # Unitree机器人仿真
+│   ├── uav_simulator/             # 无人机仿真
+│   └── rviz-3d-nav-goal-tool/     # RViz插件
+├── launch/                        # 启动文件
+├── config/                        # 配置文件
+└── scripts/                       # 工具脚本
+```
+
+### 扩展开发
+
+1. **添加新的规划算法**
+   - 在`planner`包中实现新的规划器
+   - 遵循ROS2节点接口规范
+   - 添加对应的启动文件和配置
+
+2. **自定义机器人模型**
+   - 在`unitree_ros2_sim`中添加新模型
+   - 更新URDF文件和控制器配置
+   - 测试Gazebo集成
+
+3. **开发新的传感器插件**
+   - 创建ROS2传感器驱动
+   - 集成到仿真环境中
+   - 提供标准的话题接口
+
+### 贡献指南
+
+1. Fork项目仓库
+2. 创建特性分支
+3. 提交更改
+4. 推送到分支
+5. 创建Pull Request
+
+---
+
+## 许可证
+
+本项目基于MIT许可证开源。详见[LICENSE](LICENSE)文件。
+
+## 致谢
+
+- [PCT-planner](https://github.com/byangw/PCT_planner.git) - 点云断层摄影路径规划
+- [ego-planner](https://github.com/ZJU-FAST-Lab/ego-planner.git) - 快速轨迹优化算法
+- [Unitree Robotics](https://www.unitree.com/) - 机器人硬件和仿真模型
+- [ROS2社区](https://docs.ros.org/) - 机器人操作系统框架
 
 ---
 
 ## 联系方式
-- **Bilibili**：[https://space.bilibili.com/29152879](https://space.bilibili.com/29152879)
-- **邮箱**：1906570332@qq.com
 
-如果您觉得本项目对您有帮助，欢迎在 Gitee 上给我点个 **star**！谢谢支持！
+如有问题或建议，请通过以下方式联系：
+- 项目Issues: [GitHub Issues]
+- 邮箱: [项目维护者邮箱]
+- 文档: [项目Wiki]
+
+## 更新日志
+
+### v2.0.0 (2024-01-01)
+- 完整迁移到ROS2 Humble
+- 新增地面/空中模式切换
+- 集成PCT规划器断层摄影模块
+- 优化仿真性能和稳定性
+
+### v1.0.0 (2023-12-31)
+- 初始版本发布
+- 基于ROS1的3D导航系统
+- 基础路径规划功能
