@@ -38,12 +38,7 @@ foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
   find_package(${Dependency} REQUIRED)
 endforeach()
 
-set(TOOL_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/include/ros2_unitree_legged_control")
-set(TOOL_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-
-add_library(unitree_joint_control_tool STATIC IMPORTED SHARED)
-set_target_properties(unitree_joint_control_tool PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/lib/libunitree_joint_control_tool.so)
 
 add_library(ros2_unitree_legged_control SHARED
   src/ros2_unitree_legged_control.cpp
@@ -61,7 +56,6 @@ add_library(ros2_unitree_legged_control SHARED
 
 target_link_libraries(ros2_unitree_legged_control PUBLIC
   ros2_unitree_legged_control_parameters
-  unitree_joint_control_tool
 )
 target_compile_features(ros2_unitree_legged_control PUBLIC cxx_std_17)
 target_include_directories(ros2_unitree_legged_control PUBLIC
@@ -119,8 +113,6 @@ install(TARGETS
   ARCHIVE DESTINATION lib/${PROJECT_NAME}
   LIBRARY DESTINATION lib/${PROJECT_NAME}
 )
-
-ament_export_libraries(${CMAKE_SOURCE_DIR}/lib)
 
 ament_export_targets(ros2_unitree_legged_control HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})

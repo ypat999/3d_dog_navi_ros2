@@ -33,7 +33,7 @@ def generate_launch_description():
 
     # Position and orientation
     # [X, Y, Z]
-    position = [0, 0.0, 1.6]
+    position = [0, 0.0, 0.6]
     # [Roll, Pitch, Yaw]
     orientation = [0.0, 0.0, 0.0]
     # Base Name or robot
@@ -151,12 +151,12 @@ def generate_launch_description():
             # navigation,
             # Delay spawn_robot by 10 seconds to ensure Gazebo is fully started
             TimerAction(
-                period=20.0,
+                period=10.0,
                 actions=[spawn_robot]
             ),
             # Delay controller launch by 15 seconds to ensure robot is spawned
             TimerAction(
-                period=20.0,
+                period=15.0,
                 actions=[launch_ros2_control]
             )
         ]

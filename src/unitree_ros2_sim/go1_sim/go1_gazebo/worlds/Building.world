@@ -10,29 +10,29 @@
         </gui>
 
         <physics type="ode">
-        <max_step_size>0.001</max_step_size>
+        <max_step_size>0.002</max_step_size>
         <real_time_factor>1.0</real_time_factor>
-        <real_time_update_rate>1000</real_time_update_rate>
+        <real_time_update_rate>500</real_time_update_rate>
         <gravity>0 0 -9.81</gravity>
             <ode>
                 <solver>
-                <type>quick</type>  
-                <iters>20</iters>
-                <sor>1.1</sor>
+                <type>world</type>  
+                <iters>100</iters>
+                <sor>1.0</sor>
                 </solver>  
                 <constraints>
                 <cfm>0.00001</cfm>
-                <erp>0.1</erp>
-                <contact_max_correcting_vel>10.0</contact_max_correcting_vel>
-                <contact_surface_layer>0.001</contact_surface_layer>
+                <erp>0.8</erp>
+                <contact_max_correcting_vel>100.0</contact_max_correcting_vel>
+                <contact_surface_layer>0.01</contact_surface_layer>
                 </constraints>  
             </ode>
         </physics>
 
         <scene>
-        <ambient>0.4 0.4 0.4 1.0</ambient>
-        <background>0.7 0.7 0.7 1.0</background>
-        <shadows>false</shadows>
+        <!-- <ambient>0.4 0.4 0.4 1.0</ambient> -->
+        <!-- <background>0.7 0.7 0.7 1.0</background> -->
+        <!-- <shadows>false</shadows> -->
         <sky>
             <!-- <clouds>
                 <speed>12</speed>
@@ -53,7 +53,7 @@
             <uri>model://Building</uri>
             <!-- <uri>model:///home/ywj/3d_dog_navi_ros2/src/unitree_ros2_sim/go1_sim/go1_gazebo/models/Building</uri> -->
             <pose>0 0 0 0 0 0</pose>   <!-- 模型位姿（x,y,z,r,p,y），默认放在原点 -->
-            <scale>0.5 0.5 0.5</scale>   <!-- 缩小到0.5倍 -->
+            <!-- <scale>0.5 0.5 0.5</scale>   缩小到0.5倍 -->
             
 
         </include>

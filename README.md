@@ -87,7 +87,7 @@ sudo apt install ros-humble-desktop
 
 2. **安装项目依赖**
 ```bash
-sudo apt install python3-colcon-common-extensions python3-pip
+sudo apt install python3-colcon-common-extensions python3-pip liblcm-dev
 pip3 install numpy scipy pybind11
 ```
 
@@ -103,23 +103,23 @@ unzip libtorch*.zip -d /opt/
 
 ### 项目编译
 
-1. **创建工作空间并克隆代码**
+ **编译ROS2包**
 ```bash
-mkdir -p ~/3d_dog_navi_ros2_ws/src
-cd ~/3d_dog_navi_ros2_ws/src
-git clone <repository-url> .
-```
-
-2. **安装Python依赖**
-```bash
-cd ~/3d_dog_navi_ros2_ws
-pip3 install -r src/requirements.txt
-```
-
-3. **编译ROS2包**
-```bash
-cd ~/3d_dog_navi_ros2_ws
+cd ~/3d_dog_navi_ros2
 source /opt/ros/humble/setup.bash
+```
+
+# 编译特定包：
+```bash
+# 编译Unitree相关包
+colcon build --symlink-install --packages-select go1_gazebo go1_description go1_navigation ros2_unitree_legged_msgs ros2_unitree_legged_control unitree_guide2
+
+# 编译规划器包
+colcon build --symlink-install --packages-select planner pct_planner_ros2
+
+# 编译其他包
+colcon build --symlink-install --packages-select uav_simulator rviz-3d-nav-goal-tool
+
 colcon build --symlink-install
 ```
 
@@ -138,11 +138,11 @@ source ~/.bashrc
 #### 1. 启动Gazebo仿真环境
 ```bash
 # 终端1 - 启动Gazebo
-ros2 launch unitree_ros2_sim go1_gazebo.launch.py
+ros2 launch go1_gazebo spawn_go1.launch.py
 
 # 终端2 - 启动机器人控制器
 ros2 run unitree_guide2 junior_ctrl
-- W/S - 前进/后退
+```- W/S - 前进/后退
 - A/D - 左/右移动
 - I/K - 抬头/低头
 - J/L - 左转/右转

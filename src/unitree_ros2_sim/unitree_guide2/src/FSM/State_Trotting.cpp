@@ -169,7 +169,21 @@ void State_Trotting::calcTau(){
     _velError = _vCmdGlobal - _velBody;
 
     _ddPcd = _Kpp * _posError + _Kdp * _velError;
-    _dWbd  = _kpw*rotMatToExp(_Rd*_G2B_RotMat) + _Kdw * (_wCmdGlobal - _lowState->getGyroGlobal());
+    
+    // 添加数值稳定性检查，防止NaN错误
+    RotMat rotResult = _Rd * _G2B_RotMat;
+    if (rotResult.hasNaN()) {
+        printf("[WARNING] 旋转矩阵包含NaN值，使用单位矩阵作为后备\n");
+        rotResult = RotMat::Identity();
+    }
+    
+    _dWbd  = _kpw*rotMatToExp(rotResult) + _Kdw * (_wCmdGlobal - _lowState->getGyroGlobal());
+    
+    // 检查_dWbd是否包含NaN值
+    if (_dWbd.hasNaN()) {
+        printf("[WARNING] dWbd包含NaN值，重置为零\n");
+        _dWbd.setZero();
+    }
 
     _ddPcd(0) = saturation(_ddPcd(0), Vec2(-3, 3));
     _ddPcd(1) = saturation(_ddPcd(1), Vec2(-3, 3));
