@@ -33,7 +33,7 @@ def generate_launch_description():
 
     # Position and orientation
     # [X, Y, Z]
-    position = [0, 0.0, 0.6]
+    position = [0, 0.0, 1.6]
     # [Roll, Pitch, Yaw]
     orientation = [0.0, 0.0, 0.0]
     # Base Name or robot
@@ -137,16 +137,6 @@ def generate_launch_description():
             world_file_name_arg,
             urdf_file_arg,
             start_world,
-            # Delay spawn_robot by 10 seconds to ensure Gazebo is fully started
-            TimerAction(
-                period=10.0,
-                actions=[spawn_robot]
-            ),
-            # Delay controller launch by 15 seconds to ensure robot is spawned
-            TimerAction(
-                period=15.0,
-                actions=[launch_ros2_control]
-            ),
             visualize_robot,
             odom_tf_publisher_node,
             # static_map_publisher_node
@@ -158,6 +148,16 @@ def generate_launch_description():
             #     )
             # )
             # joystick, 
-            # navigation
+            # navigation,
+            # Delay spawn_robot by 10 seconds to ensure Gazebo is fully started
+            TimerAction(
+                period=20.0,
+                actions=[spawn_robot]
+            ),
+            # Delay controller launch by 15 seconds to ensure robot is spawned
+            TimerAction(
+                period=20.0,
+                actions=[launch_ros2_control]
+            )
         ]
     )
