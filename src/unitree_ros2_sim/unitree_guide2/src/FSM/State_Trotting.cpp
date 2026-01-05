@@ -11,15 +11,16 @@ State_Trotting::State_Trotting(CtrlComponents *ctrlComp)
               _balCtrl(ctrlComp->balCtrl){
     _gait = new GaitGenerator(ctrlComp);
 
-    _gaitHeight = 0.08;
+    _gaitHeight = 0.15;
 
 #ifdef ROBOT_TYPE_Go1
     _Kpp = Vec3(70, 70, 70).asDiagonal();
     _Kdp = Vec3(10, 10, 10).asDiagonal();
     _kpw = 780; 
     _Kdw = Vec3(70, 70, 70).asDiagonal();
-    _KpSwing = Vec3(400, 400, 400).asDiagonal();
-    _KdSwing = Vec3(10, 10, 10).asDiagonal();
+    // 增加摆动腿控制增益以匹配更高的抬腿高度
+    _KpSwing = Vec3(600, 600, 600).asDiagonal();
+    _KdSwing = Vec3(15, 15, 15).asDiagonal();
 #endif
 
 #ifdef ROBOT_TYPE_A1

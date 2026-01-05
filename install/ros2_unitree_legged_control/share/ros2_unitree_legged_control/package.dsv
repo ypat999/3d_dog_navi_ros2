@@ -1,8 +1,1 @@
-source;share/ros2_unitree_legged_control/hook/cmake_prefix_path.ps1
-source;share/ros2_unitree_legged_control/hook/cmake_prefix_path.dsv
-source;share/ros2_unitree_legged_control/hook/cmake_prefix_path.sh
-source;share/ros2_unitree_legged_control/local_setup.bash
-source;share/ros2_unitree_legged_control/local_setup.dsv
-source;share/ros2_unitree_legged_control/local_setup.ps1
-source;share/ros2_unitree_legged_control/local_setup.sh
-source;share/ros2_unitree_legged_control/local_setup.zsh
+/home/ywj/3d_dog_navi_ros2/build/ros2_unitree_legged_control/ament_cmake_environment_hooks/package.dsv

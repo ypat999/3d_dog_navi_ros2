@@ -10,21 +10,21 @@
         </gui>
 
         <physics type="ode">
-        <max_step_size>0.002</max_step_size>
+        <max_step_size>0.001</max_step_size>
         <real_time_factor>1.0</real_time_factor>
-        <real_time_update_rate>500</real_time_update_rate>
+        <real_time_update_rate>1000</real_time_update_rate>
         <gravity>0 0 -9.81</gravity>
             <ode>
                 <solver>
-                <type>world</type>  
-                <iters>100</iters>
-                <sor>1.0</sor>
+                    <type>quick</type>  
+                    <iters>80</iters>
+                    <sor>1.4</sor>
                 </solver>  
                 <constraints>
-                <cfm>0.00001</cfm>
-                <erp>0.8</erp>
-                <contact_max_correcting_vel>100.0</contact_max_correcting_vel>
-                <contact_surface_layer>0.01</contact_surface_layer>
+                    <cfm>0.0</cfm>
+                    <erp>0.15</erp>
+                    <!-- <contact_max_correcting_vel>100.0</contact_max_correcting_vel>
+                    <contact_surface_layer>0.01</contact_surface_layer> -->
                 </constraints>  
             </ode>
         </physics>

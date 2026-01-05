@@ -27,23 +27,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RVIZ_POSE_TOOL_H
-#define RVIZ_POSE_TOOL_H
-
-#include <OGRE/OgreVector3.h>
+#ifndef RVIZ_3D_NAV_GOAL_TOOL__POSE_TOOL_HPP_
+#define RVIZ_3D_NAV_GOAL_TOOL__POSE_TOOL_HPP_
 
 #include <QCursor>
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
-#include "rviz/tool.h"
+#include "rviz_common/tool.hpp"
+#include "rviz_rendering/objects/arrow.hpp"
 
-namespace rviz
+namespace rviz_3d_nav_goal_tool
 {
-class Arrow;
-class DisplayContext;
 
-class Pose3DTool: public Tool
+class Pose3DTool: public rviz_common::Tool
 {
 public:
   Pose3DTool();
@@ -54,13 +51,13 @@ public:
   virtual void activate();
   virtual void deactivate();
 
-  virtual int processMouseEvent( ViewportMouseEvent& event );
+  virtual int processMouseEvent( rviz_common::ViewportMouseEvent& event );
 
 protected:
   virtual void onPoseSet(double x, double y, double z, double theta) = 0;
 
-  Arrow* arrow_;
-  std::vector<Arrow*> arrow_array;
+  rviz_rendering::Arrow* arrow_;
+  std::vector<rviz_rendering::Arrow*> arrow_array;
 
   enum State
   {
@@ -73,8 +70,8 @@ protected:
   Ogre::Vector3 pos_;
 };
 
-}
+}  // namespace rviz_3d_nav_goal_tool
 
-#endif
+#endif  // RVIZ_3D_NAV_GOAL_TOOL__POSE_TOOL_HPP_
 
 

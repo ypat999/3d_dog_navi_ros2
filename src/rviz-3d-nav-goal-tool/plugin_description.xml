@@ -1,0 +1,12 @@
+<library path="rviz_3d_nav_goal_tool">
+  <class name="rviz_3d_nav_goal_tool/Goal3DTool" type="rviz_3d_nav_goal_tool::Goal3DTool" base_class_type="rviz_common::Tool">
+    <description>
+      This is a RViz plugin tool for 3d navigation goal.
+    </description>
+  </class>
+  <class name="rviz_3d_nav_goal_tool/Pose3DTool" type="rviz_3d_nav_goal_tool::Pose3DTool" base_class_type="rviz_common::Tool">
+    <description>
+      This is a RViz plugin tool for 3d pose.
+    </description>
+  </class>
+</library>

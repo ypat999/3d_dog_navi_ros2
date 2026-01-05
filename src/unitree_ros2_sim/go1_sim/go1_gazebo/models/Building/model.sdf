@@ -36,7 +36,7 @@
       </visual>
       <collision name='collision'>
         <laser_retro>0</laser_retro>
-        <max_contacts>30</max_contacts>
+        <max_contacts>10</max_contacts>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
@@ -49,8 +49,14 @@
           <friction>
             <ode>
             <!-- 增加大一点摩擦力 -->
-              <mu>0.5</mu>
-              <mu2>0.5</mu2>
+              <!-- <mu>0.5</mu> -->
+              <!-- <mu2>0.5</mu2> -->
+
+
+              <mu>1.2</mu>
+              <mu2>1.2</mu2>
+
+
               <fdir1>0 0 0</fdir1>
               <slip1>0</slip1>
               <slip2>0</slip2>
@@ -76,10 +82,17 @@
             <ode>
               <soft_cfm>0</soft_cfm>
               <soft_erp>0.2</soft_erp>
-              <kp>1e+13</kp>
-              <kd>1</kd>
+              <!-- <kp>1e+13</kp> -->
+              <!-- <kd>1</kd> -->
               <max_vel>0.01</max_vel>
-              <min_depth>0</min_depth>
+              <!-- <min_depth>0</min_depth> -->
+
+
+              <kp>50000</kp>
+              <kd>100</kd>
+              <min_depth>0.002</min_depth>
+
+
             </ode>
             <bullet>
               <split_impulse>1</split_impulse>

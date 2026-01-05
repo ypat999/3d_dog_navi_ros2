@@ -32,19 +32,19 @@
 #include <OGRE/OgreSceneNode.h>
 #include <OGRE/OgreViewport.h>
 
-#include <rviz/geometry.h>
-#include <rviz/ogre_helpers/arrow.h>
-#include <rviz/viewport_mouse_event.h>
-#include <rviz/load_resource.h>
-#include <rviz/render_panel.h>
+#include <rviz_common/geometry.hpp>
+#include <rviz_rendering/objects/arrow.hpp>
+#include <rviz_common/viewport_mouse_event.hpp>
+#include <rviz_common/load_resource.hpp>
+#include <rviz_common/render_panel.hpp>
 
 #include "rviz-3d-nav-goal-tool/pose_tool.hpp"
 
-namespace rviz
+namespace rviz_3d_nav_goal_tool
 {
 
 Pose3DTool::Pose3DTool()
-  : Tool()
+  : rviz_common::Tool()
   , arrow_( NULL )
 {
 }
@@ -56,7 +56,7 @@ Pose3DTool::~Pose3DTool()
 
 void Pose3DTool::onInitialize()
 {
-  arrow_ = new Arrow( scene_manager_, NULL, 2.0f, 0.2f, 0.5f, 0.35f );
+  arrow_ = new rviz_rendering::Arrow( scene_manager_, NULL, 2.0f, 0.2f, 0.5f, 0.35f );
   arrow_->setColor( 0.0f, 1.0f, 0.0f, 1.0f );
   arrow_->getSceneNode()->setVisible( false );
 }
@@ -72,7 +72,7 @@ void Pose3DTool::deactivate()
   arrow_->getSceneNode()->setVisible( false );
 }
 
-int Pose3DTool::processMouseEvent( ViewportMouseEvent& event )
+int Pose3DTool::processMouseEvent( rviz_common::ViewportMouseEvent& event )
 {
   int flags = 0;
   static Ogre::Vector3 ang_pos;
@@ -85,10 +85,10 @@ int Pose3DTool::processMouseEvent( ViewportMouseEvent& event )
 
   if( event.leftDown() )
   {
-    ROS_ASSERT( state_ == Position );
+    assert( state_ == Position );
     Ogre::Vector3 intersection;
     Ogre::Plane ground_plane( Ogre::Vector3::UNIT_Z, 0.0f );
-    if( getPointOnPlaneFromWindowXY( event.viewport,
+    if( rviz_common::getPointOnPlaneFromWindowXY( event.viewport,
                                      ground_plane,
                                      event.x, event.y, intersection ))
     {
@@ -105,7 +105,7 @@ int Pose3DTool::processMouseEvent( ViewportMouseEvent& event )
       //compute angle in x-y plane
       Ogre::Vector3 cur_pos;
       Ogre::Plane ground_plane( Ogre::Vector3::UNIT_Z, 0.0f );
-      if( getPointOnPlaneFromWindowXY( event.viewport,
+      if( rviz_common::getPointOnPlaneFromWindowXY( event.viewport,
                                        ground_plane,
                                        event.x, event.y, cur_pos ))
       {
@@ -134,8 +134,8 @@ int Pose3DTool::processMouseEvent( ViewportMouseEvent& event )
       int cnt = ceil( fabs(initz - pos_.z) / z_interval );
       for (int k = 0; k < cnt; k++)
       {
-        Arrow* arrow__;
-        arrow__ = new Arrow( scene_manager_, NULL, 0.5f, 0.1f, 0.0f, 0.1f );
+        rviz_rendering::Arrow* arrow__;
+        arrow__ = new rviz_rendering::Arrow( scene_manager_, NULL, 0.5f, 0.1f, 0.0f, 0.1f );
         arrow__->setColor( 0.0f, 1.0f, 0.0f, 1.0f );
         arrow__->getSceneNode()->setVisible( true );       
         Ogre::Vector3 arr_pos = pos_;
@@ -163,5 +163,5 @@ int Pose3DTool::processMouseEvent( ViewportMouseEvent& event )
   return flags;
 }
 
-}
+}  // namespace rviz_3d_nav_goal_tool
 

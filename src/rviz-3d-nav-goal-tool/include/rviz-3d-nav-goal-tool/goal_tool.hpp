@@ -27,22 +27,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RVIZ_GOAL_TOOL_H
-#define RVIZ_GOAL_TOOL_H
+#ifndef RVIZ_3D_NAV_GOAL_TOOL__GOAL_TOOL_HPP_
+#define RVIZ_3D_NAV_GOAL_TOOL__GOAL_TOOL_HPP_
 
 #ifndef Q_MOC_RUN  // See: https://bugreports.qt-project.org/browse/QTBUG-22829
   #include <QObject>
 
-  #include <ros/ros.h>
+  #include <rclcpp/rclcpp.hpp>
+  #include <geometry_msgs/msg/pose_stamped.hpp>
+  #include <rviz_common/properties/string_property.hpp>
 
   #include "rviz-3d-nav-goal-tool/pose_tool.hpp"
 #endif
 
-namespace rviz
+namespace rviz_3d_nav_goal_tool
 {
-class Arrow;
-class DisplayContext;
-class StringProperty;
 
 class Goal3DTool: public Pose3DTool
 {
@@ -59,14 +58,14 @@ private Q_SLOTS:
   void updateTopic();
 
 private:
-  ros::NodeHandle nh_;
-  ros::Publisher pub_;
+  rclcpp::Node::SharedPtr node_;
+  rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pub_;
 
-  StringProperty* topic_property_;
+  rviz_common::properties::StringProperty* topic_property_;
 };
 
-}
+}  // namespace rviz_3d_nav_goal_tool
 
-#endif
+#endif  // RVIZ_3D_NAV_GOAL_TOOL__GOAL_TOOL_HPP_
 
 
