@@ -93,6 +93,9 @@ public:
 	bool AstarSearch(const double step_size, Eigen::Vector3d start_pt, Eigen::Vector3d end_pt);
 
 	std::vector<Eigen::Vector3d> getPath();
+	
+	// Function to enable/disable ground mode and configure its parameters
+	void setGroundMode(bool enable_ground_mode, int xy_extend, int z_extend, double z_penalty);
 };
 
 inline double AStar::getHeu(GridNodePtr node1, GridNodePtr node2)

@@ -27,13 +27,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <OGRE/OgrePlane.h>
-#include <OGRE/OgreRay.h>
-#include <OGRE/OgreSceneNode.h>
-#include <OGRE/OgreViewport.h>
+#include <OgrePlane.h>
+#include <OgreRay.h>
+#include <OgreSceneNode.h>
+#include <OgreViewport.h>
 
-#include <rviz_common/geometry.hpp>
+#include <rviz_rendering/geometry.hpp>
 #include <rviz_rendering/objects/arrow.hpp>
+#include <rviz_rendering/viewport_projection_finder.hpp>
 #include <rviz_common/viewport_mouse_event.hpp>
 #include <rviz_common/load_resource.hpp>
 #include <rviz_common/render_panel.hpp>
@@ -83,16 +84,17 @@ int Pose3DTool::processMouseEvent( rviz_common::ViewportMouseEvent& event )
   const double z_interval = 0.5;
   Ogre::Quaternion orient_x = Ogre::Quaternion( Ogre::Radian(-Ogre::Math::HALF_PI), Ogre::Vector3::UNIT_Y );
 
+  // Create projection finder for plane intersection
+  rviz_rendering::ViewportProjectionFinder projection_finder;
+
   if( event.leftDown() )
   {
     assert( state_ == Position );
-    Ogre::Vector3 intersection;
-    Ogre::Plane ground_plane( Ogre::Vector3::UNIT_Z, 0.0f );
-    if( rviz_common::getPointOnPlaneFromWindowXY( event.viewport,
-                                     ground_plane,
-                                     event.x, event.y, intersection ))
+    auto intersection = projection_finder.getViewportPointProjectionOnXYPlane(
+      event.panel->getRenderWindow(), event.x, event.y);
+    if( intersection.first )
     {
-      pos_ = intersection;
+      pos_ = intersection.second;
       arrow_->setPosition( pos_ );
       state_ = Orientation;
       flags |= Render;
@@ -103,13 +105,11 @@ int Pose3DTool::processMouseEvent( rviz_common::ViewportMouseEvent& event )
     if( state_ == Orientation )
     {
       //compute angle in x-y plane
-      Ogre::Vector3 cur_pos;
-      Ogre::Plane ground_plane( Ogre::Vector3::UNIT_Z, 0.0f );
-      if( rviz_common::getPointOnPlaneFromWindowXY( event.viewport,
-                                       ground_plane,
-                                       event.x, event.y, cur_pos ))
+      auto cur_pos = projection_finder.getViewportPointProjectionOnXYPlane(
+        event.panel->getRenderWindow(), event.x, event.y);
+      if( cur_pos.first )
       {
-        double angle = atan2( cur_pos.y - pos_.y, cur_pos.x - pos_.x );
+        double angle = atan2( cur_pos.second.y - pos_.y, cur_pos.second.x - pos_.x );
         arrow_->getSceneNode()->setVisible( true );
         arrow_->setOrientation( Ogre::Quaternion( Ogre::Radian(angle), Ogre::Vector3::UNIT_Z ) * orient_x );
         if ( event.right() )
@@ -128,7 +128,7 @@ int Pose3DTool::processMouseEvent( rviz_common::ViewportMouseEvent& event )
       pos_.z -= dz / z_scale;
       arrow_->setPosition( pos_ );
       // Create a list of arrows
-      for (int k = 0; k < arrow_array.size(); k++)
+      for (size_t k = 0; k < arrow_array.size(); k++)
         delete arrow_array[k];
       arrow_array.clear();
       int cnt = ceil( fabs(initz - pos_.z) / z_interval );
@@ -152,7 +152,7 @@ int Pose3DTool::processMouseEvent( rviz_common::ViewportMouseEvent& event )
     if( state_ == Orientation || state_ == Height)
     {
       // Create a list of arrows
-      for (int k = 0; k < arrow_array.size(); k++)
+      for (size_t k = 0; k < arrow_array.size(); k++)
         delete arrow_array[k];
       arrow_array.clear();
       onPoseSet(pos_.x, pos_.y, pos_.z, prevangle);
