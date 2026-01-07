@@ -1,1 +1,0 @@
-/home/ywj/3d_dog_navi_ros2/src/unitree_ros2_sim/ros2_unitree_legged_msgs/msg/Cartesian.msg

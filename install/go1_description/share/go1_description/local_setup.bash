@@ -1,1 +1,0 @@
-/home/ywj/3d_dog_navi_ros2/build/go1_description/ament_cmake_environment_hooks/local_setup.bash

@@ -1,1 +1,0 @@
-/home/ywj/3d_dog_navi_ros2/build/ros2_unitree_legged_control/include/ros2_unitree_legged_control/ros2_unitree_legged_control_parameters.hpp
