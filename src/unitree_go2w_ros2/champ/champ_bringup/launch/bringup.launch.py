@@ -170,7 +170,7 @@ def generate_launch_description():
             LaunchConfiguration('links_map_path'),
             LaunchConfiguration('gait_config_path'),
         ],
-        remappings=[("/cmd_vel/smooth", "/cmd_vel")],
+        # remappings=[("/cmd_vel/smooth", "/cmd_vel")],
     )
 
     state_estimator_node = Node(
