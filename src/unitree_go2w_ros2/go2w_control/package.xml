@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>go2w_control</name>
+  <version>1.0.0</version>
+  <description>
+    Control package for go2w_control.
+  </description>
+
+  <maintainer email="samuel.magni@gmail.com"></maintainer>
+  <license>BSD</license>
+
+  <!-- ROS 2 build system -->
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <!-- Runtime dependencies -->
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+  <exec_depend>joint_state_publisher_gui</exec_depend>
+  <exec_depend>gazebo_ros</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+
+
+  <export>
+    <build_type>ament_cmake</build_type>
+    <architecture_independent/>
+  </export>
+</package>

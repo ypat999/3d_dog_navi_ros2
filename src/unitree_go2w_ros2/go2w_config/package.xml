@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>go2w_config</name>
+  <version>0.1.0</version>
+  <description>Go2W Config Package</description>
+
+  <maintainer email="TODO@email.com">TODO</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <build_depend>launch_ros</build_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
