@@ -2,7 +2,7 @@
 
 ## 项目介绍
 
-本项目是基于ROS2 Humble的3D导航仿真系统，集成了多种先进的路径规划算法和机器人控制技术。项目支持Unitree A1/Go1机器人在Gazebo仿真环境中的3D导航任务，并提供了完整的ROS2生态系统支持。
+本项目是基于ROS2 Humble的3D导航仿真系统，集成了多种先进的路径规划算法和机器人控制技术。项目支持Unitree Go2W机器人在Gazebo仿真环境中的3D导航任务，并提供了完整的ROS2生态系统支持。
 
 ### 主要特性
 
@@ -39,16 +39,21 @@
    - B样条轨迹优化
    - 可配置的地面/空中导航模式
 
-3. **unitree_ros2_sim** - Unitree机器人ROS2仿真包
-   - Go1机器人模型
+3. **unitree_go2w_ros2** - Unitree Go2W机器人ROS2仿真包
+   - Go2W机器人模型
    - 强化学习控制器
    - Gazebo集成
 
-4. **uav_simulator** - 无人机仿真环境
+4. **unitree_ros2_sim** - Unitree机器人ROS2仿真包（兼容Go1）
+   - Go1机器人模型
+   - 控制器支持
+   - Gazebo集成
+
+5. **uav_simulator** - 无人机仿真环境
    - 支持无人机导航
    - 与地面机器人共享规划算法
 
-5. **rviz-3d-nav-goal-tool** - 3D导航目标工具
+6. **rviz-3d-nav-goal-tool** - 3D导航目标工具
    - RViz插件
    - 3D目标点设置
 
@@ -111,7 +116,10 @@ source /opt/ros/humble/setup.bash
 
 # 编译特定包：
 ```bash
-# 编译Unitree相关包
+# 编译Unitree Go2W相关包（推荐使用symlink编译）
+colcon build --symlink-install --packages-select go2w_config go2w_control go2w_description champ champ_base champ_bringup champ_config champ_description champ_gazebo champ_msgs champ_navigation
+
+# 编译Unitree Go1相关包（兼容）
 colcon build --symlink-install --packages-select go1_gazebo go1_description go1_navigation ros2_unitree_legged_msgs ros2_unitree_legged_control unitree_guide2
 
 # 编译规划器包
@@ -120,12 +128,13 @@ colcon build --symlink-install --packages-select planner pct_planner_ros2
 # 编译其他包
 colcon build --symlink-install --packages-select uav_simulator rviz-3d-nav-goal-tool
 
+# 完整编译所有包（推荐）
 colcon build --symlink-install
 ```
 
 4. **配置环境变量**
 ```bash
-echo "source ~/3d_dog_navi_ros2_ws/install/setup.bash" >> ~/.bashrc
+echo "source ~/3d_dog_navi_ros2/install/setup.bash" >> ~/.bashrc
 source ~/.bashrc
 ```
 
@@ -137,18 +146,13 @@ source ~/.bashrc
 
 #### 1. 启动Gazebo仿真环境
 ```bash
-# 终端1 - 启动Gazebo
-ros2 launch go1_gazebo spawn_go1.launch.py
+# 终端1 - 启动完整的Go2W机器人仿真（包括Gazebo、控制器和混合运动控制器）
+ros2 launch go2w_control hybrid_controller.launch.py
 
-# 终端2 - 启动机器人控制器
-ros2 run unitree_guide2 junior_ctrl
-```- W/S - 前进/后退
-- A/D - 左/右移动
-- I/K - 抬头/低头
-- J/L - 左转/右转
-- 数字键1-5 - 切换不同模式(1趴下，2固定站立，3原地俯仰，4键盘控制运动，5接收指令)
-- 空格键 - 重置控制
-‘’‘
+# 终端2 - 启动键盘控制
+ros2 run teleop_twist_keyboard teleop_twist_keyboard
+```
+
 #### 2. 启动路径规划器
 
 **地面机器人模式**:
@@ -189,6 +193,14 @@ ros2 launch planner navigation.launch.py mode:=aerial
 
 ### 控制器操作
 
+#### Go2W机器人控制
+使用键盘控制（teleop_twist_keyboard）：
+- **W/S**: 前进/后退
+- **A/D**: 左转/右转
+- **Q/E**: 左移/右移
+- **R/F**: 上升/下降
+
+#### Go1机器人控制（兼容模式）
 在控制器运行后：
 - **按键 2**: 机器人站立
 - **按键 6**: 切换为RL模式（接收`cmd_vel`消息）
@@ -270,9 +282,7 @@ ros2 run pct_planner_ros2 plan_node --ros-args -p use_cpp:=true
    
    # 重新安装依赖
    pip3 install -r src/pct_planner_ros2/requirements.txt
-   ```
-
-### 调试工具
+   ### 调试工具
 
 使用ROS2内置工具进行调试：
 
@@ -285,8 +295,33 @@ ros2 topic list
 
 # 监控特定话题
 ros2 topic echo /cmd_vel
+```
 
-# 查看节点图
+### 已知问题与解决方案
+
+1. **包名验证错误："'package.xml' is not a valid package name"**
+   - **问题**：启动时出现包名验证错误
+   - **原因**：包索引目录中存在错误的文件名
+   - **解决方案**：
+     ```bash
+     # 检查并修复包索引文件
+     cd ~/3d_dog_navi_ros2/install
+     find . -name "package.xml" -path "*/ament_index/resource_index/packages/*"
+     
+     # 如果发现错误的文件，重命名为正确的包名
+     mv pct_planner_ros2/share/ament_index/resource_index/packages/package.xml \
+        pct_planner_ros2/share/ament_index/resource_index/packages/pct_planner_ros2
+     ```
+
+2. **FindPackageShare对象类型错误**
+   - **问题**：启动时出现"expected str, bytes or os.PathLike object, not FindPackageShare"错误
+   - **原因**：FindPackageShare对象被错误地传递给os.path.join()函数
+   - **解决方案**：使用PathJoinSubstitution替代os.path.join()
+
+3. **编译错误：私有成员访问问题**
+   - **问题**：编译planner_manager.cpp时出现私有成员访问错误
+   - **原因**：直接访问BsplineOptimizer类的私有成员enable_ground_mode_
+   - **解决方案**：通过节点参数读取参数值，而不是直接访问私有成员查看节点图
 rqt_graph
 ```
 
@@ -301,7 +336,8 @@ rqt_graph
 ├── src/
 │   ├── pct_planner_ros2/          # PCT规划器ROS2版本
 │   ├── planner/                   # 路径规划器
-│   ├── unitree_ros2_sim/          # Unitree机器人仿真
+│   ├── unitree_go2w_ros2/         # Unitree Go2W机器人仿真
+│   ├── unitree_ros2_sim/          # Unitree机器人仿真（兼容Go1）
 │   ├── uav_simulator/             # 无人机仿真
 │   └── rviz-3d-nav-goal-tool/     # RViz插件
 ├── launch/                        # 启动文件

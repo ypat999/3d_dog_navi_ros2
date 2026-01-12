@@ -46,13 +46,14 @@ namespace ego_planner
     int xy_extend = 5;
     int z_extend = 1;
     double z_penalty = 0.5;
-    node->get_parameter("optimization.enable_ground_mode", bspline_optimizer_->enable_ground_mode_);
-    if (bspline_optimizer_->enable_ground_mode_) {
+    bool enable_ground_mode = false;
+    node->get_parameter("optimization.enable_ground_mode", enable_ground_mode);
+    if (enable_ground_mode) {
         node->get_parameter("optimization.xy_extend", xy_extend);
         node->get_parameter("optimization.z_extend", z_extend);
         node->get_parameter("optimization.z_penalty_weight", z_penalty);
     }
-    bspline_optimizer_->a_star_->setGroundMode(bspline_optimizer_->enable_ground_mode_, xy_extend, z_extend, z_penalty);
+    bspline_optimizer_->a_star_->setGroundMode(enable_ground_mode, xy_extend, z_extend, z_penalty);
     // ========== END OF AIR/GROUND MODE PARAMETERS ==========
 
     visualization_ = vis;

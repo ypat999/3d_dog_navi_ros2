@@ -7,17 +7,17 @@ from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
-    this_package = FindPackageShare('go2w_config').find('go2w_config')
+    this_package = FindPackageShare('go2w_config')
     description_pkg = FindPackageShare('go2w_description')
 
-    joints_config = os.path.join(
-        this_package, 'config', 'joints', 'joints.yaml'
+    joints_config = PathJoinSubstitution(
+        [this_package, 'config', 'joints', 'joints.yaml']
     )
-    gait_config = os.path.join(
-        this_package, 'config', 'gait', 'gait.yaml'
+    gait_config = PathJoinSubstitution(
+        [this_package, 'config', 'gait', 'gait.yaml']
     )
-    links_config = os.path.join(
-        this_package, 'config', 'links', 'links.yaml'
+    links_config = PathJoinSubstitution(
+        [this_package, 'config', 'links', 'links.yaml']
     )
 
     model_path = PathJoinSubstitution(

@@ -7,17 +7,13 @@ from ament_index_python.packages import get_package_share_directory
 from launch.substitutions import LaunchConfiguration
 
 def generate_launch_description():
-    
     simulation_launcher = os.path.join(get_package_share_directory('go2w_description'), 'launch', 'gazebo.launch.py')
-
     champ_bringup_launcher = os.path.join(get_package_share_directory('go2w_config'), 'launch', 'champ_bringup.launch.py')
-    
     declare_world = DeclareLaunchArgument(
         name="world",
         default_value="default.world",
         description="World file name to load from the worlds directory"
     )
-
     return LaunchDescription([
         declare_world,
         IncludeLaunchDescription(
