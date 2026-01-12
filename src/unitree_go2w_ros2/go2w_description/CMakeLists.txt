@@ -11,6 +11,8 @@ install(
     launch
     meshes
     urdf
+    worlds
+    models
   DESTINATION share/${PROJECT_NAME}
 )
 

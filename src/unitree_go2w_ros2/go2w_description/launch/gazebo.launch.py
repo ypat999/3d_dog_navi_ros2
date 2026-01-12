@@ -7,6 +7,7 @@ from launch_ros.substitutions import FindPackageShare
 from launch.substitutions import LaunchConfiguration
 from launch.actions import DeclareLaunchArgument
 import os
+from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
     pkg_go2w = FindPackageShare("go2w_description")
@@ -23,9 +24,9 @@ def generate_launch_description():
     os.environ['GAZEBO_MODEL_PATH'] = '/usr/share/gazebo-11/models'
     os.environ['GAZEBO_PLUGIN_PATH'] = '/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:/opt/ros/humble/lib'
 
-    # Set the path to the WORLD model files. Is to find the models inside the models folder in my_box_bot_gazebo package
-    gazebo_models_path = '/home/ywj/3d_dog_navi_ros2/src/unitree_ros2_sim/go1_sim/go1_gazebo/models'
-    local_models_path = '~/.gazebo/models'
+    # Set the path to the WORLD model files. Is to find the models inside the models folder in go2w_description package
+    gazebo_models_path = os.path.join(get_package_share_directory('go2w_description'), 'models')
+    local_models_path = os.path.expanduser('~/.gazebo/models')
     
     # Set GAZEBO_MODEL_PATH to include local models only, disable online retrieval
     model_paths = [local_models_path, gazebo_models_path]
@@ -43,10 +44,9 @@ def generate_launch_description():
                 FindPackageShare("gazebo_ros"), "/launch", "/gzserver.launch.py"
             ]),
             launch_arguments={
-                # "world": PathJoinSubstitution([
-                #     FindPackageShare("go2w_config"), "worlds", LaunchConfiguration("world")
-                # ]),
-                "world": "/home/ywj/3d_dog_navi_ros2/src/unitree_ros2_sim/go1_sim/go1_gazebo/worlds/Building.world",
+                "world": PathJoinSubstitution([
+                    pkg_go2w, "worlds", "Building.world"
+                ]),
                 'extra_gazebo_args': '--disable-online-model-retrieval --disable-audio',
             }.items()
         )
