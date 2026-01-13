@@ -88,6 +88,7 @@ curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
 sudo apt update
 sudo apt install ros-humble-desktop
+sudo apt install ros-humble-robot-localization
 ```
 
 2. **安装项目依赖**
@@ -151,6 +152,11 @@ ros2 launch go2w_control hybrid_controller.launch.py
 
 # 终端2 - 启动键盘控制
 ros2 run teleop_twist_keyboard teleop_twist_keyboard
+
+
+
+# 单独终端 - 启动所有节点
+ros2 launch ego_planner dog_ego_planner_integrated.launch.py
 ```
 
 #### 2. 启动路径规划器
