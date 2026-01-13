@@ -91,4 +91,18 @@ install(
   DESTINATION share/${PROJECT_NAME}/launch
 )
 
+# 安装 RViz 配置文件
+install(
+  DIRECTORY rviz/
+  DESTINATION share/${PROJECT_NAME}/rviz
+)
+
+# 安装 Python 脚本
+install(
+  PROGRAMS
+    src/laserscan_to_pointcloud.py
+    src/goal_publisher.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_package()

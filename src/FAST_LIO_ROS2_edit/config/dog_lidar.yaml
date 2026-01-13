@@ -1,0 +1,45 @@
+/**:
+    ros__parameters:
+        feature_extract_enable: false
+        point_filter_num: 4
+        max_iteration: 3
+        filter_size_surf: 0.5
+        filter_size_map: 0.5
+        cube_side_length: 1000.0
+        runtime_pos_log_enable: false
+        map_file_path: ""
+
+        common:
+            lid_topic:  "/lidar/scan"  # 机器狗激光雷达话题
+            imu_topic:  "/imu/data"    # 机器狗IMU话题
+            time_sync_en: false
+            time_offset_lidar_to_imu: 0.0
+
+        preprocess:
+            lidar_type: 5              # 使用OTHER类型配置（适用于机器狗Livox激光雷达）
+            scan_line: 32
+            scan_rate: 10
+            timestamp_unit: 2
+            blind: 0.1
+
+        mapping:
+            acc_cov: 0.1
+            gyr_cov: 0.1
+            b_acc_cov: 0.0001
+            b_gyr_cov: 0.0001
+            
+            # 机器狗特定参数
+            extrinsic_T: [0.0, 0.0, 0.0]
+            extrinsic_R: [1.0, 0.0, 0.0,
+                         0.0, 1.0, 0.0,
+                         0.0, 0.0, 1.0]
+            
+            # 发布话题配置
+            publish_odometry_with_covariance: true
+            publish_tf: true
+            tf_child_frame_id: "base_link"
+            
+        publish:
+            publish_odometry_with_covariance: true
+            publish_tf: true
+            tf_child_frame_id: "base_link"
