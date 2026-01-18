@@ -402,21 +402,21 @@
       <ray>
         <scan>
           <horizontal>
-            <samples>128</samples>
+            <samples>180</samples>
             <resolution>1</resolution>
             <min_angle>-3.14159</min_angle>
             <max_angle>3.14159</max_angle>
           </horizontal>
           <vertical>
-            <samples>16</samples>
+            <samples>30</samples>
             <resolution>1</resolution>
-            <min_angle>${-PI/2.0}</min_angle>
-            <max_angle>0</max_angle>
+            <min_angle>${-PI/2.0 + 1.0}</min_angle>
+            <max_angle>${-PI/2.0 + 1.7}</max_angle>
           </vertical>
         </scan>
         <range>
           <min>0.1</min>
-          <max>20.0</max>
+          <max>40.0</max>
           <resolution>0.01</resolution>
         </range>
         <noise>

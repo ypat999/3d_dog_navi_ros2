@@ -14,6 +14,8 @@
             imu_topic:  "/imu/data"    # 机器狗IMU话题
             time_sync_en: false
             time_offset_lidar_to_imu: 0.0
+            frame_id_camera_init: "odom"  # 初始坐标系名称
+            frame_id_body: "base"               # 机器人身体坐标系名称
 
         preprocess:
             lidar_type: 5              # 使用OTHER类型配置（适用于机器狗Livox激光雷达）
@@ -37,9 +39,9 @@
             # 发布话题配置
             publish_odometry_with_covariance: true
             publish_tf: true
-            tf_child_frame_id: "base_link"
+            tf_child_frame_id: "base"
             
         publish:
             publish_odometry_with_covariance: true
             publish_tf: true
-            tf_child_frame_id: "base_link"
+            tf_child_frame_id: "base"
