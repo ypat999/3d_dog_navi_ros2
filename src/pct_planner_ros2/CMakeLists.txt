@@ -35,26 +35,29 @@ ament_target_dependencies(pct_planner_lib
   "nav_msgs"
 )
 
-# 创建pybind11绑定
-pybind11_add_module(pct_planner_cpp src/bindings.cpp src/a_star.cpp src/ele_planner.cpp src/traj_opt.cpp)
-
-target_include_directories(pct_planner_cpp PRIVATE
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-  $<INSTALL_INTERFACE:include>)
-
-target_link_libraries(pct_planner_cpp
-  pct_planner_lib
-)
-
-ament_target_dependencies(pct_planner_cpp
-  "rclcpp"
-  "std_msgs"
-  "geometry_msgs"
-  "nav_msgs"
-)
+# 暂时禁用pybind11绑定，先编译C++库
+# pybind11_add_module(pct_planner_cpp src/bindings.cpp)
+# 
+# target_include_directories(pct_planner_cpp PRIVATE
+#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+#   $<INSTALL_INTERFACE:include>)
+# 
+# # 手动链接库和依赖项
+# target_link_libraries(pct_planner_cpp PRIVATE
+#   pct_planner_lib
+#   pybind11::module
+# )
+# 
+# # 手动添加依赖项
+# target_include_directories(pct_planner_cpp PRIVATE
+#   ${rclcpp_INCLUDE_DIRS}
+#   ${std_msgs_INCLUDE_DIRS}
+#   ${geometry_msgs_INCLUDE_DIRS}
+#   ${nav_msgs_INCLUDE_DIRS}
+# )
 
 # 安装库
-install(TARGETS pct_planner_lib pct_planner_cpp
+install(TARGETS pct_planner_lib
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

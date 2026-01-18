@@ -402,13 +402,13 @@
       <ray>
         <scan>
           <horizontal>
-            <samples>180</samples>
+            <samples>18</samples>
             <resolution>1</resolution>
             <min_angle>-3.14159</min_angle>
             <max_angle>3.14159</max_angle>
           </horizontal>
           <vertical>
-            <samples>30</samples>
+            <samples>1</samples>
             <resolution>1</resolution>
             <min_angle>${-PI/2.0 + 1.0}</min_angle>
             <max_angle>${-PI/2.0 + 1.7}</max_angle>
@@ -434,6 +434,19 @@
       </plugin>
     </sensor>
   </gazebo>
+
+
+
+
+  <!-- =============== mid360 ============ -->
+  <xacro:include filename="$(find go2w_description)/urdf/sensor/mid360_gpu.xacro"/> 
+  <xacro:mid360  name="livox_frame" parent="base" topic="/livox/lidar" imu_topic="/livox/imu" >
+    <origin xyz="0.07 0.0 0.10" rpy="0 0.5235987756 0"/>
+  </xacro:mid360> 
+
+
+
+
 
   <!-- Camera -->
   <link name="camera">
