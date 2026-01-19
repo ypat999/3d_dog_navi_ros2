@@ -57,20 +57,20 @@ def generate_launch_description():
             PathJoinSubstitution([
                 FindPackageShare('fast_lio'),
                 'config',
-                'dog_lidar.yaml'
+                'mid360.yaml'
             ]),
             {
                 'use_sim_time': use_sim_time,
-                'common.lid_topic': '/lidar/scan',  # 直接使用机器狗的点云数据
-                'common.imu_topic': '/imu/data',    # 机器狗IMU话题
-                'publish.tf_child_frame_id': ['drone_', drone_id, '_base_link'],
+                'common.lid_topic': '/livox/lidar',  # 机器狗激光雷达点云数据
+                'common.imu_topic': '/livox/imu',    # 机器狗IMU数据
+                'publish.tf_child_frame_id': 'base_footprint',
                 'publish.publish_odometry_with_covariance': True,
                 'publish.publish_tf': True
             }
         ],
         remappings=[
-            ('Odometry', ['drone_', drone_id, '_fast_lio_odom']),  # 发布fast_lio里程计
-            ('cloud_registered', ['drone_', drone_id, '_fast_lio_cloud'])
+            ('Odometry', '/Odometry'),  # FAST_LIO2生成的里程计
+            ('cloud_registered', '/cloud_registered')
         ]
     )
     
@@ -88,8 +88,8 @@ def generate_launch_description():
                 'map_size_x_': map_size_x,
                 'map_size_y_': map_size_y,
                 'map_size_z_': map_size_z,
-                'odometry_topic': ['drone_', drone_id, '_fast_lio_odom'],  # 使用fast_lio2生成的高精度里程计
-                'cloud_topic': ['drone_', drone_id, '_fast_lio_cloud'],  # 使用fast_lio2处理后的点云数据
+                'odometry_topic': '/odom',  # 使用机器狗状态估计器生成的里程计
+                'cloud_topic': '/livox/lidar',  # 直接使用机器狗原始点云数据
                 'camera_pose_topic': 'camera_pose',
                 'depth_topic': 'depth_image',
                 # 目标点设置
@@ -128,7 +128,7 @@ def generate_launch_description():
         name=['drone_', drone_id, '_traj_server'],
         output='screen',
         remappings=[
-            ('position_cmd', ['drone_', drone_id, '_planning/pos_cmd']),
+            ('position_cmd', ['drone_', drone_id, '_plan_vis/goal_point']),  # 使用EgoPlanner的目标点话题
             ('planning/bspline', ['drone_', drone_id, '_planning/bspline'])
         ],
         parameters=[
