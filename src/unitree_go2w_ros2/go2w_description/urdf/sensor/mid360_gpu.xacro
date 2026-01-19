@@ -25,7 +25,7 @@
   </xacro:macro>
 
 
-  <xacro:macro name="mid360" params="name:='' parent:= 'base' topic:='/livox/lidar' imu_topic:='/livox/imu' *origin ">
+  <xacro:macro name="mid360" params="name:='' parent:= 'body' topic:='/livox/lidar' imu_topic:='/livox/imu' *origin ">
 
     <link name="${name}">
       <visual>
@@ -71,13 +71,13 @@
         <ray>
           <scan>
             <horizontal>
-              <samples>360</samples>
+              <samples>720</samples>
               <resolution>1</resolution>
               <min_angle>${0}</min_angle>
               <max_angle>${2*M_PI}</max_angle>
             </horizontal>
             <vertical>
-              <samples>60</samples>
+              <samples>120</samples>
               <resolution>1</resolution>
               <min_angle>${-7.22/180*M_PI}</min_angle>
               <max_angle>${55.22/180*M_PI}</max_angle>
@@ -99,7 +99,7 @@
       <sensor name="${name}_imu" type="imu">
         <pose>0 0 0 0 0 0</pose> 
         <always_on>true</always_on>
-        <update_rate>40</update_rate> 
+        <update_rate>200</update_rate> 
         <use_strict_rate>true</use_strict_rate>
         <visualize>false</visualize>
         

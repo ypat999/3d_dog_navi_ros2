@@ -5,7 +5,7 @@ from launch_ros.actions import Node
 from launch.substitutions import Command, FindExecutable, PathJoinSubstitution
 from launch_ros.substitutions import FindPackageShare
 from launch.substitutions import LaunchConfiguration
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, SetEnvironmentVariable
 import os
 from ament_index_python.packages import get_package_share_directory
 
@@ -20,6 +20,11 @@ def generate_launch_description():
         default_value="default.world",
         description="World file name to load from the worlds directory"
     )
+
+    
+    # （可选）阻止Gazebo从互联网自动下载模型（加速本地加载）
+    os.environ['GAZEBO_MODEL_DATABASE_URI'] = ""
+    
     
     os.environ['GAZEBO_MODEL_PATH'] = '/usr/share/gazebo-11/models'
     os.environ['GAZEBO_PLUGIN_PATH'] = '/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:/opt/ros/humble/lib'
@@ -38,6 +43,21 @@ def generate_launch_description():
         os.environ['GAZEBO_RESOURCE_PATH'] = os.environ['GAZEBO_RESOURCE_PATH'] + ':' + gazebo_resource_path
     else:
         os.environ['GAZEBO_RESOURCE_PATH'] = gazebo_resource_path
+
+
+
+    # 添加GPU渲染优化环境变量
+    mesa_adapter = SetEnvironmentVariable(
+        name='MESA_D3D12_DEFAULT_ADAPTER_NAME',
+        value='NVIDIA'
+    )
+    
+    gazebo_gpu_rendering = SetEnvironmentVariable(
+        name='GAZEBO_GPU_RENDERING',
+        value='1'
+    )
+
+
 
     gzserver_launch = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([
@@ -126,6 +146,8 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        mesa_adapter,
+        gazebo_gpu_rendering,
         declare_world,
         gzserver_launch,
         gzclient_launch,

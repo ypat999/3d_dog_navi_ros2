@@ -17,7 +17,7 @@ def generate_launch_description():
 
     use_sim_time = True
     config_path = config_path
-    config_file = 'dog_lidar.yaml'
+    config_file = 'mid360.yaml'
 
     ld = LaunchDescription()
 
@@ -98,16 +98,16 @@ def generate_launch_description():
     )
     ld.add_action(static_transform_map_to_odom)
 
-    # odom -> base_link (里程计到机器人基坐标系的静态变换)
-    static_transform_odom_to_base = Node(
+    # odom -> base_footprint (里程计到机器人身体坐标系的静态变换)
+    static_transform_odom_to_base_footprint = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
-        name='static_transform_odom_to_base',
+        name='static_transform_odom_to_base_footprint',
         parameters=[{'use_sim_time': True}],
-        arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', 'odom', 'base'],
+        arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', 'odom', 'base_footprint'],
         output='screen'
     )
-    # ld.add_action(static_transform_odom_to_base)
+    # ld.add_action(static_transform_odom_to_base_footprint)
 
 
     return ld

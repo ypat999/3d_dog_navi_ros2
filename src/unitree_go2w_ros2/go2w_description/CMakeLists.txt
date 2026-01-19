@@ -9,17 +9,30 @@ endif()
 # Find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(gazebo_dev REQUIRED)
-find_package(gazebo_ros REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(ament_index_cpp REQUIRED)
+find_package(gazebo_dev REQUIRED)
+find_package(gazebo_ros REQUIRED)
 
-# Add include directories
-include_directories(
-  include
-  ${gazebo_dev_INCLUDE_DIRS}
-  ${gazebo_ros_INCLUDE_DIRS}
-)
+# Find Gazebo and SDF using pkg-config
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GAZEBO REQUIRED gazebo)
+pkg_check_modules(SDFORMAT REQUIRED sdformat9)
+
+# Find OpenMP
+find_package(OpenMP REQUIRED)
+
+# Include directories
+include_directories(include)
+include_directories(${GAZEBO_INCLUDE_DIRS})
+include_directories(${SDFORMAT_INCLUDE_DIRS})
+
+# Link directories for Gazebo libraries
+link_directories(${GAZEBO_LIBRARY_DIRS})
 
 # Add library for livox GPU laser plugin
 add_library(livox_sim_gpu_laser SHARED
@@ -29,8 +42,8 @@ add_library(livox_sim_gpu_laser SHARED
 # Add target-specific include directories
 target_include_directories(livox_sim_gpu_laser PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/include
-  ${gazebo_dev_INCLUDE_DIRS}
-  ${gazebo_ros_INCLUDE_DIRS}
+  ${GAZEBO_INCLUDE_DIRS}
+  ${SDFORMAT_INCLUDE_DIRS}
 )
 
 # Add ROS2 message include directories
@@ -38,15 +51,24 @@ ament_target_dependencies(livox_sim_gpu_laser
   rclcpp
   sensor_msgs
   geometry_msgs
+  std_msgs
+  tf2
+  tf2_ros
+  ament_index_cpp
 )
 
 # Link libraries
 target_link_libraries(livox_sim_gpu_laser
-  ${gazebo_dev_LIBRARIES}
-  ${gazebo_ros_LIBRARIES}
-  ${rclcpp_LIBRARIES}
-  ${sensor_msgs_LIBRARIES}
+  ${GAZEBO_LIBRARIES}
+  ${SDFORMAT_LIBRARIES}
+  GpuRayPlugin
+  OpenMP::OpenMP_CXX
 )
+
+# Add OpenMP compile flags if needed
+if(OpenMP_CXX_FOUND)
+  target_compile_options(livox_sim_gpu_laser PRIVATE ${OpenMP_CXX_FLAGS})
+endif()
 
 # Add compile definitions
 target_compile_definitions(livox_sim_gpu_laser PRIVATE

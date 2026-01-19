@@ -39,7 +39,7 @@
  #include <gazebo/transport/transport.hh>
  
  // PointCloud2 message helper
- #include <sensor_msgs/sensor_msgs/point_cloud2_iterator.hpp>
+ #include "sensor_msgs/point_cloud2_iterator.hpp"
  
  #include "livox_sim_plugins/livox_sim_gpu_laser.h"
  #include <ignition/math/Rand.hh>

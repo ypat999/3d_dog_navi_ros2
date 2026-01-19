@@ -440,8 +440,8 @@
 
   <!-- =============== mid360 ============ -->
   <xacro:include filename="$(find go2w_description)/urdf/sensor/mid360_gpu.xacro"/> 
-  <xacro:mid360  name="livox_frame" parent="base" topic="/livox/lidar" imu_topic="/livox/imu" >
-    <origin xyz="0.07 0.0 0.10" rpy="0 0.5235987756 0"/>
+  <xacro:mid360  name="livox_frame" parent="body" topic="/livox/lidar" imu_topic="/livox/imu" >
+    <origin xyz="0.3 0.0 0.10" rpy="0 0.5235987756 0"/>
   </xacro:mid360> 
 
 

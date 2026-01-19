@@ -153,7 +153,7 @@ ros2 launch go2w_control hybrid_controller.launch.py
 # 终端2 - 启动键盘控制
 ros2 run teleop_twist_keyboard teleop_twist_keyboard
 
-
+ros2 launch fast_lio mapping.launch.py 
 
 # 单独终端 - 启动所有节点
 ros2 launch ego_planner dog_ego_planner_integrated.launch.py

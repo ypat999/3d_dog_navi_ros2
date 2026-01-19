@@ -25,11 +25,11 @@
     </inertial>
   </xacro:macro>
 
-  <xacro:macro name="mid360" params="name:='' parent:= 'base_link' topic:='mid360' imu_topic:='/livox/imu' *origin ">
+  <xacro:macro name="mid360" params="name:='' parent:= 'body' topic:='mid360' imu_topic:='/livox/imu' *origin ">
 
     <link name="${name}">
       <visual>
-        <origin xyz="0.025 -0.0265 -0.025" rpy="${pi/2} 0 ${pi}"/>
+        <origin xyz="0.025 -0.0265 -0.025" rpy="${pi/2} 0 ${pi/2}"/>
         <geometry>
           <mesh filename="package://go2w_description/meshes/mid-360-scaled.dae"/>
         </geometry>
@@ -37,7 +37,7 @@
 
 
   <collision>
-    <origin xyz="0.025 -0.0265 -0.025" rpy="${pi/2} 0 ${pi}"/>
+    <origin xyz="0.025 -0.0265 -0.025" rpy="${pi/2} 0 ${pi/2}"/>
     <geometry>
       <mesh filename="package://go2w_description/meshes/mid-360-scaled.dae"/>
     </geometry>

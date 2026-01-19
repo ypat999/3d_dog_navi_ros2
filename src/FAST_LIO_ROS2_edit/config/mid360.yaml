@@ -1,8 +1,8 @@
 /**:
     ros__parameters:
         feature_extract_enable: false
-        point_filter_num: 3                   # 增加过滤点数，减少计算量，提高稳定性
-        max_iteration: 3                      # 增加最大迭代次数，提高匹配精度
+        point_filter_num: 1                   # 增加过滤点数，减少计算量，提高稳定性
+        max_iteration: 5                      # 增加最大迭代次数，提高匹配精度
         # filter_size_corner: 0.01               # 角点过滤尺寸（新增参数）
         filter_size_surf: 0.1                 # 增加表面过滤尺寸，减少噪声影响
         filter_size_map: 0.5                  # 增加地图过滤尺寸，减少噪声影响
@@ -18,11 +18,11 @@
                                         # This param will take effect no matter what time_sync_en is. So if the time offset is not known exactly, please set as 0.0
             gravity_constant: 9.8066      # 重力常数，对于mid360归一化IMU数据设为1.0
             frame_id_camera_init: "odom"  # 初始坐标系名称
-            frame_id_body: "base_link"               # 机器人身体坐标系名称
+            frame_id_body: "base_footprint"               # 机器人身体坐标系名称
             
         preprocess:
             # 1 for Livox serials LiDAR, 2 for Velodyne LiDAR, 3 for ouster LiDAR, 4 for any other pointcloud input
-            lidar_type: 1
+            lidar_type: 4
             
             scan_line:  4
             blind: 0.3                   # 减小盲区范围，增加有效点数量
@@ -38,16 +38,16 @@
             det_range:     60.0
             extrinsic_est_en:  false         # 保持关闭，避免外参在线估计导致的不稳定
             extrinsic_T: [ -0.011, -0.02329, 0.04412 ]
-            extrinsic_R: [ 1., 0., 0.,
-                            0., 1., 0.,
-                            0., 0., 1.]
+            # extrinsic_R: [ 1., 0., 0.,
+            #                 0., 1., 0.,
+            #                 0., 0., 1.]
             
             # 速度限制参数（新增）
             max_velocity: 3.0               # 最大速度限制 (m/s)
             # extrinsic_T: [ 0.1,  0.0,  0.1 ]
-            # extrinsic_R: [0.8660, 0.0, 0.5,
-            #                 0.0, 1.0, 0.0,
-            #                 -0.5, 0.0, 0.8660]
+            extrinsic_R: [0.8660, 0.0, 0.5,
+                            0.0, 1.0, 0.0,
+                            -0.5, 0.0, 0.8660]
             
             
 
@@ -55,7 +55,7 @@
         publish:
             path_en: false                # true: publish Path
             effect_map_en: false         # true: publish Effects
-            map_en: false                 # true: publish Map cloud
+            map_en: true                 # true: publish Map cloud
             scan_publish_en:  true       # false: close all the point cloud output
             dense_publish_en: false      # false: low down the points number in a global-frame point clouds scan.
             scan_bodyframe_pub_en: true  # true: output the point cloud scans in IMU-body-frame
