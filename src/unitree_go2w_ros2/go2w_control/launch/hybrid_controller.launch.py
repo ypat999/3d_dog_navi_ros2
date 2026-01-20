@@ -31,4 +31,35 @@ def generate_launch_description():
             name='hybrid_motion_controller',
             output='screen'
         ),
+        
+        # Gazebo odom真值转发节点 - 将Gazebo中的机器狗真实位姿转发为ROS2 odom话题
+        Node(
+            package='ros_gz_bridge',
+            executable='parameter_bridge',
+            name='gz_odom_bridge',
+            arguments=[
+                '/model/go2w/odometry@nav_msgs/msg/Odometry[gz.msgs.Odometry',
+                '--ros-args', '-p', 'use_sim_time:=true'
+            ],
+            output='screen'
+        ),
+        
+        # 重命名Gazebo odom真值话题到标准odom话题
+        Node(
+            package='topic_tools',
+            executable='relay',
+            name='gz_odom_relay',
+            parameters=[{'use_sim_time': True}],
+            arguments=['/model/go2w/odometry', '/odom_gazebo'],
+            output='screen'
+        ),
+        
+        # 添加静态tf变换 - 将Gazebo世界坐标系映射到ROS2世界坐标系
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='world_to_gz_world_tf',
+            arguments=['0', '0', '0', '0', '0', '0', 'world', 'gz_world'],
+            output='screen'
+        ),
     ])

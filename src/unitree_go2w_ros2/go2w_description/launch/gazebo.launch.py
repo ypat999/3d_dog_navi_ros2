@@ -34,15 +34,19 @@ def generate_launch_description():
     local_models_path = os.path.expanduser('~/.gazebo/models')
     
     # Set GAZEBO_MODEL_PATH to include local models only, disable online retrieval
-    model_paths = [local_models_path, gazebo_models_path]
+    # 添加meshes目录路径，确保Gazebo能找到mid360模型文件
+    meshes_path = os.path.join(get_package_share_directory('go2w_description'), 'meshes')
+    model_paths = [local_models_path, gazebo_models_path, meshes_path]
     os.environ['GAZEBO_MODEL_PATH'] = ':'.join(model_paths)
-
-    # Set GAZEBO_RESOURCE_PATH for shader libraries
-    gazebo_resource_path = '/usr/share/gazebo-11'
-    if 'GAZEBO_RESOURCE_PATH' in os.environ:
-        os.environ['GAZEBO_RESOURCE_PATH'] = os.environ['GAZEBO_RESOURCE_PATH'] + ':' + gazebo_resource_path
-    else:
-        os.environ['GAZEBO_RESOURCE_PATH'] = gazebo_resource_path
+    
+    # 设置GAZEBO_RESOURCE_PATH包含所有资源路径
+    resource_paths = [
+        '/usr/share/gazebo-11',
+        get_package_share_directory('go2w_description'),
+        os.path.join(get_package_share_directory('go2w_description'), 'meshes'),
+        os.path.join(get_package_share_directory('go2w_description'), 'models')
+    ]
+    os.environ['GAZEBO_RESOURCE_PATH'] = ':'.join(resource_paths)
 
 
 
@@ -96,7 +100,7 @@ def generate_launch_description():
             "-topic", "robot_description",
             "-x", "0",
             "-y", "0",
-            "-z", "0.8",
+            "-z", "1.0",
         ],
         output="screen",
         parameters=[{"use_sim_time": True}]

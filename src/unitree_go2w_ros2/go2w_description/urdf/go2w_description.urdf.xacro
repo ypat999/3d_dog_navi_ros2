@@ -441,7 +441,8 @@
   <!-- =============== mid360 ============ -->
   <xacro:include filename="$(find go2w_description)/urdf/sensor/mid360_gpu.xacro"/> 
   <xacro:mid360  name="livox_frame" parent="body" topic="/livox/lidar" imu_topic="/livox/imu" >
-    <origin xyz="0.3 0.0 0.10" rpy="0 0.5235987756 0"/>
+    <!-- <origin xyz="0.3 0.0 0.10" rpy="0 0.5235987756 0"/> -->
+    <origin xyz="0.3 0.0 0.10" rpy="0 0.0 0"/>
   </xacro:mid360> 
 
 
@@ -555,4 +556,35 @@
       <parameters>$(find go2w_description)/config/joint_controller.yaml</parameters>
     </plugin>
   </gazebo>
+
+  <!-- Gazebo Odometry Publisher Plugin - 发布机器狗真实位姿 -->
+  <gazebo>
+    <plugin filename="libgazebo_odometry_publisher.so" name="odometry_publisher">
+      <!-- 发布频率 (Hz) -->
+      <update_rate>30</update_rate>
+      
+      <!-- 参考坐标系 -->
+      <frame_name>odom</frame_name>
+      
+      <!-- 机器狗本体坐标系 -->
+      <body_name>base_footprint</body_name>
+      
+      <!-- 发布的话题名称 -->
+      <topic_name>/gazebo/tower/go2w/odometry</topic_name>
+      
+      <!-- 坐标系设置 -->
+      <xyz_offset>0 0 0</xyz_offset>
+      <rpy_offset>0 0 0</rpy_offset>
+      
+      <!-- 高斯噪声设置 (可选) -->
+      <gaussian_noise>0.001</gaussian_noise>
+      
+      <!-- 是否发布tf变换 -->
+      <publish_tf>true</publish_tf>
+      
+      <!-- 坐标系前缀 -->
+      <frame_prefix></frame_prefix>
+    </plugin>
+  </gazebo>
+
 </robot>

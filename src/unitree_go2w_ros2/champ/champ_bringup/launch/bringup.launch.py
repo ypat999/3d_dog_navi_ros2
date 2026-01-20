@@ -258,7 +258,7 @@ def generate_launch_description():
             quadruped_controller_node,
             state_estimator_node,
             base_to_footprint_ekf,
-            footprint_to_odom_ekf,
+            # footprint_to_odom_ekf,
             rviz2
         ]
     )

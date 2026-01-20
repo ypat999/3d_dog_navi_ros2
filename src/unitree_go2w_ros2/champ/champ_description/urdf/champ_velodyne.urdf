@@ -137,7 +137,7 @@
     <plugin filename="libhector_gazebo_ros_imu.so" name="imu_controller">
       <updateRate>50.0</updateRate>
       <bodyName>imu_link</bodyName>
-      <topicName>imu/data</topicName>
+      <topicName>/imu/data</topicName>
       <accelDrift>0.005 0.005 0.005</accelDrift>
       <accelGaussianNoise>0.005 0.005 0.005</accelGaussianNoise>
       <rateDrift>0.005 0.005 0.005 </rateDrift>

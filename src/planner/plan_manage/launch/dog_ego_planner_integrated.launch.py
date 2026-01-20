@@ -63,14 +63,7 @@ def generate_launch_description():
                 'use_sim_time': use_sim_time,
                 'common.lid_topic': '/livox/lidar',  # 机器狗激光雷达点云数据
                 'common.imu_topic': '/livox/imu',    # 机器狗IMU数据
-                'publish.tf_child_frame_id': 'base_footprint',
-                'publish.publish_odometry_with_covariance': True,
-                'publish.publish_tf': True
             }
-        ],
-        remappings=[
-            ('Odometry', '/Odometry'),  # FAST_LIO2生成的里程计
-            ('cloud_registered', '/cloud_registered')
         ]
     )
     
@@ -90,8 +83,8 @@ def generate_launch_description():
                 'map_size_z_': map_size_z,
                 'odometry_topic': '/odom',  # 使用机器狗状态估计器生成的里程计
                 'cloud_topic': '/livox/lidar',  # 直接使用机器狗原始点云数据
-                'camera_pose_topic': 'camera_pose',
-                'depth_topic': 'depth_image',
+                'camera_pose_topic': '/odom',
+                # 'depth_topic': 'depth_image',
                 # 目标点设置
                 'point_num': '4',
                 'point0_x': '5.0',
@@ -110,7 +103,7 @@ def generate_launch_description():
                 'max_vel': '2.0',
                 'max_acc': '3.0',
                 'planning_horizon': '7.5',
-                'flight_type': '2',
+                'flight_type': '1',
                 'use_distinctive_trajs': 'True',
                 # 地面模式参数（适合机器狗）
                 'enable_ground_mode': 'True',
@@ -185,7 +178,7 @@ def generate_launch_description():
     
     # 添加节点和启动文件
     ld.add_action(dog_simulation_launch)
-    ld.add_action(fast_lio2_node)  # 添加fast_lio2里程计节点
+    # ld.add_action(fast_lio2_node)  # 添加fast_lio2里程计节点
     ld.add_action(ego_planner_launch)
     ld.add_action(traj_server_node)
     ld.add_action(rviz_node)

@@ -5,7 +5,16 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /PointCloud21
+        - /TF1
+        - /TF1/Tree1
+        - /TF1/Tree1/odom1
+        - /TF1/Tree1/odom1/base_footprint1
+        - /TF1/Tree1/odom1/base_footprint1/base1
+        - /TF1/Tree1/odom1/base_footprint1/base1/body1
+        - /PointCloud22/Status1
+        - /Marker1
+        - /Marker1/Status1
+        - /Marker1/Topic1
       Splitter Ratio: 0.5852941274642944
     Tree Height: 660
   - Class: rviz_common/Selection
@@ -244,19 +253,149 @@ Visualization Manager:
       Value: true
       Visual Enabled: true
     - Class: rviz_default_plugins/TF
-      Enabled: false
+      Enabled: true
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        FL_calf:
+          Value: true
+        FL_calflower:
+          Value: true
+        FL_calflower1:
+          Value: true
+        FL_foot:
+          Value: true
+        FL_foot_motor:
+          Value: true
+        FL_hip:
+          Value: true
+        FL_thigh:
+          Value: true
+        FR_calf:
+          Value: true
+        FR_calflower:
+          Value: true
+        FR_calflower1:
+          Value: true
+        FR_foot:
+          Value: true
+        FR_foot_motor:
+          Value: true
+        FR_hip:
+          Value: true
+        FR_thigh:
+          Value: true
+        Head_lower:
+          Value: true
+        Head_upper:
+          Value: true
+        RL_calf:
+          Value: true
+        RL_calflower:
+          Value: true
+        RL_calflower1:
+          Value: true
+        RL_foot:
+          Value: true
+        RL_foot_motor:
+          Value: true
+        RL_hip:
+          Value: true
+        RL_thigh:
+          Value: true
+        RR_calf:
+          Value: true
+        RR_calflower:
+          Value: true
+        RR_calflower1:
+          Value: true
+        RR_foot:
+          Value: true
+        RR_foot_motor:
+          Value: true
+        RR_hip:
+          Value: true
+        RR_thigh:
+          Value: true
+        base:
+          Value: true
+        base_footprint:
+          Value: true
+        body:
+          Value: true
+        camera:
+          Value: true
+        imu:
+          Value: true
+        lidar:
+          Value: true
+        livox_frame:
+          Value: true
+        odom:
+          Value: true
       Marker Scale: 0.30000001192092896
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: true
       Tree:
-        {}
+        odom:
+          base_footprint:
+            base:
+              body:
+                FL_hip:
+                  FL_thigh:
+                    FL_calf:
+                      FL_calflower:
+                        FL_calflower1:
+                          {}
+                      FL_foot:
+                        {}
+                      FL_foot_motor:
+                        {}
+                FR_hip:
+                  FR_thigh:
+                    FR_calf:
+                      FR_calflower:
+                        FR_calflower1:
+                          {}
+                      FR_foot:
+                        {}
+                      FR_foot_motor:
+                        {}
+                Head_upper:
+                  Head_lower:
+                    {}
+                RL_hip:
+                  RL_thigh:
+                    RL_calf:
+                      RL_calflower:
+                        RL_calflower1:
+                          {}
+                      RL_foot:
+                        {}
+                      RL_foot_motor:
+                        {}
+                RR_hip:
+                  RR_thigh:
+                    RR_calf:
+                      RR_calflower:
+                        RR_calflower1:
+                          {}
+                      RR_foot:
+                        {}
+                      RR_foot_motor:
+                        {}
+                camera:
+                  {}
+                imu:
+                  {}
+                lidar:
+                  {}
+                livox_frame:
+                  {}
       Update Interval: 0
-      Value: false
+      Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -269,7 +408,7 @@ Visualization Manager:
       Color: 255; 255; 255
       Color Transformer: Intensity
       Decay Time: 1
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 0
@@ -287,14 +426,81 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /cloud_registered_body
+        Value: /livox/lidar
       Use Fixed Frame: true
       Use rainbow: true
+      Value: false
+    - Alpha: 0.20000000298023224
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 2.279400110244751
+        Min Value: 0.5794000625610352
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz_default_plugins/PointCloud2
+      Color: 85; 255; 127
+      Color Transformer: AxisColor
+      Decay Time: 0
+      Enabled: false
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: PointCloud2
+      Position Transformer: XYZ
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.10000000149011612
+      Style: Flat Squares
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /drone_0_grid/grid_map/occupancy_inflate
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: false
+    - Alpha: 1
+      Axes Length: 1
+      Axes Radius: 0.10000000149011612
+      Class: rviz_default_plugins/Pose
+      Color: 255; 25; 0
+      Enabled: true
+      Head Length: 0.30000001192092896
+      Head Radius: 0.10000000149011612
+      Name: Pose
+      Shaft Length: 1
+      Shaft Radius: 0.05000000074505806
+      Shape: Arrow
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /move_base_simple/goal
       Value: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: false
+      Name: Marker
+      Namespaces:
+        {}
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /drone_0_plan_vis/global_list
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 238; 238; 236
-    Fixed Frame: map
+    Fixed Frame: odom
     Frame Rate: 30
   Name: root
   Tools:
@@ -337,7 +543,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 13.038260459899902
+      Distance: 9.527694702148438
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -352,10 +558,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.4097970128059387
+      Pitch: 0.12479660660028458
       Target Frame: base
       Value: Orbit (rviz_default_plugins)
-      Yaw: 5.789968490600586
+      Yaw: 1.7617793083190918
     Saved: ~
 Window Geometry:
   Displays:
@@ -371,5 +577,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1850
-  X: 1816
-  Y: 41
+  X: 1757
+  Y: 1045

@@ -17,8 +17,8 @@
             time_offset_lidar_to_imu: 0.0 # Time offset between lidar and IMU calibrated by other algorithms, e.g. LI-Init (can be found in README).
                                         # This param will take effect no matter what time_sync_en is. So if the time offset is not known exactly, please set as 0.0
             gravity_constant: 9.8066      # 重力常数，对于mid360归一化IMU数据设为1.0
-            frame_id_camera_init: "odom"  # 初始坐标系名称
-            frame_id_body: "base_footprint"               # 机器人身体坐标系名称
+            frame_id_camera_init: "camera_init"  # 初始坐标系名称
+            frame_id_body: "body"               # 机器人身体坐标系名称
             
         preprocess:
             # 1 for Livox serials LiDAR, 2 for Velodyne LiDAR, 3 for ouster LiDAR, 4 for any other pointcloud input
@@ -38,16 +38,16 @@
             det_range:     60.0
             extrinsic_est_en:  false         # 保持关闭，避免外参在线估计导致的不稳定
             extrinsic_T: [ -0.011, -0.02329, 0.04412 ]
-            # extrinsic_R: [ 1., 0., 0.,
-            #                 0., 1., 0.,
-            #                 0., 0., 1.]
+            extrinsic_R: [ 1., 0., 0.,
+                            0., 1., 0.,
+                            0., 0., 1.]
             
             # 速度限制参数（新增）
             max_velocity: 3.0               # 最大速度限制 (m/s)
             # extrinsic_T: [ 0.1,  0.0,  0.1 ]
-            extrinsic_R: [0.8660, 0.0, 0.5,
-                            0.0, 1.0, 0.0,
-                            -0.5, 0.0, 0.8660]
+            # extrinsic_R: [0.8660, 0.0, 0.5,
+            #                 0.0, 1.0, 0.0,
+            #                 -0.5, 0.0, 0.8660]
             
             
 

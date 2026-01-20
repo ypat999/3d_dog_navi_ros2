@@ -87,7 +87,7 @@ StateEstimation::StateEstimation():
 
     if (orientation_from_imu_)
       imu_subscriber_ = this->create_subscription<sensor_msgs::msg::Imu>(
-        "imu/data", 1, std::bind(&StateEstimation::imu_callback_, this,  std::placeholders::_1));
+        "/imu/data", 1, std::bind(&StateEstimation::imu_callback_, this,  std::placeholders::_1));
     base_.setGaitConfig(gait_config_);
     champ::URDF::loadFromString(base_, this->get_node_parameters_interface(), urdf);
     joint_names_ = champ::URDF::getJointNames(this->get_node_parameters_interface());

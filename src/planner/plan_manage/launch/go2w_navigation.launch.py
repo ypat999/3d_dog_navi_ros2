@@ -23,8 +23,8 @@ def generate_launch_description():
     target_z = LaunchConfiguration('target_z', default=1.0)
     
     # Go2W robot ID and odometry topic
-    robot_id = LaunchConfiguration('robot_id', default='go2w')
-    odom_topic = LaunchConfiguration('odom_topic', default='odom')
+    robot_id = LaunchConfiguration('robot_id', default=0)
+    odom_topic = LaunchConfiguration('odom_topic', default='/odom')
     
     # DeclareLaunchArgument definitions
     map_size_x_cmd = DeclareLaunchArgument('map_size_x', default_value=map_size_x, description='Map size along x')
@@ -52,12 +52,14 @@ def generate_launch_description():
             'map_size_y_': map_size_y,
             'map_size_z_': map_size_z,
             'odometry_topic': odom_topic,
+            'cloud_topic': '/livox/lidar',  # 直接使用机器狗原始点云数据
+            'camera_pose_topic': odom_topic,
             
             # Go2W-specific parameters for ground navigation
             'max_vel': str(1.5),           # Reduced max velocity for stability
             'max_acc': str(2.0),           # Reduced acceleration for legged robot
             'planning_horizon': str(10.0), # Extended planning horizon for complex terrain
-            'flight_type': str(2),         # Ground mode flight type
+            'flight_type': str(1),         # Ground mode flight type
             
             # Waypoint configuration for 3D navigation
             'point_num': str(1),
@@ -75,6 +77,26 @@ def generate_launch_description():
         }.items()
     )
 
+    # 添加world->map的静态tf变换
+    # 将世界坐标系映射到地图坐标系，通常用于固定地图位置
+    world_to_map_tf = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='world_to_map_tf',
+        arguments=['0', '0', '0', '0', '0', '0', 'world', 'map'],
+        output='screen'
+    )
+
+    # 添加map->odom的静态tf变换
+    # 将地图坐标系映射到里程计坐标系，用于SLAM建图时的初始位置对齐
+    map_to_odom_tf = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='map_to_odom_tf',
+        arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom'],
+        output='screen'
+    )
+
     return LaunchDescription([
         map_size_x_cmd,
         map_size_y_cmd,
@@ -89,4 +111,6 @@ def generate_launch_description():
         odom_topic_cmd,
         
         advanced_param_include,
+        world_to_map_tf,  # 添加world->map的tf变换
+        map_to_odom_tf,   # 添加map->odom的tf变换
     ])
