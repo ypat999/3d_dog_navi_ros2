@@ -1,0 +1,67 @@
+# Gazebo Garden 到 ROS 2 桥接配置
+# 定义Gazebo和ROS之间的主题映射
+
+# 时钟同步
+bridge:
+  - 
+    gz_topic: "/clock"
+    ros_topic: "/clock"
+    gz_type: "gz.msgs.Clock"
+    ros_type: "rosgraph_msgs/msg/Clock"
+    direction: BIDIRECTIONAL
+
+# 机器狗关节状态
+  - 
+    gz_topic: "/world/tower/model/go2w_robot/joint_state"
+    ros_topic: "/joint_states"
+    gz_type: "gz.msgs.Model"
+    ros_type: "sensor_msgs/msg/JointState"
+    direction: BIDIRECTIONAL
+
+# 机器狗姿态
+  - 
+    gz_topic: "/world/tower/model/go2w_robot/pose"
+    ros_topic: "/go2w/pose"
+    gz_type: "gz.msgs.Pose"
+    ros_type: "geometry_msgs/msg/PoseStamped"
+    direction: BIDIRECTIONAL
+
+# 机器狗关节控制命令
+  - 
+    gz_topic: "/world/tower/model/go2w_robot/joint_cmd"
+    ros_topic: "/go2w/joint_commands"
+    gz_type: "gz.msgs.Actuator"
+    ros_type: "trajectory_msgs/msg/JointTrajectory"
+    direction: BIDIRECTIONAL
+
+# 相机图像（如果存在）
+  - 
+    gz_topic: "/world/tworld/model/go2w_robot/link/camera_link/sensor/camera/image"
+    ros_topic: "/camera/image_raw"
+    gz_type: "gz.msgs.Image"
+    ros_type: "sensor_msgs/msg/Image"
+    direction: BIDIRECTIONAL
+
+# 2D激光雷达数据
+  - 
+    gz_topic: "/world/tower/model/go2w_robot/link/lidar_link/sensor/lidar_sensor/scan"
+    ros_topic: "/scan"
+    gz_type: "gz.msgs.LaserScan"
+    ros_type: "sensor_msgs/msg/LaserScan"
+    direction: BIDIRECTIONAL
+
+# 3D激光雷达数据 (Livox Mid360)
+  - 
+    gz_topic: "/world/tower/model/go2w_robot/link/lidar_link/sensor/livox_sensor/scan"
+    ros_topic: "/livox/points"
+    gz_type: "gz.msgs.LaserScan"
+    ros_type: "sensor_msgs/msg/PointCloud2"
+    direction: BIDIRECTIONAL
+
+# IMU数据
+  - 
+    gz_topic: "/world/tower/model/go2w_robot/link/imu_link/sensor/imu_sensor/imu"
+    ros_topic: "/imu/data"
+    gz_type: "gz.msgs.IMU"
+    ros_type: "sensor_msgs/msg/Imu"
+    direction: BIDIRECTIONAL

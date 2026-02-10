@@ -32,25 +32,25 @@ def generate_launch_description():
             output='screen'
         ),
         
-        # Gazebo odom真值转发节点 - 将Gazebo中的机器狗真实位姿转发为ROS2 odom话题
+        # Gazebo pose真值转发节点 - 将Gazebo中的机器狗真实位姿转发为ROS2 pose话题
         Node(
             package='ros_gz_bridge',
             executable='parameter_bridge',
-            name='gz_odom_bridge',
+            name='gz_pose_bridge',
             arguments=[
-                '/model/go2w/odometry@nav_msgs/msg/Odometry[gz.msgs.Odometry',
+                '/model/go2w/pose@geometry_msgs/msg/PoseStamped[gz.msgs.Pose]',
                 '--ros-args', '-p', 'use_sim_time:=true'
             ],
             output='screen'
         ),
         
-        # 重命名Gazebo odom真值话题到标准odom话题
+        # 重命名Gazebo pose真值话题到标准pose话题
         Node(
             package='topic_tools',
             executable='relay',
-            name='gz_odom_relay',
+            name='gz_pose_relay',
             parameters=[{'use_sim_time': True}],
-            arguments=['/model/go2w/odometry', '/odom_gazebo'],
+            arguments=['/gazebo/tower/go2w/pose', '/odom'],
             output='screen'
         ),
         
@@ -58,8 +58,8 @@ def generate_launch_description():
         Node(
             package='tf2_ros',
             executable='static_transform_publisher',
-            name='world_to_gz_world_tf',
-            arguments=['0', '0', '0', '0', '0', '0', 'world', 'gz_world'],
+            name='world_to_odom_tf',
+            arguments=['0', '0', '0', '0', '0', '0', 'world', 'odom'],
             output='screen'
         ),
     ])

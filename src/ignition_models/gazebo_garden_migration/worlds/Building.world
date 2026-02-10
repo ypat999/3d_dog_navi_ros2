@@ -1,0 +1,89 @@
+<?xml version="1.0" ?>
+<sdf version="1.9">
+    <world name="tower">
+
+        <gui fullscreen='false'>
+        <camera name='user_camera'>
+            <pose>0.5 21 11 0 0.5 -1.6</pose>  <!-- x y z roll pitch yaw -->
+            <view_controller>orbit</view_controller>
+        </camera>
+        </gui>
+
+        <!-- Gazebo Garden推荐使用dartsim物理引擎 -->
+        <physics type="dartsim" name="default_physics" default="true">
+            <max_step_size>0.001</max_step_size>
+            <real_time_factor>1.0</real_time_factor>
+            <real_time_update_rate>1000</real_time_update_rate>
+        </physics>
+
+        <scene>
+            <ambient>0.4 0.4 0.4 1.0</ambient>
+            <background>0.7 0.7 0.7 1.0</background>
+            <shadows>true</shadows>
+            <grid>false</grid>
+            <sky>
+                <clouds>
+                    <speed>12</speed>
+                </clouds>
+            </sky>
+        </scene>
+
+        <!-- 使用Gazebo Garden的默认光源 -->
+        <light type="directional" name="sun">
+            <cast_shadows>true</cast_shadows>
+            <pose>0 0 10 0 0 0</pose>
+            <diffuse>0.8 0.8 0.8 1</diffuse>
+            <specular>0.2 0.2 0.2 1</specular>
+            <attenuation>
+                <range>1000</range>
+                <constant>0.9</constant>
+                <linear>0.01</linear>
+                <quadratic>0.001</quadratic>
+            </attenuation>
+            <direction>-0.5 0.1 -0.9</direction>
+        </light>
+
+        <!-- 地面平面 -->
+        <model name="ground_plane">
+            <static>true</static>
+            <link name="link">
+                <collision name="collision">
+                    <geometry>
+                        <plane>
+                            <normal>0 0 1</normal>
+                            <size>100 100</size>
+                        </plane>
+                    </geometry>
+                </collision>
+                <visual name="visual">
+                    <geometry>
+                        <plane>
+                            <normal>0 0 1</normal>
+                            <size>100 100</size>
+                        </plane>
+                    </geometry>
+                    <material>
+                        <ambient>0.3 0.3 0.3 1</ambient>
+                        <diffuse>0.7 0.7 0.7 1</diffuse>
+                        <specular>0.1 0.1 0.1 1</specular>
+                    </material>
+                </visual>
+            </link>
+        </model>
+
+        <!-- 建筑模型 - 使用相对路径 -->
+        <include>
+            <uri>model://Building</uri>
+            <pose>0 0 0 0 0 0</pose>
+            <name>building_obstacles</name>
+        </include>
+
+        <!-- 机器狗模型 -->
+        <include>
+            <uri>model://go2w</uri>
+            <pose>0 0 0.6 0 0 0</pose>
+            <name>go2w_robot</name>
+        </include>
+
+    </world>
+</sdf>
