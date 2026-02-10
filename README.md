@@ -1,4 +1,5 @@
 # 3D Dog Navigation ROS2 项目
+# 建设中，目前只有手动控制
 
 ## 项目介绍
 
