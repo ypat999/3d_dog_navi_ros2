@@ -21,7 +21,7 @@ def generate_launch_description():
     )
 
     model_path = PathJoinSubstitution(
-        [description_pkg, 'urdf', 'go2w_description.urdf.xacro']
+        [description_pkg, 'urdf', 'go2w_description_gz.urdf.xacro']
     )
 
     bringup_launch_path = PathJoinSubstitution(
@@ -60,12 +60,18 @@ def generate_launch_description():
             default_value='champ_joint_group_effort_controller/joint_trajectory',
             description='Topic for joint controller'
         ),
+        
+        DeclareLaunchArgument(
+            name='description_path', 
+            default_value=model_path,
+            description='Absolute path to robot urdf file'
+        ),
 
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(bringup_launch_path),
             launch_arguments={
                 "use_sim_time": LaunchConfiguration("sim"),
-                "description_path": model_path,
+                "description_path": LaunchConfiguration("description_path"),
                 "base_link_frame": base_frame,
                 "robot_name": LaunchConfiguration("robot_name"),
                 "gazebo": LaunchConfiguration("sim"),

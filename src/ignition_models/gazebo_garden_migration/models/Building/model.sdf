@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<sdf version="1.9">
+  <model name="Building">
+    <static>true</static>
+    <link name="building_link">
+      <inertial>
+        <mass>1000</mass>
+        <inertia>
+          <ixx>0.166667</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.166667</iyy>
+          <iyz>0</iyz>
+          <izz>0.166667</izz>
+        </inertia>
+      </inertial>
+      <visual name="building_visual">
+        <geometry>
+          <mesh>
+            <uri>Building.dae</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="building_collision">
+        <geometry>
+          <mesh>
+            <uri>Building.dae</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.2</mu>
+              <mu2>1.2</mu2>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <kp>50000</kp>
+              <kd>100</kd>
+              <min_depth>0.002</min_depth>
+              <max_vel>0.01</max_vel>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+    </link>
+  </model>
+</sdf>

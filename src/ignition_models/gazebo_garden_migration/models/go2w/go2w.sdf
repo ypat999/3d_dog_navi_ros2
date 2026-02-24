@@ -1,638 +1,971 @@
 <?xml version="1.0" ?>
-<sdf version="1.9">
+<sdf version="1.8">
   <model name="go2w">
-    <pose>0 0 0.6 0 0 0</pose>
     <static>false</static>
+    <pose>0 0 0.7 0 0 0</pose>
     
-    <!-- 主体 -->
     <link name="body">
       <pose>0 0 0 0 0 0</pose>
       <inertial>
-        <pose>0 0 0.1 0 0 0</pose>
-        <mass>15.0</mass>
+        <mass>6.921</mass>
+        <pose>0.021112 0.0 -0.005366 0 0 0</pose>
         <inertia>
-          <ixx>0.1</ixx>
-          <ixy>0.0</ixy>
-          <ixz>0.0</ixz>
-          <iyy>0.2</iyy>
-          <iyz>0.0</iyz>
-          <izz>0.1</izz>
+          <ixx>0.02448</ixx>
+          <ixy>0.00012166</ixy>
+          <ixz>0.0014849</ixz>
+          <iyy>0.098077</iyy>
+          <iyz>-3.12e-05</iyz>
+          <izz>0.107</izz>
         </inertia>
       </inertial>
-      
-      <collision name="body_collision">
-        <geometry>
-          <box>
-            <size>0.4 0.2 0.15</size>
-          </box>
-        </geometry>
-      </collision>
-      
       <visual name="body_visual">
         <geometry>
-          <box>
-            <size>0.4 0.2 0.15</size>
-          </box>
+          <mesh>
+            <uri>meshes/base.dae</uri>
+          </mesh>
         </geometry>
         <material>
-          <ambient>0.3 0.3 0.3 1</ambient>
-          <diffuse>0.7 0.7 0.7 1</diffuse>
+          <ambient>0.9 0.95 0.95 1</ambient>
+          <diffuse>0.9 0.95 0.95 1</diffuse>
           <specular>0.1 0.1 0.1 1</specular>
         </material>
       </visual>
+      <collision name="body_collision">
+        <geometry>
+          <box>
+            <size>0.3762 0.114 0.0935</size>
+          </box>
+        </geometry>
+      </collision>
     </link>
-
-    <!-- 前左腿 -->
-    <link name="fl_hip">
-      <pose>0.15 0.1 0 0 0 0</pose>
+    
+    <!-- Front Left Leg -->
+    <link name="FL_hip">
+      <pose>0.1934 0.0465 0 0 0 0</pose>
       <inertial>
-        <mass>0.5</mass>
+        <mass>0.678</mass>
+        <pose>-0.0054 0.00194 -0.000105 0 0 0</pose>
         <inertia>
-          <ixx>0.001</ixx>
-          <ixy>0.0</ixy>
-          <ixz>0.0</ixz>
-          <iyy>0.001</iyy>
-          <iyz>0.0</iyz>
-          <izz>0.001</izz>
+          <ixx>0.00048</ixx>
+          <ixy>-3.01e-06</ixy>
+          <ixz>1.11e-06</ixz>
+          <iyy>0.000884</iyy>
+          <iyz>-1.42e-06</iyz>
+          <izz>0.000596</izz>
         </inertia>
       </inertial>
-      <collision name="fl_hip_collision">
+      <visual name="FL_hip_visual">
+        <geometry>
+          <mesh>
+            <uri>meshes/hip.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.6717055 0.6924257 0.7742702 1</ambient>
+          <diffuse>0.6717055 0.6924257 0.7742702 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <collision name="FL_hip_collision">
+        <pose>0 0.08 0 1.5708 0 0</pose>
         <geometry>
           <cylinder>
-            <radius>0.02</radius>
-            <length>0.1</length>
+            <radius>0.046</radius>
+            <length>0.04</length>
           </cylinder>
         </geometry>
       </collision>
-      <visual name="fl_hip_visual">
-        <geometry>
-          <cylinder>
-            <radius>0.02</radius>
-            <length>0.1</length>
-          </cylinder>
-        </geometry>
-        <material>
-          <ambient>0.1 0.1 0.1 1</ambient>
-          <diffuse>0.3 0.3 0.3 1</diffuse>
-        </material>
-      </visual>
     </link>
-
-    <joint name="fl_hip_joint" type="revolute">
+    
+    <joint name="FL_hip_joint" type="revolute">
       <parent>body</parent>
-      <child>fl_hip</child>
+      <child>FL_hip</child>
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
-          <lower>-1.57</lower>
-          <upper>1.57</upper>
-          <effort>100</effort>
-          <velocity>10</velocity>
+          <lower>-1.0472</lower>
+          <upper>1.0472</upper>
+          <effort>23.7</effort>
+          <velocity>30.1</velocity>
         </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0.2</friction>
+        </dynamics>
       </axis>
     </joint>
-
-    <link name="fl_thigh">
-      <pose>0.15 0.1 -0.15 0 0 0</pose>
+    
+    <link name="FL_thigh">
+      <pose>0.1934 0.142 0 0 0 0</pose>
       <inertial>
-        <mass>0.3</mass>
+        <mass>1.152</mass>
+        <pose>-0.00374 -0.0223 -0.0327 0 0 0</pose>
         <inertia>
-          <ixx>0.0005</ixx>
-          <ixy>0.0</ixy>
-          <ixz>0.0</ixz>
-          <iyy>0.0005</iyy>
-          <iyz>0.0</iyz>
-          <izz>0.0005</izz>
+          <ixx>0.00584</ixx>
+          <ixy>8.72e-05</ixy>
+          <ixz>-0.000289</ixz>
+          <iyy>0.0058</iyy>
+          <iyz>0.000808</iyz>
+          <izz>0.00103</izz>
         </inertia>
       </inertial>
-      <collision name="fl_thigh_collision">
+      <visual name="FL_thigh_visual">
         <geometry>
-          <cylinder>
-            <radius>0.015</radius>
-            <length>0.2</length>
-          </cylinder>
-        </geometry>
-      </collision>
-      <visual name="fl_thigh_visual">
-        <geometry>
-          <cylinder>
-            <radius>0.015</radius>
-            <length>0.2</length>
-          </cylinder>
+          <mesh>
+            <uri>meshes/thigh.dae</uri>
+          </mesh>
         </geometry>
         <material>
-          <ambient>0.1 0.1 0.1 1</ambient>
-          <diffuse>0.3 0.3 0.3 1</diffuse>
+          <ambient>0.6717055 0.6924257 0.7742702 1</ambient>
+          <diffuse>0.6717055 0.6924257 0.7742702 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
         </material>
       </visual>
+      <collision name="FL_thigh_collision">
+        <pose>0 0 -0.1065 0 1.5708 0</pose>
+        <geometry>
+          <box>
+            <size>0.11 0.0245 0.034</size>
+          </box>
+        </geometry>
+      </collision>
     </link>
-
-    <joint name="fl_thigh_joint" type="revolute">
-      <parent>fl_hip</parent>
-      <child>fl_thigh</child>
+    
+    <joint name="FL_thigh_joint" type="revolute">
+      <parent>FL_hip</parent>
+      <child>FL_thigh</child>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
-          <lower>-1.57</lower>
-          <upper>1.57</upper>
-          <effort>100</effort>
-          <velocity>10</velocity>
+          <lower>-1.5708</lower>
+          <upper>3.4907</upper>
+          <effort>23.7</effort>
+          <velocity>30.1</velocity>
         </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0.2</friction>
+        </dynamics>
       </axis>
     </joint>
-
-    <!-- 前右腿 (对称结构) -->
-    <link name="fr_hip">
-      <pose>0.15 -0.1 0 0 0 0</pose>
+    
+    <link name="FL_calf">
+      <pose>0.1934 0.142 -0.213 0 0 0</pose>
       <inertial>
-        <mass>0.5</mass>
+        <mass>0.154</mass>
+        <pose>0.00548 -0.000975 -0.115 0 0 0</pose>
         <inertia>
-          <ixx>0.001</ixx>
-          <ixy>0.0</ixy>
-          <ixz>0.0</ixz>
-          <iyy>0.001</iyy>
-          <iyz>0.0</iyz>
-          <izz>0.001</izz>
+          <ixx>0.00108</ixx>
+          <ixy>3.4e-07</ixy>
+          <ixz>1.72e-05</ixz>
+          <iyy>0.0011</iyy>
+          <iyz>8.28e-06</iyz>
+          <izz>3.29e-05</izz>
         </inertia>
       </inertial>
-      <collision name="fr_hip_collision">
+      <visual name="FL_calf_visual">
+        <geometry>
+          <mesh>
+            <uri>meshes/calf.stl</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>1 1 1 1</ambient>
+          <diffuse>1 1 1 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <collision name="FL_calf_collision">
+        <pose>0.01 0 -0.06 0 -0.2 0</pose>
         <geometry>
           <cylinder>
-            <radius>0.02</radius>
-            <length>0.1</length>
+            <radius>0.013</radius>
+            <length>0.12</length>
           </cylinder>
         </geometry>
       </collision>
-      <visual name="fr_hip_visual">
+    </link>
+    
+    <joint name="FL_calf_joint" type="revolute">
+      <parent>FL_thigh</parent>
+      <child>FL_calf</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-2.7227</lower>
+          <upper>-0.83776</upper>
+          <effort>35.55</effort>
+          <velocity>20.06</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0.2</friction>
+        </dynamics>
+      </axis>
+    </joint>
+    
+    <link name="FL_foot">
+      <pose>0.1934 0.142 -0.4394 0 0 0</pose>
+      <inertial>
+        <mass>0.520</mass>
+        <pose>0 0.06 0 0 0 0</pose>
+        <inertia>
+          <ixx>0.0007</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0012</iyy>
+          <iyz>0</iyz>
+          <izz>0.0012</izz>
+        </inertia>
+      </inertial>
+      <visual name="FL_foot_visual">
         <geometry>
-          <cylinder>
-            <radius>0.02</radius>
-            <length>0.1</length>
-          </cylinder>
+          <mesh>
+            <uri>meshes/foot.dae</uri>
+          </mesh>
         </geometry>
         <material>
-          <ambient>0.1 0.1 0.1 1</ambient>
-          <diffuse>0.3 0.3 0.3 1</diffuse>
+          <ambient>0.023455 0.023455 0.023455 1</ambient>
+          <diffuse>0.023455 0.023455 0.023455 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
         </material>
       </visual>
+      <collision name="FL_foot_collision">
+        <geometry>
+          <sphere>
+            <radius>0.085</radius>
+          </sphere>
+        </geometry>
+      </collision>
     </link>
-
-    <joint name="fr_hip_joint" type="revolute">
+    
+    <joint name="FL_foot_joint" type="revolute">
+      <parent>FL_calf</parent>
+      <child>FL_foot</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-1e16</lower>
+          <upper>1e16</upper>
+          <effort>23.7</effort>
+          <velocity>30.1</velocity>
+        </limit>
+      </axis>
+    </joint>
+    
+    <!-- Front Right Leg -->
+    <link name="FR_hip">
+      <pose>0.1934 -0.0465 0 0 0 0</pose>
+      <inertial>
+        <mass>0.678</mass>
+        <pose>-0.0054 -0.00194 -0.000105 0 0 0</pose>
+        <inertia>
+          <ixx>0.00048</ixx>
+          <ixy>3.01e-06</ixy>
+          <ixz>-1.11e-06</ixz>
+          <iyy>0.000884</iyy>
+          <iyz>1.42e-06</iyz>
+          <izz>0.000596</izz>
+        </inertia>
+      </inertial>
+      <visual name="FR_hip_visual">
+        <geometry>
+          <mesh>
+            <uri>meshes/hip.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.6717055 0.6924257 0.7742702 1</ambient>
+          <diffuse>0.6717055 0.6924257 0.7742702 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <collision name="FR_hip_collision">
+        <pose>0 -0.08 0 1.5708 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.046</radius>
+            <length>0.04</length>
+          </cylinder>
+        </geometry>
+      </collision>
+    </link>
+    
+    <joint name="FR_hip_joint" type="revolute">
       <parent>body</parent>
-      <child>fr_hip</child>
+      <child>FR_hip</child>
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
-          <lower>-1.57</lower>
-          <upper>1.57</upper>
-          <effort>100</effort>
-          <velocity>10</velocity>
+          <lower>-1.0472</lower>
+          <upper>1.0472</upper>
+          <effort>23.7</effort>
+          <velocity>30.1</velocity>
         </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0.2</friction>
+        </dynamics>
       </axis>
     </joint>
-
-    <link name="fr_thigh">
-      <pose>0.15 -0.1 -0.15 0 0 0</pose>
+    
+    <link name="FR_thigh">
+      <pose>0.1934 -0.142 0 0 0 0</pose>
       <inertial>
-        <mass>0.3</mass>
+        <mass>1.152</mass>
+        <pose>-0.00374 0.0223 -0.0327 0 0 0</pose>
         <inertia>
-          <ixx>0.0005</ixx>
-          <ixy>0.0</ixy>
-          <ixz>0.0</ixz>
-          <iyy>0.0005</iyy>
-          <iyz>0.0</iyz>
-          <izz>0.0005</izz>
+          <ixx>0.00584</ixx>
+          <ixy>-8.72e-05</ixy>
+          <ixz>0.000289</ixz>
+          <iyy>0.0058</iyy>
+          <iyz>-0.000808</iyz>
+          <izz>0.00103</izz>
         </inertia>
       </inertial>
-      <collision name="fr_thigh_collision">
+      <visual name="FR_thigh_visual">
         <geometry>
-          <cylinder>
-            <radius>0.015</radius>
-            <length>0.2</length>
-          </cylinder>
-        </geometry>
-      </collision>
-      <visual name="fr_thigh_visual">
-        <geometry>
-          <cylinder>
-            <radius>0.015</radius>
-            <length>0.2</length>
-          </cylinder>
+          <mesh>
+            <uri>meshes/thigh_mirror.dae</uri>
+          </mesh>
         </geometry>
         <material>
-          <ambient>0.1 0.1 0.1 1</ambient>
-          <diffuse>0.3 0.3 0.3 1</diffuse>
+          <ambient>0.6717055 0.6924257 0.7742702 1</ambient>
+          <diffuse>0.6717055 0.6924257 0.7742702 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
         </material>
       </visual>
+      <collision name="FR_thigh_collision">
+        <pose>0 0 -0.1065 0 1.5708 0</pose>
+        <geometry>
+          <box>
+            <size>0.11 0.0245 0.034</size>
+          </box>
+        </geometry>
+      </collision>
     </link>
-
-    <joint name="fr_thigh_joint" type="revolute">
-      <parent>fr_hip</parent>
-      <child>fr_thigh</child>
+    
+    <joint name="FR_thigh_joint" type="revolute">
+      <parent>FR_hip</parent>
+      <child>FR_thigh</child>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
-          <lower>-1.57</lower>
-          <upper>1.57</upper>
-          <effort>100</effort>
-          <velocity>10</velocity>
+          <lower>-1.5708</lower>
+          <upper>3.4907</upper>
+          <effort>23.7</effort>
+          <velocity>30.1</velocity>
         </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0.2</friction>
+        </dynamics>
       </axis>
     </joint>
-
-    <!-- 后左腿 -->
-    <link name="rl_hip">
-      <pose>-0.15 0.1 0 0 0 0</pose>
+    
+    <link name="FR_calf">
+      <pose>0.1934 -0.142 -0.213 0 0 0</pose>
       <inertial>
-        <mass>0.5</mass>
+        <mass>0.154</mass>
+        <pose>0.00548 0.000975 -0.115 0 0 0</pose>
         <inertia>
-          <ixx>0.001</ixx>
-          <ixy>0.0</ixy>
-          <ixz>0.0</ixz>
-          <iyy>0.001</iyy>
-          <iyz>0.0</iyz>
-          <izz>0.001</izz>
+          <ixx>0.00108</ixx>
+          <ixy>-3.4e-07</ixy>
+          <ixz>-1.72e-05</ixz>
+          <iyy>0.0011</iyy>
+          <iyz>-8.28e-06</iyz>
+          <izz>3.29e-05</izz>
         </inertia>
       </inertial>
-      <collision name="rl_hip_collision">
+      <visual name="FR_calf_visual">
+        <geometry>
+          <mesh>
+            <uri>meshes/calf_mirror.stl</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>1 1 1 1</ambient>
+          <diffuse>1 1 1 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <collision name="FR_calf_collision">
+        <pose>0.01 0 -0.06 0 -0.2 0</pose>
         <geometry>
           <cylinder>
-            <radius>0.02</radius>
-            <length>0.1</length>
+            <radius>0.013</radius>
+            <length>0.12</length>
           </cylinder>
         </geometry>
       </collision>
-      <visual name="rl_hip_visual">
+    </link>
+    
+    <joint name="FR_calf_joint" type="revolute">
+      <parent>FR_thigh</parent>
+      <child>FR_calf</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-2.7227</lower>
+          <upper>-0.83776</upper>
+          <effort>35.55</effort>
+          <velocity>20.06</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0.2</friction>
+        </dynamics>
+      </axis>
+    </joint>
+    
+    <link name="FR_foot">
+      <pose>0.1934 -0.142 -0.4394 0 0 0</pose>
+      <inertial>
+        <mass>0.520</mass>
+        <pose>0 -0.06 0 0 0 0</pose>
+        <inertia>
+          <ixx>0.0007</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0012</iyy>
+          <iyz>0</iyz>
+          <izz>0.0012</izz>
+        </inertia>
+      </inertial>
+      <visual name="FR_foot_visual">
         <geometry>
-          <cylinder>
-            <radius>0.02</radius>
-            <length>0.1</length>
-          </cylinder>
+          <mesh>
+            <uri>meshes/foot.dae</uri>
+          </mesh>
         </geometry>
         <material>
-          <ambient>0.1 0.1 0.1 1</ambient>
-          <diffuse>0.3 0.3 0.3 1</diffuse>
+          <ambient>0.023455 0.023455 0.023455 1</ambient>
+          <diffuse>0.023455 0.023455 0.023455 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
         </material>
       </visual>
+      <collision name="FR_foot_collision">
+        <geometry>
+          <sphere>
+            <radius>0.085</radius>
+          </sphere>
+        </geometry>
+      </collision>
     </link>
-
-    <joint name="rl_hip_joint" type="revolute">
+    
+    <joint name="FR_foot_joint" type="revolute">
+      <parent>FR_calf</parent>
+      <child>FR_foot</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-1e16</lower>
+          <upper>1e16</upper>
+          <effort>23.7</effort>
+          <velocity>30.1</velocity>
+        </limit>
+      </axis>
+    </joint>
+    
+    <!-- Rear Left Leg -->
+    <link name="RL_hip">
+      <pose>-0.1934 0.0465 0 0 0 0</pose>
+      <inertial>
+        <mass>0.678</mass>
+        <pose>0.0054 0.00194 -0.000105 0 0 0</pose>
+        <inertia>
+          <ixx>0.00048</ixx>
+          <ixy>3.01e-06</ixy>
+          <ixz>-1.11e-06</ixz>
+          <iyy>0.000884</iyy>
+          <iyz>1.42e-06</iyz>
+          <izz>0.000596</izz>
+        </inertia>
+      </inertial>
+      <visual name="RL_hip_visual">
+        <geometry>
+          <mesh>
+            <uri>meshes/hip.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.6717055 0.6924257 0.7742702 1</ambient>
+          <diffuse>0.6717055 0.6924257 0.7742702 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <collision name="RL_hip_collision">
+        <pose>0 0.08 0 1.5708 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.046</radius>
+            <length>0.04</length>
+          </cylinder>
+        </geometry>
+      </collision>
+    </link>
+    
+    <joint name="RL_hip_joint" type="revolute">
       <parent>body</parent>
-      <child>rl_hip</child>
+      <child>RL_hip</child>
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
-          <lower>-1.57</lower>
-          <upper>1.57</upper>
-          <effort>100</effort>
-          <velocity>10</velocity>
+          <lower>-1.0472</lower>
+          <upper>1.0472</upper>
+          <effort>23.7</effort>
+          <velocity>30.1</velocity>
         </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0.2</friction>
+        </dynamics>
       </axis>
     </joint>
-
-    <link name="rl_thigh">
-      <pose>-0.15 0.1 -0.15 0 0 0</pose>
+    
+    <link name="RL_thigh">
+      <pose>-0.1934 0.142 0 0 0 0</pose>
       <inertial>
-        <mass>0.3</mass>
+        <mass>1.152</mass>
+        <pose>0.00374 -0.0223 -0.0327 0 0 0</pose>
         <inertia>
-          <ixx>0.0005</ixx>
-          <ixy>0.0</ixy>
-          <ixz>0.0</ixz>
-          <iyy>0.0005</iyy>
-          <iyz>0.0</iyz>
-          <izz>0.0005</izz>
+          <ixx>0.00584</ixx>
+          <ixy>-8.72e-05</ixy>
+          <ixz>0.000289</ixz>
+          <iyy>0.0058</iyy>
+          <iyz>-0.000808</iyz>
+          <izz>0.00103</izz>
         </inertia>
       </inertial>
-      <collision name="rl_thigh_collision">
+      <visual name="RL_thigh_visual">
         <geometry>
-          <cylinder>
-            <radius>0.015</radius>
-            <length>0.2</length>
-          </cylinder>
-        </geometry>
-      </collision>
-      <visual name="rl_thigh_visual">
-        <geometry>
-          <cylinder>
-            <radius>0.015</radius>
-            <length>0.2</length>
-          </cylinder>
+          <mesh>
+            <uri>meshes/thigh.dae</uri>
+          </mesh>
         </geometry>
         <material>
-          <ambient>0.1 0.1 0.1 1</ambient>
-          <diffuse>0.3 0.3 0.3 1</diffuse>
+          <ambient>0.6717055 0.6924257 0.7742702 1</ambient>
+          <diffuse>0.6717055 0.6924257 0.7742702 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
         </material>
       </visual>
+      <collision name="RL_thigh_collision">
+        <pose>0 0 -0.1065 0 1.5708 0</pose>
+        <geometry>
+          <box>
+            <size>0.11 0.0245 0.034</size>
+          </box>
+        </geometry>
+      </collision>
     </link>
-
-    <joint name="rl_thigh_joint" type="revolute">
-      <parent>rl_hip</parent>
-      <child>rl_thigh</child>
+    
+    <joint name="RL_thigh_joint" type="revolute">
+      <parent>RL_hip</parent>
+      <child>RL_thigh</child>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
-          <lower>-1.57</lower>
-          <upper>1.57</upper>
-          <effort>100</effort>
-          <velocity>10</velocity>
+          <lower>-1.5708</lower>
+          <upper>3.4907</upper>
+          <effort>23.7</effort>
+          <velocity>30.1</velocity>
         </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0.2</friction>
+        </dynamics>
       </axis>
     </joint>
-
-    <!-- 后右腿 -->
-    <link name="rr_hip">
-      <pose>-0.15 -0.1 0 0 0 0</pose>
+    
+    <link name="RL_calf">
+      <pose>-0.1934 0.142 -0.213 0 0 0</pose>
       <inertial>
-        <mass>0.5</mass>
+        <mass>0.154</mass>
+        <pose>-0.00548 -0.000975 -0.115 0 0 0</pose>
         <inertia>
-          <ixx>0.001</ixx>
-          <ixy>0.0</ixy>
-          <ixz>0.0</ixz>
-          <iyy>0.001</iyy>
-          <iyz>0.0</iyz>
-          <izz>0.001</izz>
+          <ixx>0.00108</ixx>
+          <ixy>-3.4e-07</ixy>
+          <ixz>-1.72e-05</ixz>
+          <iyy>0.0011</iyy>
+          <iyz>-8.28e-06</iyz>
+          <izz>3.29e-05</izz>
         </inertia>
       </inertial>
-      <collision name="rr_hip_collision">
+      <visual name="RL_calf_visual">
+        <geometry>
+          <mesh>
+            <uri>meshes/calf.stl</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>1 1 1 1</ambient>
+          <diffuse>1 1 1 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <collision name="RL_calf_collision">
+        <pose>0.01 0 -0.06 0 -0.2 0</pose>
         <geometry>
           <cylinder>
-            <radius>0.02</radius>
-            <length>0.1</length>
+            <radius>0.013</radius>
+            <length>0.12</length>
           </cylinder>
         </geometry>
       </collision>
-      <visual name="rr_hip_visual">
+    </link>
+    
+    <joint name="RL_calf_joint" type="revolute">
+      <parent>RL_thigh</parent>
+      <child>RL_calf</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-2.7227</lower>
+          <upper>-0.83776</upper>
+          <effort>35.55</effort>
+          <velocity>20.06</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0.2</friction>
+        </dynamics>
+      </axis>
+    </joint>
+    
+    <link name="RL_foot">
+      <pose>-0.1934 0.142 -0.4394 0 0 0</pose>
+      <inertial>
+        <mass>0.520</mass>
+        <pose>0 0.06 0 0 0 0</pose>
+        <inertia>
+          <ixx>0.0007</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0012</iyy>
+          <iyz>0</iyz>
+          <izz>0.0012</izz>
+        </inertia>
+      </inertial>
+      <visual name="RL_foot_visual">
         <geometry>
-          <cylinder>
-            <radius>0.02</radius>
-            <length>0.1</length>
-          </cylinder>
+          <mesh>
+            <uri>meshes/foot.dae</uri>
+          </mesh>
         </geometry>
         <material>
-          <ambient>0.1 0.1 0.1 1</ambient>
-          <diffuse>0.3 0.3 0.3 1</diffuse>
+          <ambient>0.023455 0.023455 0.023455 1</ambient>
+          <diffuse>0.023455 0.023455 0.023455 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
         </material>
       </visual>
+      <collision name="RL_foot_collision">
+        <geometry>
+          <sphere>
+            <radius>0.085</radius>
+          </sphere>
+        </geometry>
+      </collision>
     </link>
-
-    <joint name="rr_hip_joint" type="revolute">
+    
+    <joint name="RL_foot_joint" type="revolute">
+      <parent>RL_calf</parent>
+      <child>RL_foot</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-1e16</lower>
+          <upper>1e16</upper>
+          <effort>23.7</effort>
+          <velocity>30.1</velocity>
+        </limit>
+      </axis>
+    </joint>
+    
+    <!-- Rear Right Leg -->
+    <link name="RR_hip">
+      <pose>-0.1934 -0.0465 0 0 0 0</pose>
+      <inertial>
+        <mass>0.678</mass>
+        <pose>0.0054 -0.00194 -0.000105 0 0 0</pose>
+        <inertia>
+          <ixx>0.00048</ixx>
+          <ixy>-3.01e-06</ixy>
+          <ixz>1.11e-06</ixz>
+          <iyy>0.000884</iyy>
+          <iyz>-1.42e-06</iyz>
+          <izz>0.000596</izz>
+        </inertia>
+      </inertial>
+      <visual name="RR_hip_visual">
+        <geometry>
+          <mesh>
+            <uri>meshes/hip.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.6717055 0.6924257 0.7742702 1</ambient>
+          <diffuse>0.6717055 0.6924257 0.7742702 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <collision name="RR_hip_collision">
+        <pose>0 -0.08 0 1.5708 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.046</radius>
+            <length>0.04</length>
+          </cylinder>
+        </geometry>
+      </collision>
+    </link>
+    
+    <joint name="RR_hip_joint" type="revolute">
       <parent>body</parent>
-      <child>rr_hip</child>
+      <child>RR_hip</child>
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
-          <lower>-1.57</lower>
-          <upper>1.57</upper>
-          <effort>100</effort>
-          <velocity>10</velocity>
+          <lower>-1.0472</lower>
+          <upper>1.0472</upper>
+          <effort>23.7</effort>
+          <velocity>30.1</velocity>
         </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0.2</friction>
+        </dynamics>
       </axis>
     </joint>
-
-    <link name="rr_thigh">
-      <pose>-0.15 -0.1 -0.15 0 0 0</pose>
+    
+    <link name="RR_thigh">
+      <pose>-0.1934 -0.142 0 0 0 0</pose>
       <inertial>
-        <mass>0.3</mass>
+        <mass>1.152</mass>
+        <pose>0.00374 0.0223 -0.0327 0 0 0</pose>
         <inertia>
-          <ixx>0.0005</ixx>
-          <ixy>0.0</ixy>
-          <ixz>0.0</ixz>
-          <iyy>0.0005</iyy>
-          <iyz>0.0</iyz>
-          <izz>0.0005</izz>
+          <ixx>0.00584</ixx>
+          <ixy>8.72e-05</ixy>
+          <ixz>-0.000289</ixz>
+          <iyy>0.0058</iyy>
+          <iyz>0.000808</iyz>
+          <izz>0.00103</izz>
         </inertia>
       </inertial>
-      <collision name="rr_thigh_collision">
+      <visual name="RR_thigh_visual">
         <geometry>
-          <cylinder>
-            <radius>0.015</radius>
-            <length>0.2</length>
-          </cylinder>
-        </geometry>
-      </collision>
-      <visual name="rr_thigh_visual">
-        <geometry>
-          <cylinder>
-            <radius>0.015</radius>
-            <length>0.2</length>
-          </cylinder>
+          <mesh>
+            <uri>meshes/thigh_mirror.dae</uri>
+          </mesh>
         </geometry>
         <material>
-          <ambient>0.1 0.1 0.1 1</ambient>
-          <diffuse>0.3 0.3 0.3 1</diffuse>
+          <ambient>0.6717055 0.6924257 0.7742702 1</ambient>
+          <diffuse>0.6717055 0.6924257 0.7742702 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
         </material>
       </visual>
+      <collision name="RR_thigh_collision">
+        <pose>0 0 -0.1065 0 1.5708 0</pose>
+        <geometry>
+          <box>
+            <size>0.11 0.0245 0.034</size>
+          </box>
+        </geometry>
+      </collision>
     </link>
-
-    <joint name="rr_thigh_joint" type="revolute">
-      <parent>rr_hip</parent>
-      <child>rr_thigh</child>
+    
+    <joint name="RR_thigh_joint" type="revolute">
+      <parent>RR_hip</parent>
+      <child>RR_thigh</child>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
-          <lower>-1.57</lower>
-          <upper>1.57</upper>
-          <effort>100</effort>
-          <velocity>10</velocity>
+          <lower>-1.5708</lower>
+          <upper>3.4907</upper>
+          <effort>23.7</effort>
+          <velocity>30.1</velocity>
         </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0.2</friction>
+        </dynamics>
       </axis>
     </joint>
-
-    <!-- 激光雷达传感器 -->
-    <link name="lidar_link">
-      <pose>0.3 0.0 0.15 0 0 0</pose>
+    
+    <link name="RR_calf">
+      <pose>-0.1934 -0.142 -0.213 0 0 0</pose>
       <inertial>
-        <mass>0.1</mass>
+        <mass>0.154</mass>
+        <pose>-0.00548 0.000975 -0.115 0 0 0</pose>
         <inertia>
-          <ixx>0.0001</ixx>
-          <ixy>0.0</ixy>
-          <ixz>0.0</ixz>
-          <iyy>0.0001</iyy>
-          <iyz>0.0</iyz>
-          <izz>0.0001</izz>
+          <ixx>0.00108</ixx>
+          <ixy>3.4e-07</ixy>
+          <ixz>1.72e-05</ixz>
+          <iyy>0.0011</iyy>
+          <iyz>8.28e-06</iyz>
+          <izz>3.29e-05</izz>
         </inertia>
       </inertial>
-      <visual name="lidar_visual">
+      <visual name="RR_calf_visual">
         <geometry>
-          <cylinder>
-            <radius>0.03</radius>
-            <length>0.06</length>
-          </cylinder>
+          <mesh>
+            <uri>meshes/calf_mirror.stl</uri>
+          </mesh>
         </geometry>
         <material>
-          <ambient>0.1 0.5 0.1 1</ambient>
-          <diffuse>0.3 0.7 0.3 1</diffuse>
+          <ambient>1 1 1 1</ambient>
+          <diffuse>1 1 1 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
         </material>
       </visual>
-      <collision name="lidar_collision">
+      <collision name="RR_calf_collision">
+        <pose>0.01 0 -0.06 0 -0.2 0</pose>
         <geometry>
           <cylinder>
-            <radius>0.03</radius>
-            <length>0.06</length>
+            <radius>0.013</radius>
+            <length>0.12</length>
           </cylinder>
         </geometry>
       </collision>
-      
-      <!-- 2D激光雷达传感器 -->
-      <sensor name="lidar_sensor" type="lidar">
-        <topic>/lidar/scan</topic>
-        <update_rate>10</update_rate>
-        <lidar>
-          <scan>
-            <horizontal>
-              <samples>360</samples>
-              <resolution>1.0</resolution>
-              <min_angle>-3.14159</min_angle>
-              <max_angle>3.14159</max_angle>
-            </horizontal>
-            <vertical>
-              <samples>1</samples>
-              <resolution>1.0</resolution>
-              <min_angle>0</min_angle>
-              <max_angle>0</max_angle>
-            </vertical>
-          </scan>
-          <range>
-            <min>0.1</min>
-            <max>30.0</max>
-            <resolution>0.01</resolution>
-          </range>
-          <noise>
-            <type>gaussian</type>
-            <mean>0.0</mean>
-            <stddev>0.01</stddev>
-          </noise>
-        </lidar>
-        <always_on>true</always_on>
-        <visualize>true</visualize>
-      </sensor>
-      
-      <!-- 3D激光雷达传感器 (Livox Mid360简化版) -->
-      <sensor name="livox_sensor" type="lidar">
-        <topic>/livox/points</topic>
-        <update_rate>10</update_rate>
-        <lidar>
-          <scan>
-            <horizontal>
-              <samples>2000</samples>
-              <resolution>1.0</resolution>
-              <min_angle>-3.14159</min_angle>
-              <max_angle>3.14159</max_angle>
-            </horizontal>
-            <vertical>
-              <samples>16</samples>
-              <resolution>1.0</resolution>
-              <min_angle>-0.2618</min_angle>
-              <max_angle>0.2618</max_angle>
-            </vertical>
-          </scan>
-          <range>
-            <min>0.1</min>
-            <max>100.0</max>
-            <resolution>0.005</resolution>
-          </range>
-          <noise>
-            <type>gaussian</type>
-            <mean>0.0</mean>
-            <stddev>0.002</stddev>
-          </noise>
-        </lidar>
-        <always_on>true</always_on>
-        <visualize>true</visualize>
-      </sensor>
     </link>
-
-    <joint name="lidar_joint" type="fixed">
-      <parent>body</parent>
-      <child>lidar_link</child>
-      <pose>0.3 0.0 0.15 0 0 0</pose>
+    
+    <joint name="RR_calf_joint" type="revolute">
+      <parent>RR_thigh</parent>
+      <child>RR_calf</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-2.7227</lower>
+          <upper>-0.83776</upper>
+          <effort>35.55</effort>
+          <velocity>20.06</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0.2</friction>
+        </dynamics>
+      </axis>
     </joint>
-
-    <!-- IMU传感器 -->
+    
+    <link name="RR_foot">
+      <pose>-0.1934 -0.142 -0.4394 0 0 0</pose>
+      <inertial>
+        <mass>0.520</mass>
+        <pose>0 -0.06 0 0 0 0</pose>
+        <inertia>
+          <ixx>0.0007</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0012</iyy>
+          <iyz>0</iyz>
+          <izz>0.0012</izz>
+        </inertia>
+      </inertial>
+      <visual name="RR_foot_visual">
+        <geometry>
+          <mesh>
+            <uri>meshes/foot.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.023455 0.023455 0.023455 1</ambient>
+          <diffuse>0.023455 0.023455 0.023455 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <collision name="RR_foot_collision">
+        <geometry>
+          <sphere>
+            <radius>0.085</radius>
+          </sphere>
+        </geometry>
+      </collision>
+    </link>
+    
+    <joint name="RR_foot_joint" type="revolute">
+      <parent>RR_calf</parent>
+      <child>RR_foot</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-1e16</lower>
+          <upper>1e16</upper>
+          <effort>23.7</effort>
+          <velocity>30.1</velocity>
+        </limit>
+      </axis>
+    </joint>
+    
+    <!-- Sensors -->
     <link name="imu_link">
-      <pose>0.0 0.0 0.1 0 0 0</pose>
-      <inertial>
-        <mass>0.05</mass>
-        <inertia>
-          <ixx>0.00001</ixx>
-          <ixy>0.0</ixy>
-          <ixz>0.0</ixz>
-          <iyy>0.00001</iyy>
-          <iyz>0.0</iyz>
-          <izz>0.00001</izz>
-        </inertia>
-      </inertial>
-      
-      <!-- IMU传感器 -->
       <sensor name="imu_sensor" type="imu">
-        <topic>/imu/data</topic>
+        <topic>imu</topic>
         <update_rate>100</update_rate>
         <imu>
           <angular_velocity>
             <x>
-              <noise>
-                <type>gaussian</type>
-                <mean>0.0</mean>
-                <stddev>2e-4</stddev>
+              <noise type="gaussian">
+                <mean>0</mean>
+                <stddev>0.0002</stddev>
+                <bias_mean>0.0000075</bias_mean>
+                <bias_stddev>0.0000008</bias_stddev>
               </noise>
             </x>
             <y>
-              <noise>
-                <type>gaussian</type>
-                <mean>0.0</mean>
-                <stddev>2e-4</stddev>
+              <noise type="gaussian">
+                <mean>0</mean>
+                <stddev>0.0002</stddev>
+                <bias_mean>0.0000075</bias_mean>
+                <bias_stddev>0.0000008</bias_stddev>
               </noise>
             </y>
             <z>
-              <noise>
-                <type>gaussian</type>
-                <mean>0.0</mean>
-                <stddev>2e-4</stddev>
+              <noise type="gaussian">
+                <mean>0</mean>
+                <stddev>0.0002</stddev>
+                <bias_mean>0.0000075</bias_mean>
+                <bias_stddev>0.0000008</bias_stddev>
               </noise>
             </z>
           </angular_velocity>
           <linear_acceleration>
             <x>
-              <noise>
-                <type>gaussian</type>
-                <mean>0.0</mean>
-                <stddev>1.7e-2</stddev>
+              <noise type="gaussian">
+                <mean>0</mean>
+                <stddev>0.017</stddev>
+                <bias_mean>0.1</bias_mean>
+                <bias_stddev>0.001</bias_stddev>
               </noise>
             </x>
             <y>
-              <noise>
-                <type>gaussian</type>
-                <mean>0.0</mean>
-                <stddev>1.7e-2</stddev>
+              <noise type="gaussian">
+                <mean>0</mean>
+                <stddev>0.017</stddev>
+                <bias_mean>0.1</bias_mean>
+                <bias_stddev>0.001</bias_stddev>
               </noise>
             </y>
             <z>
-              <noise>
-                <type>gaussian</type>
-                <mean>0.0</mean>
-                <stddev>1.7e-2</stddev>
+              <noise type="gaussian">
+                <mean>0</mean>
+                <stddev>0.017</stddev>
+                <bias_mean>0.1</bias_mean>
+                <bias_stddev>0.001</bias_stddev>
               </noise>
             </z>
           </linear_acceleration>
         </imu>
-        <always_on>true</always_on>
       </sensor>
     </link>
-
+    
     <joint name="imu_joint" type="fixed">
       <parent>body</parent>
       <child>imu_link</child>
-      <pose>0.0 0.0 0.1 0 0 0</pose>
     </joint>
-
-    <!-- Gazebo Garden插件配置 -->
-    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics">
-      <engine>dartsim</engine>
+    
+    <!-- Plugins -->
+    <plugin name="gz_ros2_control::GazeboSimROS2ControlPlugin" filename="gz_ros2_control-system">
+      <parameters>/home/ywj/3d_dog_navi_ros2/install/go2w_description/share/go2w_description/config/joint_controller.yaml</parameters>
+      <controller_manager_node_name>controller_manager</controller_manager_node_name>
     </plugin>
-    
-    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
-    
-    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
-
   </model>
 </sdf>

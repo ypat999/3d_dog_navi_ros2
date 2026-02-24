@@ -5,33 +5,33 @@
   <description>
     URDF Description package for go2w_description.
     This package contains configuration data, 3D models, and launch files for the go2w_description robot.
+    Supports both Gazebo Classic and Gazebo Garden (Ignition).
   </description>
 
   <maintainer email="TODO@email.com">TODO</maintainer>
   <license>BSD</license>
 
-  <!-- ROS 2 build system -->
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <!-- Build dependencies -->
-  <depend>gazebo_dev</depend>
+  <depend>rclcpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>tf2</depend>
+  <depend>tf2_ros</depend>
+  <depend>ament_index_cpp</depend>
 
-  <!-- Runtime dependencies -->
+  <build_depend>gazebo_dev</build_depend>
+  <build_depend>gazebo_ros</build_depend>
+
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>rviz2</exec_depend>
   <exec_depend>joint_state_publisher_gui</exec_depend>
-  <exec_depend>gazebo_ros</exec_depend>
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
-  <exec_depend>rclcpp</exec_depend>
   <exec_depend>trajectory_msgs</exec_depend>
-  <exec_depend>sensor_msgs</exec_depend>
-  <exec_depend>geometry_msgs</exec_depend>
-  <exec_depend>std_msgs</exec_depend>
-  <exec_depend>tf2</exec_depend>
-  <exec_depend>tf2_ros</exec_depend>
-  <exec_depend>ament_index_cpp</exec_depend>
 
+  <exec_depend condition="$BUILD_GAZEBO_CLASSIC_PLUGIN == ON">gazebo_ros</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
