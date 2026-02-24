@@ -72,9 +72,9 @@
 |------|------|----------|----------|
 | Go2W机器狗仿真 | ✅ 完全迁移 | ROS2 Humble | 混合运动控制器，状态估计器 |
 | FAST-LIO2 SLAM | ✅ 完全迁移 | ROS2 Humble | 激光惯性里程计，实时建图 |
-| Ego-planner | ✅ 完全迁移 | ROS2 Humble | 地面模式优化，实时避障 |
-| PCT-planner | ✅ 完全迁移 | ROS2 Humble | 断层摄影环境建模 |
-| 机器狗导航系统 | ✅ 完全迁移 | ROS2 Humble | 完整自主导航流程 |
+| Ego-planner | ✅ 无 | ROS2 Humble | 地面模式优化，实时避障 |
+| PCT-planner | ✅ 无 | ROS2 Humble | 断层摄影环境建模 |
+| 机器狗导航系统 | ✅ 无 | ROS2 Humble | 完整自主导航流程 |
 | RViz可视化工具 | ✅ 完全迁移 | ROS2 Humble | 3D导航目标插件 |
 
 ---
@@ -85,9 +85,9 @@
 
 - **操作系统**: Ubuntu 22.04 LTS
 - **ROS版本**: ROS2 Humble
-- **Gazebo**: Gazebo Harmonic 8.10.0+ (推荐) 或 Gazebo 11+
+- **Gazebo**: Gazebo Harmonic 8.10.0+ (推荐) 或 Gazebo 11
 - **CUDA**: 11.0+ (推荐，用于PCT-planner和控制器)
-- **Python**: 3.8+
+- **Python**: 3.10
 
 ### 依赖安装
 
@@ -172,6 +172,7 @@ ros2 launch ego_planner dog_ego_planner_integrated.launch.py
 **终端1 - 启动机器狗仿真环境**
 ```bash
 ros2 launch go2w_control hybrid_controller.launch.py
+ros2 launch go2w_control hybrid_controller_ignition.launch.py
 ```
 
 **终端2 - 启动SLAM和导航系统**

@@ -24,11 +24,6 @@
             <uri>meshes/base.dae</uri>
           </mesh>
         </geometry>
-        <material>
-          <ambient>0.9 0.95 0.95 1</ambient>
-          <diffuse>0.9 0.95 0.95 1</diffuse>
-          <specular>0.1 0.1 0.1 1</specular>
-        </material>
       </visual>
       <collision name="body_collision">
         <geometry>
@@ -60,11 +55,6 @@
             <uri>meshes/hip.dae</uri>
           </mesh>
         </geometry>
-        <material>
-          <ambient>0.6717055 0.6924257 0.7742702 1</ambient>
-          <diffuse>0.6717055 0.6924257 0.7742702 1</diffuse>
-          <specular>0.1 0.1 0.1 1</specular>
-        </material>
       </visual>
       <collision name="FL_hip_collision">
         <pose>0 0.08 0 1.5708 0 0</pose>
@@ -115,11 +105,6 @@
             <uri>meshes/thigh.dae</uri>
           </mesh>
         </geometry>
-        <material>
-          <ambient>0.6717055 0.6924257 0.7742702 1</ambient>
-          <diffuse>0.6717055 0.6924257 0.7742702 1</diffuse>
-          <specular>0.1 0.1 0.1 1</specular>
-        </material>
       </visual>
       <collision name="FL_thigh_collision">
         <pose>0 0 -0.1065 0 1.5708 0</pose>
@@ -172,7 +157,8 @@
         <material>
           <ambient>1 1 1 1</ambient>
           <diffuse>1 1 1 1</diffuse>
-          <specular>0.1 0.1 0.1 1</specular>
+          <specular>0.8 0.8 0.8 1</specular>
+          <emissive>0.1 0.1 0.1 1</emissive>
         </material>
       </visual>
       <collision name="FL_calf_collision">
@@ -227,7 +213,8 @@
         <material>
           <ambient>0.023455 0.023455 0.023455 1</ambient>
           <diffuse>0.023455 0.023455 0.023455 1</diffuse>
-          <specular>0.1 0.1 0.1 1</specular>
+          <specular>0.8 0.8 0.8 1</specular>
+          <emissive>0.1 0.1 0.1 1</emissive>
         </material>
       </visual>
       <collision name="FL_foot_collision">
@@ -269,16 +256,12 @@
         </inertia>
       </inertial>
       <visual name="FR_hip_visual">
+        <pose>0 0 0 0 3.14159 3.14159</pose>
         <geometry>
           <mesh>
             <uri>meshes/hip.dae</uri>
           </mesh>
         </geometry>
-        <material>
-          <ambient>0.6717055 0.6924257 0.7742702 1</ambient>
-          <diffuse>0.6717055 0.6924257 0.7742702 1</diffuse>
-          <specular>0.1 0.1 0.1 1</specular>
-        </material>
       </visual>
       <collision name="FR_hip_collision">
         <pose>0 -0.08 0 1.5708 0 0</pose>
@@ -329,11 +312,6 @@
             <uri>meshes/thigh_mirror.dae</uri>
           </mesh>
         </geometry>
-        <material>
-          <ambient>0.6717055 0.6924257 0.7742702 1</ambient>
-          <diffuse>0.6717055 0.6924257 0.7742702 1</diffuse>
-          <specular>0.1 0.1 0.1 1</specular>
-        </material>
       </visual>
       <collision name="FR_thigh_collision">
         <pose>0 0 -0.1065 0 1.5708 0</pose>
@@ -386,7 +364,8 @@
         <material>
           <ambient>1 1 1 1</ambient>
           <diffuse>1 1 1 1</diffuse>
-          <specular>0.1 0.1 0.1 1</specular>
+          <specular>0.8 0.8 0.8 1</specular>
+          <emissive>0.1 0.1 0.1 1</emissive>
         </material>
       </visual>
       <collision name="FR_calf_collision">
@@ -441,7 +420,8 @@
         <material>
           <ambient>0.023455 0.023455 0.023455 1</ambient>
           <diffuse>0.023455 0.023455 0.023455 1</diffuse>
-          <specular>0.1 0.1 0.1 1</specular>
+          <specular>0.8 0.8 0.8 1</specular>
+          <emissive>0.1 0.1 0.1 1</emissive>
         </material>
       </visual>
       <collision name="FR_foot_collision">
@@ -483,16 +463,12 @@
         </inertia>
       </inertial>
       <visual name="RL_hip_visual">
+        <pose>0 0 0 0 3.14159 0</pose>
         <geometry>
           <mesh>
             <uri>meshes/hip.dae</uri>
           </mesh>
         </geometry>
-        <material>
-          <ambient>0.6717055 0.6924257 0.7742702 1</ambient>
-          <diffuse>0.6717055 0.6924257 0.7742702 1</diffuse>
-          <specular>0.1 0.1 0.1 1</specular>
-        </material>
       </visual>
       <collision name="RL_hip_collision">
         <pose>0 0.08 0 1.5708 0 0</pose>
@@ -543,11 +519,6 @@
             <uri>meshes/thigh.dae</uri>
           </mesh>
         </geometry>
-        <material>
-          <ambient>0.6717055 0.6924257 0.7742702 1</ambient>
-          <diffuse>0.6717055 0.6924257 0.7742702 1</diffuse>
-          <specular>0.1 0.1 0.1 1</specular>
-        </material>
       </visual>
       <collision name="RL_thigh_collision">
         <pose>0 0 -0.1065 0 1.5708 0</pose>
@@ -600,7 +571,8 @@
         <material>
           <ambient>1 1 1 1</ambient>
           <diffuse>1 1 1 1</diffuse>
-          <specular>0.1 0.1 0.1 1</specular>
+          <specular>0.8 0.8 0.8 1</specular>
+          <emissive>0.1 0.1 0.1 1</emissive>
         </material>
       </visual>
       <collision name="RL_calf_collision">
@@ -655,7 +627,8 @@
         <material>
           <ambient>0.023455 0.023455 0.023455 1</ambient>
           <diffuse>0.023455 0.023455 0.023455 1</diffuse>
-          <specular>0.1 0.1 0.1 1</specular>
+          <specular>0.8 0.8 0.8 1</specular>
+          <emissive>0.1 0.1 0.1 1</emissive>
         </material>
       </visual>
       <collision name="RL_foot_collision">
@@ -697,16 +670,12 @@
         </inertia>
       </inertial>
       <visual name="RR_hip_visual">
+        <pose>0 0 0 3.14159 3.14159 0</pose>
         <geometry>
           <mesh>
             <uri>meshes/hip.dae</uri>
           </mesh>
         </geometry>
-        <material>
-          <ambient>0.6717055 0.6924257 0.7742702 1</ambient>
-          <diffuse>0.6717055 0.6924257 0.7742702 1</diffuse>
-          <specular>0.1 0.1 0.1 1</specular>
-        </material>
       </visual>
       <collision name="RR_hip_collision">
         <pose>0 -0.08 0 1.5708 0 0</pose>
@@ -757,11 +726,6 @@
             <uri>meshes/thigh_mirror.dae</uri>
           </mesh>
         </geometry>
-        <material>
-          <ambient>0.6717055 0.6924257 0.7742702 1</ambient>
-          <diffuse>0.6717055 0.6924257 0.7742702 1</diffuse>
-          <specular>0.1 0.1 0.1 1</specular>
-        </material>
       </visual>
       <collision name="RR_thigh_collision">
         <pose>0 0 -0.1065 0 1.5708 0</pose>
@@ -814,7 +778,8 @@
         <material>
           <ambient>1 1 1 1</ambient>
           <diffuse>1 1 1 1</diffuse>
-          <specular>0.1 0.1 0.1 1</specular>
+          <specular>0.8 0.8 0.8 1</specular>
+          <emissive>0.1 0.1 0.1 1</emissive>
         </material>
       </visual>
       <collision name="RR_calf_collision">
@@ -869,7 +834,8 @@
         <material>
           <ambient>0.023455 0.023455 0.023455 1</ambient>
           <diffuse>0.023455 0.023455 0.023455 1</diffuse>
-          <specular>0.1 0.1 0.1 1</specular>
+          <specular>0.8 0.8 0.8 1</specular>
+          <emissive>0.1 0.1 0.1 1</emissive>
         </material>
       </visual>
       <collision name="RR_foot_collision">
@@ -960,6 +926,42 @@
     <joint name="imu_joint" type="fixed">
       <parent>body</parent>
       <child>imu_link</child>
+    </joint>
+    
+    <!-- Mid360 Livox -->
+    <link name="livox_frame">
+      <pose>0.3 0 0.10 0 0 3.14159</pose>
+      <inertial>
+        <mass>0.4</mass>
+        <pose>0 0 0 0 0 0</pose>
+        <inertia>
+          <ixx>0.0004</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0004</iyy>
+          <iyz>0</iyz>
+          <izz>0.0004</izz>
+        </inertia>
+      </inertial>
+      <visual name="livox_frame_visual">
+        <geometry>
+          <mesh>
+            <uri>meshes/mid-360-scaled.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="livox_frame_collision">
+        <geometry>
+          <mesh>
+            <uri>meshes/mid-360-scaled.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+    
+    <joint name="livox_frame_joint" type="fixed">
+      <parent>body</parent>
+      <child>livox_frame</child>
     </joint>
     
     <!-- Plugins -->
