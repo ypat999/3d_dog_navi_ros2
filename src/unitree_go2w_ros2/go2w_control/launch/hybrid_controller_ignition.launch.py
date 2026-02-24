@@ -8,7 +8,7 @@ from ament_index_python.packages import get_package_share_directory
 from launch.substitutions import LaunchConfiguration
 
 def generate_launch_description():
-    workspace_src = '/home/ywj/3d_dog_navi_ros2/src'
+    workspace_src = '/home/ywj/git/3d_dog_navi_ros2/src'
     ignition_models_path = os.path.join(workspace_src, 'ignition_models', 'gazebo_garden_migration')
     
     world_dir = os.path.join(ignition_models_path, 'worlds')
@@ -74,7 +74,8 @@ def generate_launch_description():
     env_vars = [
         SetEnvironmentVariable('DISPLAY', ':0'),
         SetEnvironmentVariable('GZ_SIM_RESOURCE_PATH', gz_sim_resource_path),
-        SetEnvironmentVariable('GZ_SIM_SYSTEM_PLUGIN_PATH', '/home/ywj/3d_dog_navi_ros2/install/gz_ros2_control/lib:/usr/lib/x86_64-linux-gnu/gz-sim-7/plugins'),
+        SetEnvironmentVariable('GZ_SIM_SYSTEM_PLUGIN_PATH', '/home/ywj/git/3d_dog_navi_ros2/install/gz_ros2_control/lib:/usr/lib/x86_64-linux-gnu/gz-sim-7/plugins:/opt/ros/humble/lib'),
+        
     ]
     
     def generate_gazebo_command(context, *args, **kwargs):
@@ -82,7 +83,7 @@ def generate_launch_description():
         world_path = os.path.join(world_dir, world_file)
         
         return [ExecuteProcess(
-            cmd=['gz', 'sim', '-r', '--headless-rendering', world_path],
+            cmd=['gz', 'sim', '--force-version', '8', '-r', '--headless-rendering', world_path],
             output='screen',
             shell=False
         )]

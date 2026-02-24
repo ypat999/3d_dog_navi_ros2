@@ -85,9 +85,9 @@
 
 - **操作系统**: Ubuntu 22.04 LTS
 - **ROS版本**: ROS2 Humble
+- **Gazebo**: Gazebo Harmonic 8.10.0+ (推荐) 或 Gazebo 11+
 - **CUDA**: 11.0+ (推荐，用于PCT-planner和控制器)
 - **Python**: 3.8+
-- **Gazebo**: Gazebo 11+
 
 ### 依赖安装
 
@@ -104,6 +104,7 @@ sudo apt install ros-humble-robot-localization
 2. **安装项目依赖**
 ```bash
 sudo apt install python3-colcon-common-extensions python3-pip liblcm-dev
+sudo apt install ros-humble-topic-tools
 pip3 install numpy scipy pybind11
 ```
 
@@ -412,11 +413,39 @@ rqt_graph
    - **问题**：节点间话题通信失败
    - **原因**：话题名称不匹配
    - **解决方案**：检查并更新启动文件中的话题映射配置
-   - **问题**：编译planner_manager.cpp时出现私有成员访问错误
-   - **原因**：直接访问BsplineOptimizer类的私有成员enable_ground_mode_
-   - **解决方案**：通过节点参数读取参数值，而不是直接访问私有成员查看节点图
-rqt_graph
-```
+
+4. **Gazebo Harmonic插件加载失败**
+   - **问题**：gz_ros2_control插件无法加载，提示"library does not contain requested plugin"
+   - **原因**：插件编译版本与Gazebo版本不匹配
+   - **解决方案**：
+     ```bash
+     # 重新编译gz_ros2_control插件以支持Gazebo Harmonic
+     export GZ_VERSION=harmonic
+     colcon build --symlink-install --packages-select gz_ros2_control
+     ```
+
+5. **机器狗轮子在Gazebo中不可见**
+   - **问题**：Gazebo中看不到机器狗轮子，但RViz中可见
+   - **原因**：SDF文件中脚的视觉模型使用了错误的mesh文件
+   - **解决方案**：检查并修正go2w.sdf中的视觉模型配置，确保使用正确的轮子模型（left_wheel.dae/right_wheel.dae）
+
+6. **XTDrone2传感器错误**
+   - **问题**：PX4仿真中出现"Compass Sensor 0 missing"或"ekf2 missing data"错误
+   - **原因**：Gazebo模型中缺少磁力计传感器配置
+   - **解决方案**：
+     ```bash
+     # 在PX4 Gazebo模型中添加磁力计传感器
+     # 启用PX4磁力计支持：param set-default EKF2_MAG_TYPE 3
+     # 添加ROS-Gazebo磁力计数据桥接
+     ```
+
+7. **topic_tools包缺失**
+   - **问题**：启动时出现"package 'topic_tools' not found"错误
+   - **原因**：缺少ROS2 topic_tools包
+   - **解决方案**：
+     ```bash
+     sudo apt install ros-humble-topic-tools
+     ```
 
 ---
 
@@ -486,6 +515,22 @@ rqt_graph
 - 文档: [项目Wiki]
 
 ## 更新日志
+
+### v2.1.0 (2025-02-25)
+- **Gazebo Harmonic兼容性修复**
+  - 重新编译gz_ros2_control插件以支持Gazebo Harmonic 8.10.0
+  - 修正SDF插件名称从gz_ros2_control::GazeboSystemPlugin到gz_ros2_control::GazeboSimROS2ControlPlugin
+  - 修复XML插件描述文件安装问题
+- **机器狗轮子显示修复**
+  - 修正go2w.sdf中脚的视觉模型从foot.dae到对应的轮子模型（left_wheel.dae/right_wheel.dae）
+  - 解决Gazebo中看不到轮子但RViz中可见的问题
+- **依赖包完善**
+  - 添加ros-humble-topic-tools包依赖
+  - 验证并修复YAML配置文件语法
+- **XTDrone2传感器问题修复**
+  - 在PX4 Gazebo模型中添加磁力计传感器配置
+  - 启用PX4磁力计支持（EKF2_MAG_TYPE设置为3）
+  - 添加ROS-Gazebo磁力计数据桥接
 
 ### v2.0.0 (2024-01-01)
 - 完整迁移到ROS2 Humble

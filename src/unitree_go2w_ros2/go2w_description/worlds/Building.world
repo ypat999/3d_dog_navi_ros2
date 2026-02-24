@@ -51,7 +51,7 @@
         <include>
             <!-- <uri>/home/cjh/unitree_ws/src/unitree_guide/unitree_ros/unitree_gazebo/worlds/Building</uri> -->
             <uri>model://Building</uri>
-            <!-- <uri>model:///home/ywj/3d_dog_navi_ros2/src/unitree_ros2_sim/go1_sim/go1_gazebo/models/Building</uri> -->
+            <!-- <uri>model:///home/ywj/git/3d_dog_navi_ros2/src/unitree_ros2_sim/go1_sim/go1_gazebo/models/Building</uri> -->
             <pose>0 0 0 0 0 0</pose>   <!-- 模型位姿（x,y,z,r,p,y），默认放在原点 -->
             <!-- <scale>0.5 0.5 0.5</scale>   缩小到0.5倍 -->
             

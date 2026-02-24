@@ -13,22 +13,23 @@ controller_manager:
       type: joint_state_broadcaster/JointStateBroadcaster
 
 initial_positions:
-  FL_hip_joint: 0.0
-  FL_thigh_joint: 1.0143535137176514
-  FL_calf_joint: -2.0291322589877523
-  FL_foot_joint: 0.0
-  FR_hip_joint: 0.0
-  FR_thigh_joint: 1.0143535137176514
-  FR_calf_joint: -2.0291322589877523
-  FR_foot_joint: 0.0
-  RL_hip_joint: 0.0
-  RL_thigh_joint: 1.0143535137176514
-  RL_calf_joint: -2.0291322589877523
-  RL_foot_joint: 0.0
-  RR_hip_joint: 0.0
-  RR_thigh_joint: 1.0143535137176514
-  RR_calf_joint: -2.0291322589877523
-  RR_foot_joint: 0.0
+  ros__parameters:
+    FL_hip_joint: 0.0
+    FL_thigh_joint: 1.0143535137176514
+    FL_calf_joint: -2.0291322589877523
+    FL_foot_joint: 0.0
+    FR_hip_joint: 0.0
+    FR_thigh_joint: 1.0143535137176514
+    FR_calf_joint: -2.0291322589877523
+    FR_foot_joint: 0.0
+    RL_hip_joint: 0.0
+    RL_thigh_joint: 1.0143535137176514
+    RL_calf_joint: -2.0291322589877523
+    RL_foot_joint: 0.0
+    RR_hip_joint: 0.0
+    RR_thigh_joint: 1.0143535137176514
+    RR_calf_joint: -2.0291322589877523
+    RR_foot_joint: 0.0
 
 joint_group_effort_controller:
   ros__parameters:

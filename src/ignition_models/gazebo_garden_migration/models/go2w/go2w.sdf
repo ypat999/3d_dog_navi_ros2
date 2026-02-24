@@ -221,7 +221,7 @@
       <visual name="FL_foot_visual">
         <geometry>
           <mesh>
-            <uri>meshes/foot.dae</uri>
+            <uri>meshes/left_wheel.dae</uri>
           </mesh>
         </geometry>
         <material>
@@ -435,7 +435,7 @@
       <visual name="FR_foot_visual">
         <geometry>
           <mesh>
-            <uri>meshes/foot.dae</uri>
+            <uri>meshes/right_wheel.dae</uri>
           </mesh>
         </geometry>
         <material>
@@ -649,7 +649,7 @@
       <visual name="RL_foot_visual">
         <geometry>
           <mesh>
-            <uri>meshes/foot.dae</uri>
+            <uri>meshes/left_wheel.dae</uri>
           </mesh>
         </geometry>
         <material>
@@ -863,7 +863,7 @@
       <visual name="RR_foot_visual">
         <geometry>
           <mesh>
-            <uri>meshes/foot.dae</uri>
+            <uri>meshes/right_wheel.dae</uri>
           </mesh>
         </geometry>
         <material>
@@ -964,7 +964,7 @@
     
     <!-- Plugins -->
     <plugin name="gz_ros2_control::GazeboSimROS2ControlPlugin" filename="gz_ros2_control-system">
-      <parameters>/home/ywj/3d_dog_navi_ros2/install/go2w_description/share/go2w_description/config/joint_controller.yaml</parameters>
+      <parameters>/home/ywj/git/3d_dog_navi_ros2/install/go2w_description/share/go2w_description/config/joint_controller.yaml</parameters>
       <controller_manager_node_name>controller_manager</controller_manager_node_name>
     </plugin>
   </model>

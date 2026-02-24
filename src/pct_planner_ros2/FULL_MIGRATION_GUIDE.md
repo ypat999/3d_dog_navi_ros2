@@ -57,12 +57,12 @@ ros2 launch pct_planner_ros2 pct_planner.launch.py scene:=Spiral
 ## 原始文件夹处理
 
 ### 可以安全删除的文件：
-1. `/home/ywj/3d_dog_navi_ros2/PCT_planner/planner/scripts/` - Python脚本已迁移
+1. `/home/ywj/git/3d_dog_navi_ros2/PCT_planner/planner/scripts/` - Python脚本已迁移
 2. 所有ROS1相关的配置和脚本
 
 ### 保留的文件（如果需要）：
-1. `/home/ywj/3d_dog_navi_ros2/PCT_planner/rsc/tomogram/` - tomogram数据文件
-2. `/home/ywj/3d_dog_navi_ros2/PCT_planner/planner/lib/` - 如果需要原始C++源码进行编译
+1. `/home/ywj/git/3d_dog_navi_ros2/PCT_planner/rsc/tomogram/` - tomogram数据文件
+2. `/home/ywj/git/3d_dog_navi_ros2/PCT_planner/planner/lib/` - 如果需要原始C++源码进行编译
 
 ## 重要说明
 

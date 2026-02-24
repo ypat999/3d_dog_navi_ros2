@@ -19,7 +19,7 @@
         <geometry>
           <mesh>
             <uri>model://Building/Building.dae</uri>
-            <!-- <uri>file://home/ywj/3d_dog_navi_ros2/src/unitree_ros2_sim/go1_sim/go1_gazebo/models/Building.dae</uri> -->
+            <!-- <uri>file://home/ywj/git/3d_dog_navi_ros2/src/unitree_ros2_sim/go1_sim/go1_gazebo/models/Building.dae</uri> -->
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
@@ -41,7 +41,7 @@
         <geometry>
           <mesh>
             <uri>model://Building/Building.dae</uri>
-            <!-- <uri>file://home/ywj/3d_dog_navi_ros2/src/unitree_ros2_sim/go1_sim/go1_gazebo/models/Building.dae</uri> -->
+            <!-- <uri>file://home/ywj/git/3d_dog_navi_ros2/src/unitree_ros2_sim/go1_sim/go1_gazebo/models/Building.dae</uri> -->
             <scale>1 1 1</scale>
           </mesh>
         </geometry>

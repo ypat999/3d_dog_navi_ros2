@@ -84,7 +84,7 @@ class TomogramPlanner(object):
         # 使用相对路径适应ROS2包结构，优先查找原始PCT_planner目录
         import os
         # 首先尝试在原始PCT_planner位置查找
-        original_tomo_dir = '/home/ywj/3d_dog_navi_ros2/PCT_planner' + self.cfg.wrapper.tomo_dir
+        original_tomo_dir = '/home/ywj/git/3d_dog_navi_ros2/PCT_planner' + self.cfg.wrapper.tomo_dir
         if os.path.exists(original_tomo_dir):
             self.tomo_dir = original_tomo_dir
         else:

@@ -75,7 +75,7 @@
         </model>
 
         <include>
-            <uri>file:///home/ywj/3d_dog_navi_ros2/src/ignition_models/gazebo_garden_migration/models/Building/model.sdf</uri>
+            <uri>file:///home/ywj/git/3d_dog_navi_ros2/src/ignition_models/gazebo_garden_migration/models/Building/model.sdf</uri>
             <pose>0 0 0 0 0 0</pose>
             <name>building_env</name>
         </include>
