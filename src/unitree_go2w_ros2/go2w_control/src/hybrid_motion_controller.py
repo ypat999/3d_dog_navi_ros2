@@ -40,7 +40,7 @@ class HybridMotionController(Node):
         linear_y = msg.linear.y
         angular_z = msg.angular.z
         
-        self.get_logger().info(f'收到速度命令: linear_x={linear_x}, linear_y={linear_y}, angular_z={angular_z}')
+        # self.get_logger().info(f'收到速度命令: linear_x={linear_x}, linear_y={linear_y}, angular_z={angular_z}')
         
         # 创建过滤后的速度命令（去掉x方向速度）
         filtered_msg = Twist()
@@ -54,7 +54,7 @@ class HybridMotionController(Node):
         # 转发过滤后的速度命令给Quadruped Controller（处理腿部控制）
         self.quadruped_cmd_publisher.publish(filtered_msg)
         
-        self.get_logger().info(f'转发给Quadruped Controller: linear_y={linear_y}, angular_z={angular_z}')
+        # self.get_logger().info(f'转发给Quadruped Controller: linear_y={linear_y}, angular_z={angular_z}')
         
         # 控制轮子转动速度（使用完整的速度命令）
         self.control_wheels(linear_x, linear_y, angular_z)

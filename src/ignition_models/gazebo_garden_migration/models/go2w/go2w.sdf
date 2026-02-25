@@ -862,10 +862,24 @@
     </joint>
     
     <!-- Sensors -->
-    <link name="imu_link">
+    <link name="imu">
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.000001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.000001</iyy>
+          <iyz>0</iyz>
+          <izz>0.000001</izz>
+        </inertia>
+      </inertial>
       <sensor name="imu_sensor" type="imu">
+        <always_on>1</always_on>
         <topic>imu</topic>
         <update_rate>100</update_rate>
+        <enable_metrics>true</enable_metrics>
         <imu>
           <angular_velocity>
             <x>
@@ -925,7 +939,7 @@
     
     <joint name="imu_joint" type="fixed">
       <parent>body</parent>
-      <child>imu_link</child>
+      <child>imu</child>
     </joint>
     
     <!-- Mid360 Livox -->

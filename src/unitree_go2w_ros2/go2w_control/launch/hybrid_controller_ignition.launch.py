@@ -32,7 +32,7 @@ def generate_launch_description():
     
     declare_robot_name = DeclareLaunchArgument(
         name="robot_name",
-        default_value="go2w_robot",
+        default_value="go2w",
         description="Robot model name in Ignition Gazebo"
     )
     
@@ -56,7 +56,7 @@ def generate_launch_description():
     
     declare_y = DeclareLaunchArgument(
         name="y",
-        default_value="0.0",
+        default_value="10.0",
         description="Initial y position"
     )
     

@@ -12,7 +12,7 @@ bridge:
 
 # 机器狗关节状态
   - 
-    gz_topic: "/world/tower/model/go2w_robot/joint_state"
+    gz_topic: "/world/tower/model/go2w/joint_state"
     ros_topic: "/joint_states"
     gz_type: "gz.msgs.Model"
     ros_type: "sensor_msgs/msg/JointState"
@@ -20,7 +20,7 @@ bridge:
 
 # 机器狗姿态
   - 
-    gz_topic: "/world/tower/model/go2w_robot/pose"
+    gz_topic: "/world/tower/model/go2w/pose"
     ros_topic: "/go2w/pose"
     gz_type: "gz.msgs.Pose"
     ros_type: "geometry_msgs/msg/PoseStamped"
@@ -28,7 +28,7 @@ bridge:
 
 # 机器狗关节控制命令
   - 
-    gz_topic: "/world/tower/model/go2w_robot/joint_cmd"
+    gz_topic: "/world/tower/model/go2w/joint_cmd"
     ros_topic: "/go2w/joint_commands"
     gz_type: "gz.msgs.Actuator"
     ros_type: "trajectory_msgs/msg/JointTrajectory"
@@ -36,7 +36,7 @@ bridge:
 
 # 相机图像（如果存在）
   - 
-    gz_topic: "/world/tworld/model/go2w_robot/link/camera_link/sensor/camera/image"
+    gz_topic: "/world/tower/model/go2w/link/camera_link/sensor/camera/image"
     ros_topic: "/camera/image_raw"
     gz_type: "gz.msgs.Image"
     ros_type: "sensor_msgs/msg/Image"
@@ -44,7 +44,7 @@ bridge:
 
 # 2D激光雷达数据
   - 
-    gz_topic: "/world/tower/model/go2w_robot/link/lidar_link/sensor/lidar_sensor/scan"
+    gz_topic: "/world/tower/model/go2w/link/lidar_link/sensor/lidar_sensor/scan"
     ros_topic: "/scan"
     gz_type: "gz.msgs.LaserScan"
     ros_type: "sensor_msgs/msg/LaserScan"
@@ -52,7 +52,7 @@ bridge:
 
 # 3D激光雷达数据 (Livox Mid360)
   - 
-    gz_topic: "/world/tower/model/go2w_robot/link/lidar_link/sensor/livox_sensor/scan"
+    gz_topic: "/world/tower/model/go2w/link/lidar_link/sensor/livox_sensor/scan"
     ros_topic: "/livox/points"
     gz_type: "gz.msgs.LaserScan"
     ros_type: "sensor_msgs/msg/PointCloud2"
@@ -60,7 +60,7 @@ bridge:
 
 # IMU数据
   - 
-    gz_topic: "/world/tower/model/go2w_robot/link/imu_link/sensor/imu_sensor/imu"
+    gz_topic: "/world/tower/model/go2w/link/imu/sensor/imu_sensor/imu"
     ros_topic: "/imu/data"
     gz_type: "gz.msgs.IMU"
     ros_type: "sensor_msgs/msg/Imu"
