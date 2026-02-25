@@ -71,7 +71,7 @@ class HybridMotionController(Node):
         # 发布轮子控制
         self.wheel_publisher.publish(wheel_msg)
         
-        self.get_logger().info(f'轮子控制发布: {wheel_speeds}')
+        # self.get_logger().info(f'轮子控制发布: {wheel_speeds}')
     
     def calculate_wheel_speeds(self, linear_x, linear_y, angular_z):
         """计算轮子速度（差速驱动）"""

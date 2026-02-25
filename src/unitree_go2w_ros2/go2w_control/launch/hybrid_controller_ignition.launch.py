@@ -254,4 +254,12 @@ def generate_launch_description():
             parameters=[{'use_sim_time': True}],
             output='screen'
         ),
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='livox_frame_to_lidar_tf',
+            arguments=['0', '0', '0', '0', '0', '0', 'livox_frame', 'go2w/livox_frame/mid360_lidar'],
+            parameters=[{'use_sim_time': True}],
+            output='screen'
+        ),
     ])

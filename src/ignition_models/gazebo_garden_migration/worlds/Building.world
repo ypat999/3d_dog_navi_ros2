@@ -1,10 +1,11 @@
 <?xml version="1.0" ?>
 <sdf version="1.9">
     <world name="tower">
-        <physics name="default_physics" default="true" type="dartsim">
+        <physics name="default_physics" default="true" type="ode">
             <max_step_size>0.001</max_step_size>
             <real_time_factor>1.0</real_time_factor>
             <real_time_update_rate>1000</real_time_update_rate>
+            <gravity>0 0 -9.8</gravity>
         </physics>
 
         <scene>
@@ -92,9 +93,12 @@
             filename="gz-sim-scene-broadcaster-system"
             name="gz::sim::systems::SceneBroadcaster">
         </plugin>
+        <plugin name="gz::sim::systems::Imu" filename="gz-sim-imu-system"/>
+        <plugin name="gz::sim::systems::NavSat" filename="gz-sim-navsat-system"/>
         <plugin
             filename="gz-sim-sensors-system"
             name="gz::sim::systems::Sensors">
+            <render_engine>ogre2</render_engine>
         </plugin>
 
     </world>

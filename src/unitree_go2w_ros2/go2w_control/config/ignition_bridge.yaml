@@ -16,12 +16,24 @@
   gz_type_name: "gz.msgs.Pose"
   direction: GZ_TO_ROS
 
-- ros_topic_name: "/imu/data"
-  gz_topic_name: "/world/tower/model/go2w/link/imu/sensor/imu_sensor/imu"
+- ros_topic_name: "/body/imu"
+  gz_topic_name: "/body/imu"
   ros_type_name: "sensor_msgs/msg/Imu"
   gz_type_name: "gz.msgs.IMU"
   direction: GZ_TO_ROS
   lazy: false
+
+- ros_topic_name: "/livox/lidar"
+  gz_topic_name: "/livox/lidar/points"
+  ros_type_name: "sensor_msgs/msg/PointCloud2"
+  gz_type_name: "gz.msgs.PointCloudPacked"
+  direction: GZ_TO_ROS
+
+- ros_topic_name: "/livox/imu"
+  gz_topic_name: "/livox/imu"
+  ros_type_name: "sensor_msgs/msg/Imu"
+  gz_type_name: "gz.msgs.IMU"
+  direction: GZ_TO_ROS
 
 - ros_topic_name: "/odom"
   gz_topic_name: "/model/go2w/odometry"
