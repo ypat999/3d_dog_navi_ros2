@@ -67,6 +67,18 @@ def generate_launch_description():
             description='Absolute path to robot urdf file'
         ),
 
+        DeclareLaunchArgument(
+            name='compensation_gain', 
+            default_value='0.2',
+            description='Pose compensation gain'
+        ),
+
+        DeclareLaunchArgument(
+            name='max_compensation_height', 
+            default_value='0.1',
+            description='Maximum compensation height'
+        ),
+
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(bringup_launch_path),
             launch_arguments={
@@ -84,7 +96,9 @@ def generate_launch_description():
                 "joints_map_path": joints_config,
                 "links_map_path": links_config,
                 "gait_config_path": gait_config,
-                'orientation_from_imu': 'true'
+                'orientation_from_imu': 'true',
+                'compensation_gain': LaunchConfiguration('compensation_gain'),
+                'max_compensation_height': LaunchConfiguration('max_compensation_height')
             }.items(),
         )
     ])

@@ -4,6 +4,7 @@ import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64MultiArray
+from sensor_msgs.msg import Imu
 import math
 
 class HybridMotionController(Node):
@@ -13,6 +14,10 @@ class HybridMotionController(Node):
         # 订阅cmd_vel话题
         self.cmd_vel_subscription = self.create_subscription(
             Twist, '/cmd_vel', self.cmd_vel_callback, 10)
+        
+        # 订阅IMU话题
+        self.imu_subscription = self.create_subscription(
+            Imu, '/imu/data', self.imu_callback, 10)
         
         # 发布速度命令给Quadruped Controller（处理腿部控制）
         self.quadruped_cmd_publisher = self.create_publisher(
@@ -32,32 +37,75 @@ class HybridMotionController(Node):
         self.wheel_base = 0.3      # 轮子间距
         self.wheel_track = 0.2     # 轮子轴距
         
+        # IMU数据
+        self.pitch_angle = 0.0
+        self.pitch_threshold = 3.0  # 上坡阈值（度）
+        
         self.get_logger().info('混合运动控制器已启动')
     
+    def imu_callback(self, msg):
+        """处理IMU数据，提取pitch角度"""
+        # 从四元数提取pitch角度
+        quaternion = msg.orientation
+        x, y, z, w = quaternion.x, quaternion.y, quaternion.z, quaternion.w
+        
+        # 转换四元数为欧拉角
+        t0 = +2.0 * (w * x + y * z)
+        t1 = +1.0 - 2.0 * (x * x + y * y)
+        roll_x = math.atan2(t0, t1)
+        
+        t2 = +2.0 * (w * y - z * x)
+        t2 = +1.0 if t2 > +1.0 else t2
+        t2 = -1.0 if t2 < -1.0 else t2
+        pitch_y = math.asin(t2)
+        
+        # 转换为角度
+        self.pitch_angle = math.degrees(pitch_y)
+        
+    
     def cmd_vel_callback(self, msg):
-        """处理速度命令，转发给Quadruped Controller控制腿部，同时控制轮子"""
+        """处理速度命令，根据pitch角度决定控制策略"""
         linear_x = msg.linear.x
         linear_y = msg.linear.y
         angular_z = msg.angular.z
         
-        # self.get_logger().info(f'收到速度命令: linear_x={linear_x}, linear_y={linear_y}, angular_z={angular_z}')
+        # 检测是否上坡（pitch超过5度）
+        self.get_logger().info(f'pitch_angle: {self.pitch_angle:.2f}')
+        is_uphill = self.pitch_angle > self.pitch_threshold
         
-        # 创建过滤后的速度命令（去掉x方向速度）
-        filtered_msg = Twist()
-        filtered_msg.linear.x = 0.0  # 过滤掉x方向速度
-        filtered_msg.linear.y = linear_y
-        filtered_msg.linear.z = 0.0
-        filtered_msg.angular.x = 0.0
-        filtered_msg.angular.y = 0.0
-        filtered_msg.angular.z = angular_z
-        
-        # 转发过滤后的速度命令给Quadruped Controller（处理腿部控制）
-        self.quadruped_cmd_publisher.publish(filtered_msg)
-        
-        # self.get_logger().info(f'转发给Quadruped Controller: linear_y={linear_y}, angular_z={angular_z}')
-        
-        # 控制轮子转动速度（使用完整的速度命令）
-        self.control_wheels(linear_x, linear_y, angular_z)
+        if is_uphill:
+            # 上坡模式：轮子和腿部同时前进
+            self.get_logger().info(f'上坡模式: pitch={self.pitch_angle:.2f}度')
+            
+            # 发送完整的速度命令给Quadruped Controller（包括x方向）
+            full_msg = Twist()
+            full_msg.linear.x = linear_x
+            full_msg.linear.y = linear_y
+            full_msg.linear.z = 0.0
+            full_msg.angular.x = 0.0
+            full_msg.angular.y = 0.0
+            full_msg.angular.z = angular_z
+            
+            self.quadruped_cmd_publisher.publish(full_msg)
+            
+            # 控制轮子转动速度（使用完整的速度命令）
+            self.control_wheels(linear_x, linear_y, angular_z)
+        else:
+            # 平地模式：轮子控制x方向，腿部控制y和z方向
+            # 创建过滤后的速度命令（去掉x方向速度）
+            filtered_msg = Twist()
+            filtered_msg.linear.x = 0.0  # 过滤掉x方向速度
+            filtered_msg.linear.y = linear_y
+            filtered_msg.linear.z = 0.0
+            filtered_msg.angular.x = 0.0
+            filtered_msg.angular.y = 0.0
+            filtered_msg.angular.z = angular_z
+            
+            # 转发过滤后的速度命令给Quadruped Controller（处理腿部控制）
+            self.quadruped_cmd_publisher.publish(filtered_msg)
+            
+            # 控制轮子转动速度（使用完整的速度命令）
+            self.control_wheels(linear_x, linear_y, angular_z)
     
     def control_wheels(self, linear_x, linear_y, angular_z):
         """控制轮子转动速度"""

@@ -42,8 +42,8 @@ QuadrupedController::QuadrupedController():
     leg_controller_(base_, rosTimeToChampTime(clock_.now())),
     kinematics_(base_),
     enable_pose_compensation_(true),
-    compensation_gain_(0.1),
-    max_compensation_height_(0.2)
+    compensation_gain_(0.2),
+    max_compensation_height_(0.1)
 {
     std::string joint_control_topic = "joint_group_position_controller/command";
     std::string knee_orientation;
@@ -245,11 +245,11 @@ void QuadrupedController::applyPoseCompensation_(geometry::Transformation (&foot
     imu_rotation.getRPY(roll, pitch, yaw);
 
     // 计算姿态补偿量
-    double pitch_compensation = pitch * compensation_gain_ * 3;
+    double pitch_compensation = pitch * compensation_gain_ * 2;
     double roll_compensation = roll * compensation_gain_;
 
     // 限制最大补偿高度
-    pitch_compensation = std::max(-max_compensation_height_, std::min(max_compensation_height_, pitch_compensation));
+    pitch_compensation = std::max(-max_compensation_height_ * 2, std::min(max_compensation_height_ * 2, pitch_compensation));
     roll_compensation = std::max(-max_compensation_height_, std::min(max_compensation_height_, roll_compensation));
 
     // 应用姿态补偿到四条腿

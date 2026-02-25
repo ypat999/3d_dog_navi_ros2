@@ -66,6 +66,18 @@ def generate_launch_description():
         description="Initial z position"
     )
     
+    declare_compensation_gain = DeclareLaunchArgument(
+        name="compensation_gain",
+        default_value="0.2",
+        description="Pose compensation gain"
+    )
+    
+    declare_max_compensation_height = DeclareLaunchArgument(
+        name="max_compensation_height",
+        default_value="0.1",
+        description="Maximum compensation height"
+    )
+    
     gz_sim_resource_path = ':'.join([
         model_dir,
         world_dir,
@@ -120,6 +132,8 @@ def generate_launch_description():
         declare_x,
         declare_y,
         declare_z,
+        declare_compensation_gain,
+        declare_max_compensation_height,
         
         gazebo_process,
         
@@ -140,7 +154,9 @@ def generate_launch_description():
                         'sim': 'true',
                         'rviz': LaunchConfiguration('rviz'),
                         'hardware_connected': 'false',
-                        'orientation_from_imu': 'true'
+                        'orientation_from_imu': 'true',
+                        'compensation_gain': LaunchConfiguration('compensation_gain'),
+                        'max_compensation_height': LaunchConfiguration('max_compensation_height')
                     }.items()
                 ),
             ]
@@ -252,6 +268,15 @@ def generate_launch_description():
             executable='static_transform_publisher',
             name='world_to_odom_tf',
             arguments=['0', '0', '0', '0', '0', '0', 'world', 'odom'],
+            parameters=[{'use_sim_time': True}],
+            output='screen'
+        ),
+        
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='livox_frame_to_lidar_tf',
+            arguments=['0', '0', '0', '0', '0', '0', 'livox_frame', 'go2w/livox_frame/mid360_lidar'],
             parameters=[{'use_sim_time': True}],
             output='screen'
         ),

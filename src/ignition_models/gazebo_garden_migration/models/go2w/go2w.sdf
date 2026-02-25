@@ -35,7 +35,7 @@
       <sensor name="body_imu" type="imu">
         <always_on>true</always_on>
         <topic>imu/data</topic>
-        <update_rate>200</update_rate>
+        <update_rate>50</update_rate>
         <enable_metrics>true</enable_metrics>
         <imu>
           <angular_velocity>
@@ -923,7 +923,7 @@
   
     
     <!-- Mid360 Livox -->
-    <!-- <link name="livox_frame">
+    <link name="livox_frame">
       <pose>0.3 0 0.10 0 0 3.14159</pose>
       <inertial>
         <mass>0.4</mass>
@@ -1033,12 +1033,12 @@
           </linear_acceleration>
         </imu>
       </sensor>
-    </link> -->
+    </link>
     
-    <!-- <joint name="livox_frame_joint" type="fixed">
+    <joint name="livox_frame_joint" type="fixed">
       <parent>body</parent>
       <child>livox_frame</child>
-    </joint> -->
+    </joint>
     
     <!-- Plugins -->
     <plugin name="gz_ros2_control::GazeboSimROS2ControlPlugin" filename="gz_ros2_control-system">

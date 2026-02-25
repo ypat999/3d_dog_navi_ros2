@@ -140,6 +140,14 @@ def generate_launch_description():
         "close_loop_odom", default_value="false", description=""
     )
 
+    declare_compensation_gain = DeclareLaunchArgument(
+        "compensation_gain", default_value="0.2", description="Pose compensation gain"
+    )
+
+    declare_max_compensation_height = DeclareLaunchArgument(
+        "max_compensation_height", default_value="0.1", description="Maximum compensation height"
+    )
+
     description_ld = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(
@@ -166,6 +174,9 @@ def generate_launch_description():
             {"publish_foot_contacts": LaunchConfiguration("publish_foot_contacts")},
             {"joint_controller_topic": LaunchConfiguration("joint_controller_topic")},
             {"urdf": Command(['xacro ', LaunchConfiguration('description_path')])},
+            {"enable_pose_compensation": True},
+            {"compensation_gain": LaunchConfiguration("compensation_gain")},
+            {"max_compensation_height": LaunchConfiguration("max_compensation_height")},
             LaunchConfiguration('joints_map_path'),
             LaunchConfiguration('links_map_path'),
             LaunchConfiguration('gait_config_path'),
@@ -254,6 +265,8 @@ def generate_launch_description():
             declare_publish_foot_contacts,
             declare_publish_odom_tf,
             declare_close_loop_odom,
+            declare_compensation_gain,
+            declare_max_compensation_height,
             description_ld,
             quadruped_controller_node,
             state_estimator_node,

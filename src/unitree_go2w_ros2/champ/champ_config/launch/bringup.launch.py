@@ -60,6 +60,14 @@ def generate_launch_description():
             description='Set to true if connected to a physical robot'
         ),
 
+        DeclareLaunchArgument(
+            "compensation_gain", default_value="0.2", description="Pose compensation gain"
+        ),
+
+        DeclareLaunchArgument(
+            "max_compensation_height", default_value="0.1", description="Maximum compensation height"
+        ),
+
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(bringup_launch_path),
             launch_arguments={
@@ -73,7 +81,9 @@ def generate_launch_description():
                 "joint_controller_topic": "joint_group_effort_controller/joint_trajectory",
                 "joints_map_path": joints_config,
                 "links_map_path": links_config,
-                "gait_config_path": gait_config
+                "gait_config_path": gait_config,
+                'compensation_gain': LaunchConfiguration("compensation_gain"),
+                'max_compensation_height': LaunchConfiguration("max_compensation_height")
             }.items(),
         )
     ])

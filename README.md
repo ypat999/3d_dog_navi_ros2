@@ -13,6 +13,8 @@
 - **地面导航优化**：专门为机器狗地面运动优化的导航算法
 - **SLAM集成**：集成FAST-LIO2激光SLAM用于实时建图
 - **混合运动控制**：支持机器狗行走、小跑、奔跑等多种步态
+- **IMU姿态补偿**：基于IMU数据的姿态补偿，提高运动稳定性
+- **上坡检测**：自动检测上坡（pitch > 15度），切换到轮腿协同前进模式
 - **Gazebo仿真**：高保真的机器狗物理仿真环境
 
 ### 3D导航示例
@@ -85,9 +87,10 @@
 
 - **操作系统**: Ubuntu 22.04 LTS
 - **ROS版本**: ROS2 Humble
-- **Gazebo**: Gazebo Harmonic 8.10.0+ (推荐) 或 Gazebo 11
+- **Gazebo**: Gazebo Garden 8.10.0+ (推荐) 或 Gazebo 11
 - **CUDA**: 11.0+ (推荐，用于PCT-planner和控制器)
 - **Python**: 3.10
+- **Bridge包**: ros-humble-ros-gzgarden-bridge (针对Gazebo Garden)
 
 ### 依赖安装
 
@@ -105,6 +108,7 @@ sudo apt install ros-humble-robot-localization
 ```bash
 sudo apt install python3-colcon-common-extensions python3-pip liblcm-dev
 sudo apt install ros-humble-topic-tools
+sudo apt install ros-humble-ros-gzgarden-bridge
 pip3 install numpy scipy pybind11
 ```
 
@@ -245,6 +249,33 @@ xy_extend: 5
 z_extend: 1
 z_penalty_weight: 1.2
 xy_gradient_weight: 1.0
+```
+
+#### 混合控制器参数
+机器狗混合运动控制器支持以下关键参数：
+```yaml
+# 姿态补偿参数
+enable_pose_compensation: true      # 启用IMU姿态补偿
+compensation_gain: 0.2              # 姿态补偿增益（0.0-1.0）
+max_compensation_height: 0.1        # 最大补偿高度（米）
+
+# 上坡检测参数
+pitch_threshold: 15.0               # 上坡检测阈值（度）
+```
+
+**参数说明**：
+- `enable_pose_compensation`: 是否启用基于IMU的姿态补偿功能
+- `compensation_gain`: 姿态补偿的增益系数，值越大补偿越强
+- `max_compensation_height`: 姿态补偿的最大高度限制
+- `pitch_threshold`: 触发上坡模式的pitch角度阈值
+
+**启动时设置参数**：
+```bash
+# 使用默认参数启动
+ros2 launch go2w_control hybrid_controller_ignition.launch.py
+
+# 自定义参数启动
+ros2 launch go2w_control hybrid_controller_ignition.launch.py compensation_gain:=0.3 max_compensation_height:=0.15
 ```
 
 ### 控制器操作
@@ -448,6 +479,38 @@ rqt_graph
      sudo apt install ros-humble-topic-tools
      ```
 
+8. **IMU数据无法转发**
+   - **问题**：ROS2中`/imu/data`话题无数据，但Gazebo中有数据
+   - **原因**：ros_gz_bridge版本与Gazebo版本不匹配
+   - **解决方案**：
+     ```bash
+     # 检查Gazebo版本
+     gz sim --versions
+     
+     # 安装正确的bridge包
+     # 对于Gazebo Garden (8.x)
+     sudo apt install ros-humble-ros-gzgarden-bridge
+     
+     # 对于Gazebo Harmonic (9.x)
+     sudo apt install ros-humble-ros-gzharmonic-bridge
+     
+     # 确认launch文件使用正确的包名
+     # Gazebo Garden: package='ros_gzgarden_bridge'
+     # Gazebo Harmonic: package='ros_gzharmonic_bridge'
+     ```
+
+9. **Bridge版本不匹配**
+   - **问题**：bridge无法连接Gazebo，提示库版本错误
+   - **原因**：使用Ignition版本的bridge连接Gazebo Garden
+   - **解决方案**：
+     ```bash
+     # 卸载旧版本
+     sudo apt remove ros-humble-ros-gz-bridge
+     
+     # 安装Gazebo Garden专用bridge
+     sudo apt install ros-humble-ros-gzgarden-bridge
+     ```
+
 ---
 
 ## 开发指南
@@ -516,6 +579,23 @@ rqt_graph
 - 文档: [项目Wiki]
 
 ## 更新日志
+
+### v2.2.0 (2025-02-26)
+- **混合运动控制器增强**
+  - 添加IMU订阅和pitch角度检测
+  - 实现上坡自动检测（pitch > 15度）
+  - 上坡时自动切换到轮腿协同前进模式
+  - 平地时轮子控制x方向，腿部控制y和z方向
+- **姿态补偿功能完善**
+  - 添加enable_pose_compensation参数支持
+  - 添加compensation_gain参数（默认0.2）
+  - 添加max_compensation_height参数（默认0.1）
+  - 参数从launch文件传递到quadruped_controller节点
+- **Bridge版本兼容性修复**
+  - 修复ros_gz_bridge与Gazebo Garden版本不匹配问题
+  - 安装ros-humble-ros-gzgarden-bridge包
+  - 更新launch文件使用正确的bridge包名
+  - 修复IMU数据转发问题
 
 ### v2.1.0 (2025-02-25)
 - **Gazebo Harmonic兼容性修复**
