@@ -49,11 +49,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 #include <trajectory_msgs/msg/joint_trajectory_point.hpp>
+#include <sensor_msgs/msg/imu.hpp>
 
 class QuadrupedController: public rclcpp::Node
 {
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_subscription_;
     rclcpp::Subscription<geometry_msgs::msg::Pose>::SharedPtr cmd_pose_subscription_;
+    rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_subscription_;
     
 
     rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr joint_commands_publisher_;
@@ -67,6 +69,12 @@ class QuadrupedController: public rclcpp::Node
     champ::Pose req_pose_;
 
     champ::GaitConfig gait_config_;
+    
+    // 姿态补偿相关变量
+    sensor_msgs::msg::Imu::SharedPtr last_imu_;
+    bool enable_pose_compensation_;
+    double compensation_gain_;
+    double max_compensation_height_;
 
     champ::QuadrupedBase base_;
     champ::BodyController body_controller_;
@@ -87,6 +95,8 @@ class QuadrupedController: public rclcpp::Node
 
     void cmdVelCallback_(const geometry_msgs::msg::Twist::SharedPtr msg);
     void cmdPoseCallback_(const geometry_msgs::msg::Pose::SharedPtr msg);
+    void imuCallback_(const sensor_msgs::msg::Imu::SharedPtr msg);
+    void applyPoseCompensation_(geometry::Transformation (&foot_positions)[4]);
 
     public:
         QuadrupedController();

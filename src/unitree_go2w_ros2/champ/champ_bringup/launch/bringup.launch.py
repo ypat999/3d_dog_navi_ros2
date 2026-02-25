@@ -73,7 +73,7 @@ def generate_launch_description():
     )
 
     declare_orientation_from_imu = DeclareLaunchArgument(
-        "orientation_from_imu", default_value="false", description="Take orientation from IMU data"
+        "orientation_from_imu", default_value="true", description="Take orientation from IMU data"
     )
 
     declare_rviz = DeclareLaunchArgument(

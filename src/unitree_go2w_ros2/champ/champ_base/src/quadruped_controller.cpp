@@ -40,7 +40,10 @@ QuadrupedController::QuadrupedController():
     clock_(*this->get_clock()),
     body_controller_(base_),
     leg_controller_(base_, rosTimeToChampTime(clock_.now())),
-    kinematics_(base_)
+    kinematics_(base_),
+    enable_pose_compensation_(true),
+    compensation_gain_(0.1),
+    max_compensation_height_(0.2)
 {
     std::string joint_control_topic = "joint_group_position_controller/command";
     std::string knee_orientation;
@@ -66,10 +69,19 @@ QuadrupedController::QuadrupedController():
     this->get_parameter("loop_rate",                   loop_rate);
     this->get_parameter("urdf",                        urdf);
     
+    // 姿态补偿参数
+    this->get_parameter("enable_pose_compensation",    enable_pose_compensation_);
+    this->get_parameter("compensation_gain",           compensation_gain_);
+    this->get_parameter("max_compensation_height",     max_compensation_height_);
+    
     cmd_vel_subscription_ = this->create_subscription<geometry_msgs::msg::Twist>(
         "cmd_vel/smooth", 10, std::bind(&QuadrupedController::cmdVelCallback_, this,  std::placeholders::_1));
     cmd_pose_subscription_ = this->create_subscription<geometry_msgs::msg::Pose>(
         "body_pose", 1,  std::bind(&QuadrupedController::cmdPoseCallback_, this,  std::placeholders::_1));
+    
+    // IMU订阅用于姿态补偿
+    imu_subscription_ = this->create_subscription<sensor_msgs::msg::Imu>(
+        "/imu/data", 10, std::bind(&QuadrupedController::imuCallback_, this,  std::placeholders::_1));
     
     if(publish_joint_control_)
     {
@@ -107,6 +119,10 @@ void QuadrupedController::controlLoop_()
     body_controller_.poseCommand(target_foot_positions, req_pose_);
 
     leg_controller_.velocityCommand(target_foot_positions, req_vel_, rosTimeToChampTime(clock_.now()));
+    
+    // 应用姿态补偿
+    applyPoseCompensation_(target_foot_positions);
+    
     kinematics_.inverse(target_joint_positions, target_foot_positions);
 
     publishFootContacts_(foot_contacts);
@@ -204,4 +220,53 @@ void QuadrupedController::publishFootContacts_(bool foot_contacts[4])
         }
         foot_contacts_publisher_->publish(contacts_msg);
     }
+}
+
+void QuadrupedController::imuCallback_(const sensor_msgs::msg::Imu::SharedPtr msg)
+{
+    last_imu_ = msg;
+}
+
+void QuadrupedController::applyPoseCompensation_(geometry::Transformation (&foot_positions)[4])
+{
+    if (!enable_pose_compensation_ || last_imu_ == nullptr) {
+        return;
+    }
+
+    // 从IMU数据提取姿态角
+    tf2::Quaternion imu_quat(
+        last_imu_->orientation.x,
+        last_imu_->orientation.y,
+        last_imu_->orientation.z,
+        last_imu_->orientation.w);
+    
+    tf2::Matrix3x3 imu_rotation(imu_quat);
+    double roll, pitch, yaw;
+    imu_rotation.getRPY(roll, pitch, yaw);
+
+    // 计算姿态补偿量
+    double pitch_compensation = pitch * compensation_gain_ * 3;
+    double roll_compensation = roll * compensation_gain_;
+
+    // 限制最大补偿高度
+    pitch_compensation = std::max(-max_compensation_height_, std::min(max_compensation_height_, pitch_compensation));
+    roll_compensation = std::max(-max_compensation_height_, std::min(max_compensation_height_, roll_compensation));
+
+    // 应用姿态补偿到四条腿
+    // 前腿索引: 0 (左前), 1 (右前)
+    // 后腿索引: 2 (左后), 3 (右后)
+    
+    // 俯仰补偿 (pitch): 身体前倾时前腿升高，后腿降低（恢复平衡）
+    foot_positions[0].Translate(0, 0, -pitch_compensation);  // 左前腿
+    foot_positions[1].Translate(0, 0, -pitch_compensation);  // 右前腿
+    foot_positions[2].Translate(0, 0, pitch_compensation);   // 左后腿
+    foot_positions[3].Translate(0, 0, pitch_compensation);   // 右后腿
+
+    // 横滚补偿 (roll): 身体左倾时左腿升高，右腿降低（恢复平衡）
+    foot_positions[0].Translate(0, 0, roll_compensation);    // 左前腿
+    foot_positions[2].Translate(0, 0, roll_compensation);    // 左后腿
+    foot_positions[1].Translate(0, 0, -roll_compensation);   // 右前腿
+    foot_positions[3].Translate(0, 0, -roll_compensation);   // 右后腿
+
+    RCLCPP_DEBUG(this->get_logger(), "姿态补偿: pitch=%.3f, roll=%.3f", pitch_compensation, roll_compensation);
 }

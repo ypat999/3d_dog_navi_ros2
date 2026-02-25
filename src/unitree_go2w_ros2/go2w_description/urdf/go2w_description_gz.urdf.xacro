@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://ros.org/wiki/xacro" name="go2w_gz">
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="go2w">
+  <!-- Gloabal parameters -->
   <xacro:include filename="$(find go2w_description)/urdf/const.xacro"/>
 
   <xacro:property name="mesh_prefix" value="file://$(find go2w_description)/meshes" />
@@ -19,6 +20,7 @@
         <xacro:property name="left_sign" value="-1" />
     </xacro:if>
     
+    <!-- Hip -->
     <link name="${prefix}_hip">
       <inertial>
         <origin xyz="${hip_com_x*front_sign} ${hip_com_y*left_sign} ${hip_com_z}" rpy="0 0 0" />
@@ -41,6 +43,7 @@
         <geometry>
           <mesh filename="${mesh_prefix}/hip.dae" />
         </geometry>
+        <material name="深色橡胶_001-effect"><color rgba="0.6717055 0.6924257 0.7742702 1" /></material><material name="Material-effect"><color rgba="0.9 0.95 0.95 1" /></material>
       </visual>
       <collision>
         <origin rpy="${PI/2.0} 0 0" xyz="0 ${hip_offset_col_y*left_sign} 0" />
@@ -63,6 +66,7 @@
       <dynamics damping="${hip_damping}" friction="${hip_friction}" />
     </joint>
 
+    <!-- Thigh -->
     <link name="${prefix}_thigh">
       <inertial>
         <origin xyz="${thigh_com_x} ${thigh_com_y*left_sign} ${thigh_com_z}" rpy="0 0 0" />
@@ -79,6 +83,7 @@
               <mesh filename="${mesh_prefix}/thigh_mirror.dae" scale="1 1 1"/>
           </xacro:if>
         </geometry>
+        <material name="深色橡胶_003-effect"><color rgba="0.6717055 0.6924257 0.7742702 1" /></material><material name="Material_009-effect"><color rgba="0.9 0.95 0.95 1" /></material>
       </visual>
       <collision>
         <origin rpy="0 ${PI/2.0} 0" xyz="0 0 ${thigh_offset_col_z}" />
@@ -96,6 +101,7 @@
       <dynamics damping="${thigh_damping}" friction="${thigh_friction}" />
     </joint>
 
+    <!-- Calf -->
     <link name="${prefix}_calf">
       <inertial>
         <origin xyz="${calf_com_x} ${calf_com_y*left_sign} ${calf_com_z}" rpy="0 0 0" />
@@ -112,6 +118,9 @@
               <mesh filename="${mesh_prefix}/calf_mirror.stl" />
             </xacro:if>
         </geometry>
+        <material name="">
+          <color rgba="1 1 1 1" />
+        </material>
       </visual>
       <collision>
         <origin rpy="0 ${calf_rotation_col_p} 0" xyz="${calf_offset_col_x} 0 ${calf_offset_col_z}" />
@@ -129,6 +138,60 @@
       <dynamics damping="${calf_damping}" friction="${calf_friction}" />
     </joint>
 
+    <!-- Calf lower -->
+    <link name="${prefix}_calflower">
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0" />
+        <geometry>
+            <cylinder length="${calf_lower_length}" radius="${calf_lower_radius}" />
+        </geometry>
+      </collision>
+    </link>
+    <joint name="${prefix}_calflower_joint" type="fixed">
+      <origin xyz="${calf_lower_offset_x} ${calf_lower_offset_y*left_sign} ${calf_lower_offset_z}" rpy="0 ${calf_lower_rotation_p} 0" />
+      <parent link="${prefix}_calf" />
+      <child link="${prefix}_calflower" />
+      <axis xyz="0 0 0" />
+    </joint>
+
+    <!-- Calf flower 1 -->
+    <link name="${prefix}_calflower1">
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0" />
+        <geometry>
+            <cylinder length="${calf_lower1_length}" radius="${calf_lower1_radius}" />
+        </geometry>
+      </collision>
+    </link>
+    <joint name="${prefix}_calflower1_joint" type="fixed">
+      <origin xyz="${calf_lower1_offset_x} ${calf_lower1_offset_y*left_sign} ${calf_lower1_offset_z}" rpy="${calf_lower1_rotation_p}" />
+      <parent link="${prefix}_calflower" />
+      <child link="${prefix}_calflower1" />
+      <axis xyz="0 0 0" />
+    </joint>
+
+    <!-- Foot motor -->
+    <link name="${prefix}_foot_motor">
+      <inertial>
+        <origin xyz="${foot_motor_com_x} ${foot_motor_com_y} ${foot_motor_com_z}" rpy="0 0 0" />
+        <mass value="${foot_motor_mass}" />
+        <inertia ixx="${foot_motor_ixx}" ixy="${foot_motor_ixy*left_sign}" ixz="${foot_motor_ixz}" iyy="${foot_motor_iyy}" iyz="${foot_motor_iyz*left_sign}" izz="${foot_motor_izz}" />
+      </inertial>
+      <collision>
+        <origin rpy="${PI/2.0} 0 0" xyz="0 0 0" />
+        <geometry>
+            <cylinder length="${foot_motor_length}" radius="${foot_motor_radius}" />
+        </geometry>
+      </collision>
+    </link>
+    <joint name="${prefix}_foot_motor_joint" type="fixed">
+      <origin xyz="${foot_motor_offset_x} ${foot_motor_offset_y*left_sign} ${foot_motor_offset_z}" rpy="0 0.0 0" />
+      <parent link="${prefix}_calf" />
+      <child link="${prefix}_foot_motor" />
+      <axis xyz="0 0 0" />
+    </joint>
+
+    <!-- Foot -->
     <link name="${prefix}_foot">
       <inertial>
         <origin xyz="${foot_com_x} ${foot_com_y*left_sign} ${foot_com_z}" rpy="0 0 0" />
@@ -145,6 +208,9 @@
             <mesh filename="${mesh_prefix}/right_wheel.dae" />
             </xacro:if>
         </geometry>
+        <material name="">
+          <color rgba="1 1 1 1" />
+        </material>
       </visual>
       <collision>
         <origin rpy="${PI/2.0} 0 0" xyz="0 ${foot_offset_col_y*left_sign} 0" />
@@ -160,10 +226,18 @@
       <axis xyz="0 1 0" />
       <limit effort="${foot_torque_max}" velocity="${foot_velocity_max}" />
     </joint>
+    <gazebo reference="${prefix}_foot">
+        <mu1>3</mu1>
+        <mu2>3</mu2>
+    </gazebo>
+
   </xacro:macro>
 
+
+  <!-- Base-->
   <link name="base"/>
 
+  <!-- Body -->
   <link name="body">
     <inertial>
       <origin xyz="${body_com_x} ${body_com_y} ${body_com_z}" rpy="0 0 0" />
@@ -175,7 +249,7 @@
       <geometry>
         <mesh filename="${mesh_prefix}/base.dae" />
       </geometry>
-    </visual>
+      <material name="深色橡胶_001-effect"><color rgba="0.6717055 0.6924257 0.7742702 1" /></material><material name="白色logo_001-effect"><color rgba="1 1 1 1" /></material><material name="黑色贴纸_007-effect"><color rgba="0.009018 0.009018 0.009018 1" /></material><material name="黑色金属_007-effect"><color rgba="0.01341 0.01341 0.01341 1" /></material><material name="黑色塑料_003-effect"><color rgba="0.023455 0.023455 0.023455 1" /></material></visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0" />
       <geometry>
@@ -188,6 +262,7 @@
     <child link="body" />
   </joint>
 
+  <!-- Head Upper-->
   <link name="Head_upper">
     <inertial>
       <origin xyz="${head_upper_com_x} ${head_upper_com_y} ${head_upper_com_z}" rpy="0 0 0" />
@@ -208,6 +283,7 @@
     <axis xyz="0 0 0" />
   </joint>
 
+  <!-- Head Lower -->
   <link name="Head_lower">
     <inertial>
       <origin xyz="${head_lower_com_x} ${head_lower_com_y} ${head_lower_com_z}" rpy="0 0 0" />
@@ -233,6 +309,7 @@
   <xacro:leg prefix="RL" front="False" left="True"/>
   <xacro:leg prefix="RR" front="False" left="False"/>
 
+  <!-- IMU -->
   <link name="imu">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -246,8 +323,11 @@
     <child link="imu" />
     <axis xyz="0 0 0" />
   </joint>
-
   <link name="livox_frame">
+  
+
+
+
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <mass value="0.4" />

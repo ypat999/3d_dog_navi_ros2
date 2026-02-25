@@ -83,7 +83,8 @@ def generate_launch_description():
                 "joint_controller_topic": LaunchConfiguration("joint_controller_topic"),
                 "joints_map_path": joints_config,
                 "links_map_path": links_config,
-                "gait_config_path": gait_config
+                "gait_config_path": gait_config,
+                'orientation_from_imu': 'true'
             }.items(),
         )
     ])

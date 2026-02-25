@@ -50,7 +50,7 @@ def generate_launch_description():
     
     declare_x = DeclareLaunchArgument(
         name="x",
-        default_value="0.0",
+        default_value="-10.0",
         description="Initial x position"
     )
     
@@ -139,7 +139,8 @@ def generate_launch_description():
                         'joint_controller_topic': '/joint_group_effort_controller/joint_trajectory',
                         'sim': 'true',
                         'rviz': LaunchConfiguration('rviz'),
-                        'hardware_connected': 'false'
+                        'hardware_connected': 'false',
+                        'orientation_from_imu': 'true'
                     }.items()
                 ),
             ]
