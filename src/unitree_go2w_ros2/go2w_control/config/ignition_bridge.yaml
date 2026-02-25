@@ -5,31 +5,43 @@
   direction: GZ_TO_ROS
 
 - ros_topic_name: "/joint_states"
-  gz_topic_name: "/world/tower/model/go2w/joint_state"
+  gz_topic_name: "/world/tower/model/go2w_robot/joint_state"
   ros_type_name: "sensor_msgs/msg/JointState"
   gz_type_name: "gz.msgs.Model"
   direction: GZ_TO_ROS
 
 - ros_topic_name: "/go2w/pose"
-  gz_topic_name: "/model/go2w/pose"
+  gz_topic_name: "/model/go2w_robot/pose"
   ros_type_name: "geometry_msgs/msg/PoseStamped"
   gz_type_name: "gz.msgs.Pose"
   direction: GZ_TO_ROS
 
 - ros_topic_name: "/imu/data"
-  gz_topic_name: "/world/tower/model/go2w/link/imu/sensor/imu_sensor/imu"
+  gz_topic_name: "/world/tower/model/go2w_robot/link/imu_link/sensor/imu_sensor/imu"
+  ros_type_name: "sensor_msgs/msg/Imu"
+  gz_type_name: "gz.msgs.IMU"
+  direction: GZ_TO_ROS
+
+- ros_topic_name: "/livox/lidar"
+  gz_topic_name: "/world/tower/model/go2w_robot/link/livox_frame/sensor/mid360_lidar/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
+
+- ros_topic_name: "/livox/imu"
+  gz_topic_name: "/world/tower/model/go2w_robot/link/livox_frame/sensor/mid360_imu/imu"
   ros_type_name: "sensor_msgs/msg/Imu"
   gz_type_name: "gz.msgs.IMU"
   direction: GZ_TO_ROS
 
 - ros_topic_name: "/odom"
-  gz_topic_name: "/model/go2w/odometry"
+  gz_topic_name: "/model/go2w_robot/odometry"
   ros_type_name: "nav_msgs/msg/Odometry"
   gz_type_name: "gz.msgs.Odometry"
   direction: GZ_TO_ROS
 
 - ros_topic_name: "/tf"
-  gz_topic_name: "/model/go2w/pose"
+  gz_topic_name: "/model/go2w_robot/pose"
   ros_type_name: "tf2_msgs/msg/TFMessage"
   gz_type_name: "gz.msgs.Pose_V"
   direction: GZ_TO_ROS
