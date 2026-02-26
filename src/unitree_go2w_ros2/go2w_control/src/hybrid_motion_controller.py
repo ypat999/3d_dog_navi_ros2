@@ -70,7 +70,7 @@ class HybridMotionController(Node):
         angular_z = msg.angular.z
         
         # 检测是否上坡（pitch超过5度）
-        self.get_logger().info(f'pitch_angle: {self.pitch_angle:.2f}')
+        # self.get_logger().info(f'pitch_angle: {self.pitch_angle:.2f}')
         is_uphill = self.pitch_angle < -self.pitch_threshold
         
         if is_uphill:

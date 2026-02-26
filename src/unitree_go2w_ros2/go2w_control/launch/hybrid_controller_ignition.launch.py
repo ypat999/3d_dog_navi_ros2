@@ -50,20 +50,38 @@ def generate_launch_description():
     
     declare_x = DeclareLaunchArgument(
         name="x",
-        default_value="-10.0",
+        default_value="-6.0",
         description="Initial x position"
     )
     
     declare_y = DeclareLaunchArgument(
         name="y",
-        default_value="10.0",
+        default_value="7.0",
         description="Initial y position"
     )
     
     declare_z = DeclareLaunchArgument(
         name="z",
-        default_value="0.6",
+        default_value="0.4",
         description="Initial z position"
+    )
+    
+    declare_camera_x = DeclareLaunchArgument(
+        name="camera_x",
+        default_value="-10.0",
+        description="Initial camera x position"
+    )
+    
+    declare_camera_y = DeclareLaunchArgument(
+        name="camera_y",
+        default_value="-10.0",
+        description="Initial camera y position"
+    )
+    
+    declare_camera_z = DeclareLaunchArgument(
+        name="camera_z",
+        default_value="3.0",
+        description="Initial camera z position"
     )
     
     declare_compensation_gain = DeclareLaunchArgument(
@@ -123,6 +141,22 @@ def generate_launch_description():
     
     spawn_robot = OpaqueFunction(function=generate_spawn_command)
     
+    def generate_camera_command(context, *args, **kwargs):
+        camera_x = LaunchConfiguration('camera_x').perform(context)
+        camera_y = LaunchConfiguration('camera_y').perform(context)
+        camera_z = LaunchConfiguration('camera_z').perform(context)
+        
+        # 设置相机视角的命令
+        camera_cmd = f"gz camera -c gzclient_camera --pos {camera_x} {camera_y} {camera_z}"
+        
+        return [ExecuteProcess(
+            cmd=['bash', '-c', camera_cmd],
+            output='screen',
+            shell=False
+        )]
+    
+    set_camera = OpaqueFunction(function=generate_camera_command)
+    
     return LaunchDescription([
         *env_vars,
         declare_world,
@@ -132,6 +166,9 @@ def generate_launch_description():
         declare_x,
         declare_y,
         declare_z,
+        declare_camera_x,
+        declare_camera_y,
+        declare_camera_z,
         declare_compensation_gain,
         declare_max_compensation_height,
         
@@ -141,6 +178,13 @@ def generate_launch_description():
             period=3.0,
             actions=[
                 spawn_robot,
+            ]
+        ),
+        
+        TimerAction(
+            period=4.0,
+            actions=[
+                set_camera,
             ]
         ),
         

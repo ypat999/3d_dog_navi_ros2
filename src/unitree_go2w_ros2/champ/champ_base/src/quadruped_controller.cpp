@@ -248,25 +248,77 @@ void QuadrupedController::applyPoseCompensation_(geometry::Transformation (&foot
     double pitch_compensation = pitch * compensation_gain_;
     double roll_compensation = roll * compensation_gain_;
 
+    
+
     // 限制最大补偿高度
-    pitch_compensation = std::max(-max_compensation_height_ * 2, std::min(max_compensation_height_ * 2, pitch_compensation));
+    pitch_compensation = std::max(-max_compensation_height_, std::min(max_compensation_height_, pitch_compensation));
     roll_compensation = std::max(-max_compensation_height_, std::min(max_compensation_height_, roll_compensation));
+
+    // 创建4x3矩阵存储所有补偿值（4条腿，每条腿3个坐标）
+    double compensations[4][3] = {0};
+    
+    // 计算俯仰补偿值
+    compensations[0][0] = abs(pitch_compensation) * 3;      // 左前腿 X
+    compensations[0][1] = 0;                               // 左前腿 Y
+    compensations[0][2] = -pitch_compensation;             // 左前腿 Z
+    
+    compensations[1][0] = abs(pitch_compensation) * 3;      // 右前腿 X
+    compensations[1][1] = 0;                               // 右前腿 Y
+    compensations[1][2] = -pitch_compensation;             // 右前腿 Z
+    
+    compensations[2][0] = -abs(pitch_compensation);         // 左后腿 X
+    compensations[2][1] = 0;                               // 左后腿 Y
+    compensations[2][2] = pitch_compensation;              // 左后腿 Z
+    
+    compensations[3][0] = -abs(pitch_compensation);         // 右后腿 X
+    compensations[3][1] = 0;                               // 右后腿 Y
+    compensations[3][2] = pitch_compensation;              // 右后腿 Z
+    
+    // 计算横滚补偿值并累加到矩阵中
+    compensations[0][0] += 0;                              // 左前腿 X
+    compensations[0][1] += abs(roll_compensation) / 2;      // 左前腿 Y
+    compensations[0][2] += roll_compensation;              // 左前腿 Z
+    
+    compensations[1][0] += 0;                              // 右前腿 X
+    compensations[1][1] += -abs(roll_compensation) / 2;     // 右前腿 Y
+    compensations[1][2] += -roll_compensation;              // 右前腿 Z
+    
+    compensations[2][0] += 0;                              // 左后腿 X
+    compensations[2][1] += abs(roll_compensation) / 2;      // 左后腿 Y
+    compensations[2][2] += roll_compensation;              // 左后腿 Z
+    
+    compensations[3][0] += 0;                              // 右后腿 X
+    compensations[3][1] += -abs(roll_compensation) / 2;     // 右后腿 Y
+    compensations[3][2] += -roll_compensation;             // 右后腿 Z
+
+    // 检查所有补偿值，大于0.08的都改到0.08
+    for (int leg = 0; leg < 4; leg++) {
+        for (int axis = 0; axis < 3; axis++) {
+            if (std::abs(compensations[leg][axis]) > 0.2) {
+                compensations[leg][axis] = (compensations[leg][axis] > 0) ? 0.2 : -0.2;
+            }
+        }
+    }
 
     // 应用姿态补偿到四条腿
     // 前腿索引: 0 (左前), 1 (右前)
     // 后腿索引: 2 (左后), 3 (右后)
     
-    // 俯仰补偿 (pitch): 身体前倾时前腿升高，后腿降低（恢复平衡）
-    foot_positions[0].Translate(-pitch_compensation * 2,   0, -pitch_compensation);  // 左前腿
-    foot_positions[1].Translate(-pitch_compensation * 2,   0, -pitch_compensation);  // 右前腿
-    foot_positions[2].Translate(pitch_compensation, 0,  pitch_compensation);   // 左后腿
-    foot_positions[3].Translate(pitch_compensation, 0,  pitch_compensation);   // 右后腿
+    
+     // 当roll角度大于90度时，foot_positions取负值
+    if (std::abs(roll) > M_PI / 2 or std::abs(pitch) > M_PI / 2) {  // 90度 = π/2 弧度
+        compensations[0][0] = 0; compensations[0][1] = 0; compensations[0][2] = 0.25;
+        compensations[1][0] = 0; compensations[1][1] = 0; compensations[1][2] = 0.25;
+        compensations[2][0] = 0; compensations[2][1] = 0; compensations[2][2] = 0.25;
+        compensations[3][0] = 0; compensations[3][1] = 0; compensations[3][2] = 0.25;
+    }
+    
+    foot_positions[0].Translate(compensations[0][0], compensations[0][1], compensations[0][2]);  // 左前腿
+    foot_positions[1].Translate(compensations[1][0], compensations[1][1], compensations[1][2]);  // 右前腿
+    foot_positions[2].Translate(compensations[2][0], compensations[2][1], compensations[2][2]);   // 左后腿
+    foot_positions[3].Translate(compensations[3][0], compensations[3][1], compensations[3][2]);   // 右后腿
 
-    // 横滚补偿 (roll): 身体左倾时左腿升高，右腿降低（恢复平衡）
-    foot_positions[0].Translate(0, roll_compensation / 2, roll_compensation);    // 左前腿
-    foot_positions[2].Translate(0, roll_compensation / 2, roll_compensation);    // 左后腿
-    foot_positions[1].Translate(0, - roll_compensation / 2, -roll_compensation);   // 右前腿
-    foot_positions[3].Translate(0, - roll_compensation / 2, -roll_compensation);   // 右后腿
+   
 
     RCLCPP_DEBUG(this->get_logger(), "姿态补偿: pitch=%.3f, roll=%.3f", pitch_compensation, roll_compensation);
 }
