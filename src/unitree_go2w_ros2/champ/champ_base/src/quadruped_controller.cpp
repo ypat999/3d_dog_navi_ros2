@@ -245,7 +245,7 @@ void QuadrupedController::applyPoseCompensation_(geometry::Transformation (&foot
     imu_rotation.getRPY(roll, pitch, yaw);
 
     // 计算姿态补偿量
-    double pitch_compensation = pitch * compensation_gain_ * 2;
+    double pitch_compensation = pitch * compensation_gain_;
     double roll_compensation = roll * compensation_gain_;
 
     // 限制最大补偿高度
@@ -257,16 +257,16 @@ void QuadrupedController::applyPoseCompensation_(geometry::Transformation (&foot
     // 后腿索引: 2 (左后), 3 (右后)
     
     // 俯仰补偿 (pitch): 身体前倾时前腿升高，后腿降低（恢复平衡）
-    foot_positions[0].Translate(0, 0, -pitch_compensation);  // 左前腿
-    foot_positions[1].Translate(0, 0, -pitch_compensation);  // 右前腿
-    foot_positions[2].Translate(0, 0, pitch_compensation);   // 左后腿
-    foot_positions[3].Translate(0, 0, pitch_compensation);   // 右后腿
+    foot_positions[0].Translate(- pitch_compensation,   0, -pitch_compensation);  // 左前腿
+    foot_positions[1].Translate(- pitch_compensation,   0, -pitch_compensation);  // 右前腿
+    foot_positions[2].Translate(pitch_compensation, 0,  pitch_compensation);   // 左后腿
+    foot_positions[3].Translate(pitch_compensation, 0,  pitch_compensation);   // 右后腿
 
     // 横滚补偿 (roll): 身体左倾时左腿升高，右腿降低（恢复平衡）
-    foot_positions[0].Translate(0, 0, roll_compensation);    // 左前腿
-    foot_positions[2].Translate(0, 0, roll_compensation);    // 左后腿
-    foot_positions[1].Translate(0, 0, -roll_compensation);   // 右前腿
-    foot_positions[3].Translate(0, 0, -roll_compensation);   // 右后腿
+    foot_positions[0].Translate(0, roll_compensation / 2, roll_compensation);    // 左前腿
+    foot_positions[2].Translate(0, roll_compensation / 2, roll_compensation);    // 左后腿
+    foot_positions[1].Translate(0, - roll_compensation / 2, -roll_compensation);   // 右前腿
+    foot_positions[3].Translate(0, - roll_compensation / 2, -roll_compensation);   // 右后腿
 
     RCLCPP_DEBUG(this->get_logger(), "姿态补偿: pitch=%.3f, roll=%.3f", pitch_compensation, roll_compensation);
 }

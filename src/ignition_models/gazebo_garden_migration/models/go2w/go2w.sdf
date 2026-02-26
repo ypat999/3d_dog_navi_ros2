@@ -35,7 +35,7 @@
       <sensor name="body_imu" type="imu">
         <always_on>true</always_on>
         <topic>imu/data</topic>
-        <update_rate>50</update_rate>
+        <update_rate>100</update_rate>
         <enable_metrics>true</enable_metrics>
         <imu>
           <angular_velocity>
@@ -924,7 +924,7 @@
     
     <!-- Mid360 Livox -->
     <link name="livox_frame">
-      <pose>0.3 0 0.10 0 0 3.14159</pose>
+      <pose>0.0 0 0.10 0 0 3.14159</pose>
       <inertial>
         <mass>0.4</mass>
         <pose>0 0 0 0 0 0</pose>
