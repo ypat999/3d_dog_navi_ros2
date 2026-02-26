@@ -50,9 +50,9 @@ class HybridMotionController(Node):
         x, y, z, w = quaternion.x, quaternion.y, quaternion.z, quaternion.w
         
         # 转换四元数为欧拉角
-        t0 = +2.0 * (w * x + y * z)
-        t1 = +1.0 - 2.0 * (x * x + y * y)
-        roll_x = math.atan2(t0, t1)
+        # t0 = +2.0 * (w * x + y * z)
+        # t1 = +1.0 - 2.0 * (x * x + y * y)
+        # roll_x = math.atan2(t0, t1)
         
         t2 = +2.0 * (w * y - z * x)
         t2 = +1.0 if t2 > +1.0 else t2
@@ -71,7 +71,7 @@ class HybridMotionController(Node):
         
         # 检测是否上坡（pitch超过5度）
         self.get_logger().info(f'pitch_angle: {self.pitch_angle:.2f}')
-        is_uphill = self.pitch_angle > self.pitch_threshold
+        is_uphill = self.pitch_angle < -self.pitch_threshold
         
         if is_uphill:
             # 上坡模式：轮子和腿部同时前进
@@ -89,7 +89,7 @@ class HybridMotionController(Node):
             self.quadruped_cmd_publisher.publish(full_msg)
             
             # 控制轮子转动速度（使用完整的速度命令）
-            self.control_wheels(linear_x, linear_y, angular_z)
+            self.control_wheels(linear_x * 0.5, linear_y, angular_z)
         else:
             # 平地模式：轮子控制x方向，腿部控制y和z方向
             # 创建过滤后的速度命令（去掉x方向速度）
