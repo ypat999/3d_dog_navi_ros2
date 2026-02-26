@@ -39,7 +39,7 @@ class HybridMotionController(Node):
         
         # IMU数据
         self.pitch_angle = 0.0
-        self.pitch_threshold = 3.0  # 上坡阈值（度）
+        self.pitch_threshold = 90.0  # 上坡阈值（度）
         
         self.get_logger().info('混合运动控制器已启动')
     

@@ -257,8 +257,8 @@ void QuadrupedController::applyPoseCompensation_(geometry::Transformation (&foot
     // 后腿索引: 2 (左后), 3 (右后)
     
     // 俯仰补偿 (pitch): 身体前倾时前腿升高，后腿降低（恢复平衡）
-    foot_positions[0].Translate(- pitch_compensation,   0, -pitch_compensation);  // 左前腿
-    foot_positions[1].Translate(- pitch_compensation,   0, -pitch_compensation);  // 右前腿
+    foot_positions[0].Translate(-pitch_compensation * 2,   0, -pitch_compensation);  // 左前腿
+    foot_positions[1].Translate(-pitch_compensation * 2,   0, -pitch_compensation);  // 右前腿
     foot_positions[2].Translate(pitch_compensation, 0,  pitch_compensation);   // 左后腿
     foot_positions[3].Translate(pitch_compensation, 0,  pitch_compensation);   // 右后腿
 

@@ -28,7 +28,7 @@
         <geometry>
           <mesh>
             <uri>Building.dae</uri>
-            <scale>1 1 1</scale>
+            <scale>1 1 0.7</scale>
           </mesh>
         </geometry>
       </visual>
@@ -36,7 +36,7 @@
         <geometry>
           <mesh>
             <uri>Building.dae</uri>
-            <scale>1 1 1</scale>
+            <scale>1 1 0.7</scale>
           </mesh>
         </geometry>
         <surface>
