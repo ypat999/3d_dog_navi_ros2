@@ -60,6 +60,17 @@ def generate_launch_description():
         name='GAZEBO_GPU_RENDERING',
         value='1'
     )
+    
+    # 添加manipulator设置 - 加宽三轴圆环
+    manipulator_scale = SetEnvironmentVariable(
+        name='GAZEBO_GUI_SCALE',
+        value='1.5'
+    )
+    
+    manipulator_line_width = SetEnvironmentVariable(
+        name='GAZEBO_MANIPULATOR_LINE_WIDTH',
+        value='3.0'
+    )
 
 
 
@@ -152,6 +163,8 @@ def generate_launch_description():
     return LaunchDescription([
         mesa_adapter,
         gazebo_gpu_rendering,
+        manipulator_scale,
+        manipulator_line_width,
         declare_world,
         gzserver_launch,
         gzclient_launch,
