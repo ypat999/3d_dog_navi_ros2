@@ -1,0 +1,484 @@
+# =============================================================================
+# NAV2 Configuration for Quadruped Robot (go2w)
+# 基于 nav2_dog_slam/config/nav2_params_sim.yaml 适配
+# 使用 Super-LIO SLAM 算法
+# =============================================================================
+
+# =============================================================================
+# Controller Server Configuration - MPPI控制器
+# =============================================================================
+controller_server:
+  ros__parameters:
+    use_sim_time: true
+    controller_frequency: 20.0
+    failure_tolerance: 3.0
+
+    min_x_velocity_threshold: 0.05
+    min_y_velocity_threshold: 0.1
+    min_theta_velocity_threshold: 0.1
+
+    odom_topic: "/lio/odom"
+    
+    controller_plugins: ["FollowPath"]
+    goal_checker_plugins: ["goal_checker"]
+    progress_checker_plugin: "progress_checker"
+  
+    progress_checker:
+      plugin: "nav2_controller::SimpleProgressChecker"
+      required_movement_radius: 0.10
+      movement_time_allowance: 20.0
+    
+    goal_checker:
+      plugin: "nav2_controller::StoppedGoalChecker"
+      xy_goal_tolerance: 0.5
+      yaw_goal_tolerance: 0.3
+      trans_stopped_velocity: 1.5
+      rot_stopped_velocity: 1.5
+      stateful: true
+
+    FollowPath:
+      plugin: "nav2_mppi_controller::MPPIController"
+
+      time_steps: 60
+      model_dt: 0.05
+      batch_size: 400
+      transform_tolerance: 0.2
+      
+      ax_max: 2.0
+      ax_min: -2.5
+      az_max: 3.0
+      az_min: -3.0
+      vx_std: 2.0
+      wz_std: 0.8
+      
+      vx_max: 5.0
+      vy_max: 0.0
+      vy_std: 0.2
+      vx_min: -0.5
+      wz_max: 1.5
+      
+      temperature: 0.3
+      motion_model: "DiffDrive" 
+
+      reset_period: 0.5
+      visualize: true
+      publish_optimal_trajectory: true
+      
+      TrajectoryVisualizer:
+        time_step: 5
+        trajectory_step: 20
+      
+      enforce_path_inversion: false
+      max_robot_pose_search_dist: 2.0
+      
+      critics: ["ConstraintCritic", "CostCritic", "PathFollowCritic", "GoalCritic", "PreferForwardCritic", "GoalAngleCritic", "VelocityDeadbandCritic", "ObstaclesCritic", "PathAlignCritic", "PathAngleCritic"]
+
+      ConstraintCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 30.0
+      
+      CostCritic:
+        enabled: true
+        cost_weight: 30.0
+        cost_power: 2
+        collision_cost: 254.0
+        consider_footprint: true
+        critical_cost: 254.0
+        inflation_layer_name: "inflation_layer_local"
+        near_goal_distance: 2.0
+
+      ObstaclesCritic:
+        enabled: true
+        cost_weight: 30.0
+        cost_power: 3
+        collision_cost: 254.0
+        consider_footprint: true
+        critical_cost: 254.0
+        inflation_layer_name: "inflation_layer_local"
+        near_goal_distance: 2.0
+        
+      PathFollowCritic:
+        enabled: true
+        cost_weight: 1.0
+        cost_power: 1
+        offset_from_furthest: 8
+        threshold_to_consider: 3.0
+      
+      PathAlignCritic:
+        enabled: true
+        cost_weight: 10.0
+        cost_power: 4
+        forward_point_distance: 0.5
+        threshold_to_consider: 3.0
+
+      PathAngleCritic:
+        enabled: true
+        cost_weight: 20.0
+        cost_power: 3
+        forward_preference: true
+        offset_from_furthest: 2
+        threshold_to_consider: 1.5
+        max_angle_to_furthest: 0.5
+        
+      PreferForwardCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 30.0
+        threshold_to_consider: 3.0
+      
+      VelocityDeadbandCritic: 
+        enabled: true
+        cost_weight: 10.0
+        cost_power: 1
+        deadband_velocities: [0.05, 0.1, 0.1]
+        
+      GoalCritic:
+        enabled: true
+        cost_weight: 50.0
+        cost_power: 3
+        threshold_to_consider: 5.0
+
+      GoalAngleCritic:
+        enabled: true
+        cost_weight: 35.0  
+        cost_power: 3 
+        threshold_to_consider: 3.0
+
+    qos_overrides:
+      /tf:
+        subscription:
+          depth: 1
+          durability: "volatile"
+          history: "keep_last"
+          reliability: "best_effort"
+      /tf_static:
+        subscription:
+          depth: 1
+          durability: "transient_local"
+          history: "keep_last"
+          reliability: "reliable"
+
+
+# =============================================================================
+# Velocity Smoother Configuration
+# =============================================================================
+velocity_smoother:
+  ros__parameters:
+    use_sim_time: true
+    smoothing_frequency: 40.0
+    scale_velocities: true
+    feedback: "OPEN_LOOP" 
+
+    max_velocity: [10.0, 1.5, 5.0]
+    min_velocity: [-0.1, -1.5, -5.0]
+    
+    max_accel: [3.0, 2.0, 10.0]
+    max_decel: [-5.0, -2.0, -10.0]
+    
+    deadband_velocity: [0.05, 0.1, 0.1]
+    velocity_timeout: 1.0
+
+    qos_overrides:
+      /tf:
+        subscription:
+          depth: 1
+          durability: "volatile"
+          history: "keep_last"
+          reliability: "best_effort"
+      /tf_static:
+        subscription:
+          depth: 1
+          durability: "transient_local"
+          history: "keep_last"
+          reliability: "reliable"
+
+# =============================================================================
+# Planner Server Configuration
+# =============================================================================
+planner_server:
+  ros__parameters:
+    use_sim_time: true
+    expected_planner_frequency: 0.2
+    planner_plugins: ["GridBased"]
+    bond_disable_heartbeat_timeout: false
+
+    GridBased:
+      plugin: "nav2_smac_planner/SmacPlannerHybrid"
+
+      non_straight_penalty: 0.5
+      cost_penalty: 0.5
+
+      tolerance: 0.5
+      allow_unknown: true
+      max_iterations: 10000
+      max_on_approach_iterations: 1000
+      max_planning_time: 5.0
+      minimum_turning_radius: 0.2
+      angle_quantization_bins: 72
+      cache_obstacle_heuristic: true
+      cache_analytic_expansion: false
+
+      downsample_costmap: true
+      downsampling_factor: 2
+
+      smooth_path: true
+      smoother:
+        do_refinement: true
+        max_iterations: 1000
+        tolerance: 1.0e-10
+        w_data: 0.2
+        w_smooth: 0.3
+
+    qos_overrides:
+      /tf:
+        subscription:
+          depth: 1
+          durability: "volatile"
+          history: "keep_last"
+          reliability: "best_effort"
+      /tf_static:
+        subscription:
+          depth: 1
+          durability: "transient_local"
+          history: "keep_last"
+          reliability: "reliable"
+
+# =============================================================================
+# Local Costmap Configuration
+# =============================================================================
+local_costmap:
+  local_costmap:
+    ros__parameters:
+      use_sim_time: true
+      update_frequency: 10.0
+      publish_frequency: 10.0
+      global_frame: odom
+      robot_base_frame: body
+      transform_tolerance: 0.5
+      
+      # 四足机器狗 footprint (约 0.4m x 0.3m)
+      footprint: "[[-0.25, -0.15], [-0.25, 0.15], [0.25, 0.15], [0.25, -0.15]]"
+      footprint_padding: 0.05
+      resolution: 0.05
+      rolling_window: true
+      width: 12
+      height: 12
+      
+      track_unknown_space: true
+      
+      plugins: ["obstacle_layer_local", "inflation_layer_local"]
+      
+      obstacle_layer_local:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        enabled: true
+        observation_sources: pointcloud
+        combination_method: 1
+        footprint_clearing_enabled: true
+        max_obstacle_height: 100.0
+        min_obstacle_height: -100.0
+        pointcloud:
+          topic: /livox/lidar
+          max_obstacle_height: 100.0
+          min_obstacle_height: -100.0
+          clearing: true
+          marking: true
+          data_type: "PointCloud2"
+          raytrace_max_range: 15.0
+          raytrace_min_range: 0.0
+          obstacle_max_range: 15.0
+          obstacle_min_range: 0.0
+      
+      inflation_layer_local:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        enabled: true
+        inflation_radius: 0.4
+        cost_scaling_factor: 1.5
+      
+      always_send_full_costmap: true
+
+      qos_overrides:
+        /tf:
+          subscription:
+            depth: 1
+            durability: "volatile"
+            history: "keep_last"
+            reliability: "best_effort"
+        /tf_static:
+          subscription:
+            depth: 1
+            durability: "transient_local"
+            history: "keep_last"
+            reliability: "reliable"
+
+# =============================================================================
+# Global Costmap Configuration
+# =============================================================================
+global_costmap:
+  global_costmap:
+    ros__parameters:
+      use_sim_time: true
+      update_frequency: 0.5
+      publish_frequency: 0.5
+      global_frame: map
+      robot_base_frame: body
+      transform_tolerance: 0.5
+      
+      footprint: "[[-0.25, -0.15], [-0.25, 0.15], [0.25, 0.15], [0.25, -0.15]]"
+      footprint_padding: 0.05
+      resolution: 0.05
+      track_unknown_space: true
+    
+      plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
+      
+      static_layer:
+        plugin: "nav2_costmap_2d::StaticLayer"
+        enabled: true
+        map_topic: "/map"
+        map_subscribe_transient_local: true
+        footprint_clearing_enabled: true
+      
+      obstacle_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        enabled: true
+        observation_sources: pointcloud
+        pointcloud:
+          topic: /livox/lidar
+          max_obstacle_height: 1.8
+          min_obstacle_height: -0.1
+          clearing: true
+          marking: true
+          data_type: "PointCloud2"
+          raytrace_max_range: 10.0
+          raytrace_min_range: 0.0
+          obstacle_max_range: 10.0
+          obstacle_min_range: 0.0
+      
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        enabled: true
+        inflation_radius: 0.8
+        cost_scaling_factor: 3.0
+      
+      always_send_full_costmap: false
+      qos_overrides:
+        /tf:
+          subscription:
+            depth: 1
+            durability: "volatile"
+            history: "keep_last"
+            reliability: "best_effort"
+        /tf_static:
+          subscription:
+            depth: 1
+            durability: "transient_local"
+            history: "keep_last"
+            reliability: "reliable"
+
+# =============================================================================
+# Lifecycle Manager Configuration
+# =============================================================================
+lifecycle_manager:
+  ros__parameters:
+    use_sim_time: true
+    autostart: true
+    node_names: ['planner_server', 'controller_server', 'bt_navigator', 'waypoint_follower', 'velocity_smoother']
+    bond_timeout_ms: 10000
+
+# =============================================================================
+# Behavior Server Configuration
+# =============================================================================
+behavior_server:
+  ros__parameters:
+    use_sim_time: true
+    costmap_topic: local_costmap/costmap_raw
+    footprint_topic: local_costmap/published_footprint
+    cycle_frequency: 10.0
+    behavior_plugins: ["spin", "backup", "drive_on_heading", "assisted_teleop", "wait"]
+    spin:
+      plugin: "nav2_behaviors/Spin"
+    backup:
+      plugin: "nav2_behaviors/BackUp"
+    drive_on_heading:
+      plugin: "nav2_behaviors/DriveOnHeading"
+    wait:
+      plugin: "nav2_behaviors/Wait"
+    assisted_teleop:
+      plugin: "nav2_behaviors/AssistedTeleop"
+    global_frame: odom
+    robot_base_frame: body
+    transform_tolerance: 0.1
+    simulate_ahead_time: 2.0
+    max_rotational_vel: 1.0
+    min_rotational_vel: 0.4
+    rotational_acc_lim: 3.2
+
+# =============================================================================
+# BT Navigator Configuration
+# =============================================================================
+bt_navigator:
+  ros__parameters:
+    use_sim_time: true
+    global_frame: map
+    robot_base_frame: body
+    odom_topic: /lio/odom
+    bt_loop_duration: 10
+    default_server_timeout: 20
+    enable_groot_monitoring: true
+    groot_zmq_publisher_port: 1666
+    groot_zmq_server_port: 1667
+    plugin_lib_names:
+    - nav2_compute_path_to_pose_action_bt_node
+    - nav2_compute_path_through_poses_action_bt_node
+    - nav2_smooth_path_action_bt_node
+    - nav2_follow_path_action_bt_node
+    - nav2_spin_action_bt_node
+    - nav2_wait_action_bt_node
+    - nav2_assisted_teleop_action_bt_node
+    - nav2_back_up_action_bt_node
+    - nav2_drive_on_heading_bt_node
+    - nav2_clear_costmap_service_bt_node
+    - nav2_is_stuck_condition_bt_node
+    - nav2_goal_reached_condition_bt_node
+    - nav2_goal_updated_condition_bt_node
+    - nav2_globally_updated_goal_condition_bt_node
+    - nav2_is_path_valid_condition_bt_node
+    - nav2_initial_pose_received_condition_bt_node
+    - nav2_reinitialize_global_localization_service_bt_node
+    - nav2_rate_controller_bt_node
+    - nav2_distance_controller_bt_node
+    - nav2_speed_controller_bt_node
+    - nav2_truncate_path_action_bt_node
+    - nav2_truncate_path_local_action_bt_node
+    - nav2_goal_updater_node_bt_node
+    - nav2_recovery_node_bt_node
+    - nav2_pipeline_sequence_bt_node
+    - nav2_round_robin_node_bt_node
+    - nav2_transform_available_condition_bt_node
+    - nav2_time_expired_condition_bt_node
+    - nav2_path_expiring_timer_condition
+    - nav2_distance_traveled_condition_bt_node
+    - nav2_single_trigger_bt_node
+    - nav2_goal_updated_controller_bt_node
+    - nav2_is_battery_low_condition_bt_node
+    - nav2_navigate_through_poses_action_bt_node
+    - nav2_navigate_to_pose_action_bt_node
+    - nav2_remove_passed_goals_action_bt_node
+    - nav2_pipeline_sequence_with_recovery_bt_node
+    - nav2_goal_updated_condition_bt_node
+    - nav2_is_battery_charging_condition_bt_node
+    - nav2_is_path_valid_condition_bt_node
+
+# =============================================================================
+# Waypoint Follower Configuration
+# =============================================================================
+waypoint_follower:
+  ros__parameters:
+    use_sim_time: true
+    loop_rate: 20
+    stop_on_failure: false
+    waypoint_task_executor_plugin: "wait_at_waypoint"
+    wait_at_waypoint:
+      plugin: "nav2_waypoint_follower::WaitAtWaypoint"
+      enabled: True
+      waypoint_pause_duration: 200

@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<sdf version="1.8">
+<sdf version="1.6">
   <model name="go2w">
     <static>false</static>
     <pose>0 0 0.7 0 0 0</pose>
@@ -34,9 +34,8 @@
       </collision>
       <sensor name="body_imu" type="imu">
         <always_on>true</always_on>
-        <topic>imu/data</topic>
+        <topic>/imu/data</topic>
         <update_rate>100</update_rate>
-        <enable_metrics>true</enable_metrics>
         <imu>
           <angular_velocity>
             <x>
@@ -1009,7 +1008,7 @@
       </collision>
 
       <sensor name="mid360_lidar" type="gpu_lidar">
-        <topic>livox/lidar</topic>
+        <topic>/livox/lidar</topic>
         <update_rate>10</update_rate>
         <always_on>true</always_on>
         <visualize>false</visualize>
@@ -1042,7 +1041,7 @@
       </sensor>
 
       <sensor name="mid360_imu" type="imu">
-        <topic>livox/imu</topic>
+        <topic>/livox/imu</topic>
         <update_rate>200</update_rate>
         <always_on>true</always_on>
         <visualize>false</visualize>

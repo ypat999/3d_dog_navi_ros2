@@ -27,10 +27,10 @@ find_package(yaml_cpp_vendor REQUIRED)
 set(GZ_PLUGIN)
 set(GZ_SIM)
 
-# Force compilation against Gazebo harmonic
-find_package(gz-sim8 REQUIRED)
-set(GZ_SIM_VER ${gz-sim8_VERSION_MAJOR})
-message(STATUS "Compiling against Gazebo harmonic")
+# Force compilation against Gazebo Garden
+find_package(gz-sim7 REQUIRED)
+set(GZ_SIM_VER ${gz-sim7_VERSION_MAJOR})
+message(STATUS "Compiling against Gazebo Garden")
 find_package(gz-plugin2 REQUIRED)
 set(GZ_PLUGIN_VER ${gz-plugin2_VERSION_MAJOR})
 set(GZ_PLUGIN gz-plugin${GZ_PLUGIN_VER}::register)

@@ -1,67 +1,51 @@
-# Gazebo Garden 到 ROS 2 桥接配置
-# 定义Gazebo和ROS之间的主题映射
+# Gazebo Garden 到 ROS 2 桥接配置 (新版格式)
+# 参考: livox_gazebo_garden/config/bridge.yaml
 
 # 时钟同步
-bridge:
-  - 
-    gz_topic: "/clock"
-    ros_topic: "/clock"
-    gz_type: "gz.msgs.Clock"
-    ros_type: "rosgraph_msgs/msg/Clock"
-    direction: BIDIRECTIONAL
+- ros_topic_name: "/clock"
+  gz_topic_name: "/clock"
+  ros_type_name: "rosgraph_msgs/msg/Clock"
+  gz_type_name: "gz.msgs.Clock"
+  direction: BIDIRECTIONAL
 
-# 机器狗关节状态
-  - 
-    gz_topic: "/world/tower/model/go2w/joint_state"
-    ros_topic: "/joint_states"
-    gz_type: "gz.msgs.Model"
-    ros_type: "sensor_msgs/msg/JointState"
-    direction: BIDIRECTIONAL
+# Livox MID360 激光雷达点云
+- ros_topic_name: "/livox/lidar"
+  gz_topic_name: "/livox/lidar"
+  ros_type_name: "sensor_msgs/msg/PointCloud2"
+  gz_type_name: "gz.msgs.PointCloudPacked"
+  direction: GZ_TO_ROS
 
-# 机器狗姿态
-  - 
-    gz_topic: "/world/tower/model/go2w/pose"
-    ros_topic: "/go2w/pose"
-    gz_type: "gz.msgs.Pose"
-    ros_type: "geometry_msgs/msg/PoseStamped"
-    direction: BIDIRECTIONAL
+# Livox MID360 IMU
+- ros_topic_name: "/livox/imu"
+  gz_topic_name: "/livox/imu"
+  ros_type_name: "sensor_msgs/msg/Imu"
+  gz_type_name: "gz.msgs.IMU"
+  direction: GZ_TO_ROS
 
-# 机器狗关节控制命令
-  - 
-    gz_topic: "/world/tower/model/go2w/joint_cmd"
-    ros_topic: "/go2w/joint_commands"
-    gz_type: "gz.msgs.Actuator"
-    ros_type: "trajectory_msgs/msg/JointTrajectory"
-    direction: BIDIRECTIONAL
+# 机身 IMU (用于姿态补偿)
+- ros_topic_name: "/imu/data"
+  gz_topic_name: "/imu/data"
+  ros_type_name: "sensor_msgs/msg/Imu"
+  gz_type_name: "gz.msgs.IMU"
+  direction: GZ_TO_ROS
 
-# 相机图像（如果存在）
-  - 
-    gz_topic: "/world/tower/model/go2w/link/camera_link/sensor/camera/image"
-    ros_topic: "/camera/image_raw"
-    gz_type: "gz.msgs.Image"
-    ros_type: "sensor_msgs/msg/Image"
-    direction: BIDIRECTIONAL
+# 速度命令 (Nav2 -> Gazebo)
+- ros_topic_name: "/cmd_vel"
+  gz_topic_name: "/cmd_vel"
+  ros_type_name: "geometry_msgs/msg/Twist"
+  gz_type_name: "gz.msgs.Twist"
+  direction: ROS_TO_GZ
 
-# 2D激光雷达数据
-  - 
-    gz_topic: "/world/tower/model/go2w/link/lidar_link/sensor/lidar_sensor/scan"
-    ros_topic: "/scan"
-    gz_type: "gz.msgs.LaserScan"
-    ros_type: "sensor_msgs/msg/LaserScan"
-    direction: BIDIRECTIONAL
+# 关节状态 (Gazebo -> ROS2)
+- ros_topic_name: "/joint_states"
+  gz_topic_name: "/world/Building/model/go2w/joint_state"
+  ros_type_name: "sensor_msgs/msg/JointState"
+  gz_type_name: "gz.msgs.Model"
+  direction: GZ_TO_ROS
 
-# 3D激光雷达数据 (Livox Mid360)
-  - 
-    gz_topic: "/world/tower/model/go2w/link/lidar_link/sensor/livox_sensor/scan"
-    ros_topic: "/livox/points"
-    gz_type: "gz.msgs.LaserScan"
-    ros_type: "sensor_msgs/msg/PointCloud2"
-    direction: BIDIRECTIONAL
-
-# IMU数据
-  - 
-    gz_topic: "/world/tower/model/go2w/link/imu/sensor/imu_sensor/imu"
-    ros_topic: "/imu/data"
-    gz_type: "gz.msgs.IMU"
-    ros_type: "sensor_msgs/msg/Imu"
-    direction: BIDIRECTIONAL
+# 里程计 (可选，如果Gazebo发布)
+# - ros_topic_name: "/odom"
+#   gz_topic_name: "/odom"
+#   ros_type_name: "nav_msgs/msg/Odometry"
+#   gz_type_name: "gz.msgs.Odometry"
+#   direction: GZ_TO_ROS

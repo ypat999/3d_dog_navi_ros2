@@ -451,8 +451,8 @@ rqt_graph
    - **原因**：插件编译版本与Gazebo版本不匹配
    - **解决方案**：
      ```bash
-     # 重新编译gz_ros2_control插件以支持Gazebo Harmonic
-     export GZ_VERSION=harmonic
+     # 重新编译gz_ros2_control插件以支持Gazebo Garden
+     export GZ_VERSION=garden
      colcon build --symlink-install --packages-select gz_ros2_control
      ```
 
@@ -488,10 +488,10 @@ rqt_graph
      gz sim --versions
      
      # 安装正确的bridge包
-     # 对于Gazebo Garden (8.x)
+     # 对于Gazebo Garden (7.x)
      sudo apt install ros-humble-ros-gzgarden-bridge
      
-     # 对于Gazebo Harmonic (9.x)
+     # 对于Gazebo Harmonic (8.x)
      sudo apt install ros-humble-ros-gzharmonic-bridge
      
      # 确认launch文件使用正确的包名
