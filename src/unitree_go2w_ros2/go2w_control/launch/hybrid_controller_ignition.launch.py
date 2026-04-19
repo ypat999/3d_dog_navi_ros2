@@ -113,7 +113,7 @@ def generate_launch_description():
         world_path = os.path.join(world_dir, world_file)
         
         return [ExecuteProcess(
-            cmd=['gz', 'sim', '--force-version', '8', '-r', '--headless-rendering', world_path],
+            cmd=['gz', 'sim', '--force-version', '7', '-r', '--headless-rendering', world_path],
             output='screen',
             shell=False
         )]

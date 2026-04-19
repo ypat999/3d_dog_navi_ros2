@@ -52,10 +52,13 @@
    - 高精度定位与姿态估计
 
 #### 路径规划算法
-4. **pct_planner_ros2** - PCT路径规划器
-   - 点云断层摄影环境建模
-   - 支持C++/Python混合编程
-   - 完整的ROS2节点实现
+4. **pct_planner** - PCT路径规划器（多楼层全局规划）
+   - 点云断层摄影环境建模（GPU加速）
+   - 多楼层路径规划（楼梯、坡道、过桥）
+   - A*搜索 + GPMP轨迹优化
+   - 3D轨迹输出（nav_msgs/Path）
+   - ROS2 Humble原生支持
+   - 性能：断层图生成~40ms，路径搜索~20ms，轨迹优化~375ms
 
 5. **ego_planner** - 快速轨迹优化算法
    - B样条轨迹优化
@@ -75,7 +78,7 @@
 | Go2W机器狗仿真 | ✅ 完全迁移 | ROS2 Humble | 混合运动控制器，状态估计器 |
 | FAST-LIO2 SLAM | ✅ 完全迁移 | ROS2 Humble | 激光惯性里程计，实时建图 |
 | Ego-planner | ✅ 无 | ROS2 Humble | 地面模式优化，实时避障 |
-| PCT-planner | ✅ 无 | ROS2 Humble | 断层摄影环境建模 |
+| PCT-planner | ✅ 已部署 | ROS2 Humble | 断层摄影环境建模，多楼层规划 |
 | 机器狗导航系统 | ✅ 无 | ROS2 Humble | 完整自主导航流程 |
 | RViz可视化工具 | ✅ 完全迁移 | ROS2 Humble | 3D导航目标插件 |
 
@@ -303,11 +306,40 @@ PCT规划器集成了先进的断层摄影技术，用于环境的三维建模�
 
 ```bash
 # 生成环境断层图
-ros2 run pct_planner_ros2 tomography_node --ros-args -p scene:=Spiral
+cd ~/git/3d_dog_navi_ros2/src/pct_planner/tomography/scripts
+python3 run_standalone.py --scene Building
 
-# 查看生成的层数据
-ros2 topic list | grep layer
+# 路径规划
+cd ~/git/3d_dog_navi_ros2/src/pct_planner/planner/scripts
+python3 plan_standalone.py --tomo building2_9 --start -5 -3 --end 5 3
 ```
+
+**PCT Planner 环境变量设置**（添加到 ~/.bashrc）：
+```bash
+export LD_LIBRARY_PATH=~/git/3d_dog_navi_ros2/src/pct_planner/planner/lib/3rdparty/gtsam-4.1.1/install/lib:~/git/3d_dog_navi_ros2/src/pct_planner/planner/lib/build/src/common/smoothing:$LD_LIBRARY_PATH
+export PYTHONPATH=~/git/3d_dog_navi_ros2/src/pct_planner/planner/lib:$PYTHONPATH
+```
+
+**PCT Planner 与机器狗系统集成**：
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   PCT Planner   │     │  EGO Planner    │     │   机器狗控制    │
+│   (全局路径)    │────▶│   (局部优化)    │────▶│   (执行)        │
+│   多楼层支持    │     │   3D避障        │     │   /cmd_vel      │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+        │                       │
+        ▼                       ▼
+   /pct_path              /position_cmd
+   (nav_msgs/Path)        → 转换为/cmd_vel
+```
+
+**PCT Planner 性能指标**：
+| 指标 | 数值 |
+|------|------|
+| 断层图生成 | ~40ms (85万点) |
+| 路径搜索 | ~20ms |
+| 轨迹优化 | ~375ms |
+| 输出航点 | 1000+ |
 
 ### 自定义场景配置
 
@@ -520,8 +552,8 @@ rqt_graph
 ```
 3d_dog_navi_ros2/
 ├── src/
-│   ├── pct_planner_ros2/          # PCT规划器ROS2版本
-│   ├── planner/                   # 路径规划器
+│   ├── pct_planner/              # PCT规划器（多楼层全局规划）
+│   ├── planner/                   # EGO路径规划器
 │   ├── unitree_go2w_ros2/         # Unitree Go2W机器人仿真
 │   ├── unitree_ros2_sim/          # Unitree机器人仿真（兼容Go1）
 │   ├── uav_simulator/             # 无人机仿真
@@ -564,7 +596,7 @@ rqt_graph
 
 ## 致谢
 
-- [PCT-planner](https://github.com/byangw/PCT_planner.git) - 点云断层摄影路径规划
+- [PCT-planner](https://github.com/ypat999/PCT_planner.git) - 点云断层摄影路径规划（多楼层导航）
 - [ego-planner](https://github.com/ZJU-FAST-Lab/ego-planner.git) - 快速轨迹优化算法
 - [Unitree Robotics](https://www.unitree.com/) - 机器人硬件和仿真模型
 - [ROS2社区](https://docs.ros.org/) - 机器人操作系统框架
@@ -579,6 +611,15 @@ rqt_graph
 - 文档: [项目Wiki]
 
 ## 更新日志
+
+### v2.3.0 (2025-04-20)
+- **PCT Planner 部署完成**
+  - 编译GTSAM 4.1.1和OSQP第三方库
+  - 编译Python绑定库（a_star, ele_planner, traj_opt）
+  - 修复CuPy版本匹配问题（CUDA 11.x）
+  - 测试通过：断层图生成~40ms，路径规划~20ms，轨迹优化~375ms
+  - 添加完整的中文README文档
+  - 支持多楼层路径规划（楼梯、坡道、过桥）
 
 ### v2.2.0 (2025-02-26)
 - **混合运动控制器增强**
