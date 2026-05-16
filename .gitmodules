@@ -3,4 +3,4 @@
 	url = https://github.com/rvxfahim/PCT_planner.git
 [submodule "src/rl_sar"]
 	path = src/rl_sar
-	url = https://github.com/fan-ziqi/rl_sar.git
+	url = https://github.com/ypat999/rl_sar.git
