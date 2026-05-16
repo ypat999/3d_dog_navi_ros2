@@ -1,0 +1,49 @@
+controller_manager:
+  ros__parameters:
+    use_sim_time: True
+    update_rate: 200
+
+    robot_joint_controller:
+      type: robot_joint_controller/RobotJointControllerGroup
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+initial_positions:
+  ros__parameters:
+    FR_hip_joint: 0.0
+    FR_thigh_joint: 0.8
+    FR_calf_joint: -1.5
+    FL_hip_joint: 0.0
+    FL_thigh_joint: 0.8
+    FL_calf_joint: -1.5
+    RR_hip_joint: 0.0
+    RR_thigh_joint: 0.8
+    RR_calf_joint: -1.5
+    RL_hip_joint: 0.0
+    RL_thigh_joint: 0.8
+    RL_calf_joint: -1.5
+    FR_foot_joint: 0.0
+    FL_foot_joint: 0.0
+    RR_foot_joint: 0.0
+    RL_foot_joint: 0.0
+
+robot_joint_controller:
+  ros__parameters:
+    joints:
+      - FR_hip_joint
+      - FR_thigh_joint
+      - FR_calf_joint
+      - FL_hip_joint
+      - FL_thigh_joint
+      - FL_calf_joint
+      - RR_hip_joint
+      - RR_thigh_joint
+      - RR_calf_joint
+      - RL_hip_joint
+      - RL_thigh_joint
+      - RL_calf_joint
+      - FR_foot_joint
+      - FL_foot_joint
+      - RR_foot_joint
+      - RL_foot_joint
