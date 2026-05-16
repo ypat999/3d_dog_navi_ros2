@@ -13,6 +13,7 @@
 - **地面导航优化**：专门为机器狗地面运动优化的导航算法
 - **SLAM集成**：集成FAST-LIO2激光SLAM用于实时建图
 - **混合运动控制**：支持机器狗行走、小跑、奔跑等多种步态
+- **RL运动控制**：集成rl_sar强化学习控制器，支持高动态运动场景
 - **IMU姿态补偿**：基于IMU数据的姿态补偿，提高运动稳定性
 - **上坡检测**：自动检测上坡（pitch > 15度），切换到轮腿协同前进模式
 - **Gazebo仿真**：高保真的机器狗物理仿真环境
@@ -37,6 +38,7 @@
 1. **unitree_go2w_ros2** - Unitree Go2W机器狗专用仿真包
    - Go2W高精度机器人模型（包含Livox Mid360激光雷达）
    - 混合运动控制器（支持行走、小跑、奔跑等步态）
+   - RL强化学习控制器（基于rl_sar，支持高动态运动）
    - 状态估计器（里程计、IMU数据融合）
    - Gazebo物理仿真集成
 
@@ -75,7 +77,7 @@
 
 | 组件 | 状态 | ROS2版本 | 主要改进 |
 |------|------|----------|----------|
-| Go2W机器狗仿真 | ✅ 完全迁移 | ROS2 Humble | 混合运动控制器，状态估计器 |
+| Go2W机器狗仿真 | ✅ 完全迁移 | ROS2 Humble | 混合运动控制器，RL控制器，状态估计器 |
 | FAST-LIO2 SLAM | ✅ 完全迁移 | ROS2 Humble | 激光惯性里程计，实时建图 |
 | Ego-planner | ✅ 无 | ROS2 Humble | 地面模式优化，实时避障 |
 | PCT-planner | ✅ 已部署 | ROS2 Humble | 断层摄影环境建模，多楼层规划 |
@@ -129,7 +131,7 @@ unzip libtorch*.zip -d /opt/
 
  **编译ROS2包**
 ```bash
-cd ~/3d_dog_navi_ros2
+cd ~/git/3d_dog_navi_ros2
 source /opt/ros/humble/setup.bash
 ```
 
@@ -137,6 +139,11 @@ source /opt/ros/humble/setup.bash
 ```bash
 # 编译机器狗核心包（推荐）
 colcon build --symlink-install --packages-select go2w_config go2w_control go2w_description champ champ_base champ_bringup champ_config champ_description champ_gazebo champ_msgs champ_navigation
+
+# 编译RL控制器包（需要先编译依赖）
+colcon build --symlink-install --packages-select robot_msgs
+colcon build --symlink-install --packages-select robot_joint_controller
+colcon build --symlink-install --packages-select rl_sar
 
 # 编译SLAM和导航包
 colcon build --symlink-install --packages-select FAST_LIO_ROS2_edit ego_planner planner
@@ -147,6 +154,12 @@ colcon build --symlink-install --packages-select go2w_config go2w_control go2w_d
 # 完整编译所有包（推荐用于开发）
 colcon build --symlink-install
 ```
+
+> **注意**：rl_sar 包编译前需先下载推理运行时（LibTorch），执行：
+> ```bash
+> cd ~/git/3d_dog_navi_ros2/src/rl_sar
+> bash scripts/download_inference_runtime.sh libtorch
+> ```
 
 4. **配置环境变量**
 ```bash
@@ -191,6 +204,47 @@ ros2 launch ego_planner advanced_param.launch.py
 ```bash
 ros2 run teleop_twist_keyboard teleop_twist_keyboard
 ```
+
+#### 方法三：RL强化学习控制器启动
+
+RL控制器基于[rl_sar](https://github.com/ypat999/rl_sar)（已适配Ignition Gazebo），提供高动态运动能力，适合需要快速移动和敏捷转向的场景。
+
+```bash
+# 启动RL控制器仿真环境
+ros2 launch go2w_control rl_controller_ignition.launch.py
+```
+
+此命令将自动启动：
+- Ignition Gazebo仿真环境
+- Go2W机器狗模型（RL控制器配置）
+- ros2_control控制器管理器 + robot_joint_controller
+- rl_sim RL推理节点（加载Go2W policy）
+- Ignition-ROS2桥接（IMU、关节状态等）
+- 关节状态广播器
+
+**RL控制器操作方式**：
+- **键盘**：`W/A/S/D` 前后左右，`Q/E` 偏航转向
+- **手柄**：左摇杆移动，右摇杆偏航
+- **命令速度**：发布 `geometry_msgs/Twist` 到 `/cmd_vel`
+
+**RL控制器FSM状态机**：
+| 状态 | 说明 | 触发条件 |
+|------|------|----------|
+| Passive | 关节自由，无控制 | 启动初始状态 |
+| GetUp | 从趴下姿态站起 | 按键/手柄触发 |
+| RLLocomotion | RL策略控制行走 | 站起后自动进入 |
+| GetDown | 从站立姿态趴下 | 按键/手柄触发 |
+
+**更换RL策略模型**：
+```bash
+# 替换policy文件即可，位于：
+~/git/3d_dog_navi_ros2/src/rl_sar/policy/go2w/robot_lab/policy.pt
+
+# 如需更换策略配置，修改：
+~/git/3d_dog_navi_ros2/src/rl_sar/policy/go2w/robot_lab/config.yaml
+```
+
+> **注意**：RL控制器与混合运动控制器使用不同的SDF模型和ros2_control配置，不可同时启动。
 
 #### 机器狗控制操作
 
@@ -553,6 +607,7 @@ rqt_graph
 3d_dog_navi_ros2/
 ├── src/
 │   ├── pct_planner/              # PCT规划器（多楼层全局规划）
+│   ├── rl_sar/                   # RL强化学习控制器（submodule）
 │   ├── planner/                   # EGO路径规划器
 │   ├── unitree_go2w_ros2/         # Unitree Go2W机器人仿真
 │   ├── unitree_ros2_sim/          # Unitree机器人仿真（兼容Go1）
@@ -597,6 +652,7 @@ rqt_graph
 ## 致谢
 
 - [PCT-planner](https://github.com/ypat999/PCT_planner.git) - 点云断层摄影路径规划（多楼层导航）
+- [rl_sar](https://github.com/ypat999/rl_sar) - 强化学习机器人控制器（Go2W RL运动控制）
 - [ego-planner](https://github.com/ZJU-FAST-Lab/ego-planner.git) - 快速轨迹优化算法
 - [Unitree Robotics](https://www.unitree.com/) - 机器人硬件和仿真模型
 - [ROS2社区](https://docs.ros.org/) - 机器人操作系统框架
@@ -611,6 +667,16 @@ rqt_graph
 - 文档: [项目Wiki]
 
 ## 更新日志
+
+### v2.4.0 (2025-05-16)
+- **RL强化学习控制器集成**
+  - 添加rl_sar作为git submodule（fork自ypat999/rl_sar）
+  - 适配Ignition Gazebo环境（Gazebo Classic依赖改为可选）
+  - 创建RL专用ros2_control配置（rl_joint_controller.yaml）
+  - 创建RL专用SDF模型（go2w_rl.sdf）
+  - 创建RL启动文件（rl_controller_ignition.launch.py）
+  - 下载LibTorch推理运行时，支持policy.pt加载
+  - Go2W预训练策略：robot_lab（16自由度，含4轮关节）
 
 ### v2.3.0 (2025-04-20)
 - **PCT Planner 部署完成**
