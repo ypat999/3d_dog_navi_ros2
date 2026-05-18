@@ -32,7 +32,7 @@ class CmdVelPublisher(Node):
         msg.angular.z = angular_z
 
         self.cmd_vel_publisher_.publish(msg)
-        self.get_logger().info(f'cmd_vel published: linear.x={linear_x}, linear.y={linear_y}, angular.z={angular_z}')
+        self.get_logger().debug(f'cmd_vel published: linear.x={linear_x}, linear.y={linear_y}, angular.z={angular_z}')
 
     def publish_velocity(self, velocities):
         msg = Float64MultiArray()

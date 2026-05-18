@@ -224,30 +224,73 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard
 RL控制器基于[rl_sar](https://github.com/ypat999/rl_sar)（已适配Ignition Gazebo），提供高动态运动能力，适合需要快速移动和敏捷转向的场景。
 
 ```bash
-# 启动RL控制器仿真环境
+# 终端1 - 启动RL控制器仿真环境（Gazebo + ros2_control + 桥接等）
 ros2 launch go2w_control rl_controller_ignition.launch.py
+
+# 终端2 - 启动rl_sim RL推理节点（必须在独立终端运行，否则键盘输入无效）
+source ~/git/3d_dog_navi_ros2/install/setup.bash
+ros2 run rl_sar rl_sim
 ```
+
+> **重要**：`rl_sim` 必须在独立终端中用 `ros2 run` 直接启动，不能通过 `ros2 launch` 启动。因为 `rl_sim` 的键盘输入通过 `stdin` 直接读取终端按键，而 `ros2 launch` 启动的节点 stdin 会被重定向，导致键盘输入无效。
 
 此命令将自动启动：
 - Ignition Gazebo仿真环境
 - Go2W机器狗模型（RL控制器配置）
 - ros2_control控制器管理器 + robot_joint_controller
-- rl_sim RL推理节点（加载Go2W policy）
 - Ignition-ROS2桥接（IMU、关节状态等）
 - 关节状态广播器
 
-**RL控制器操作方式**：
-- **键盘**：`W/A/S/D` 前后左右，`Q/E` 偏航转向
-- **手柄**：左摇杆移动，右摇杆偏航
-- **命令速度**：发布 `geometry_msgs/Twist` 到 `/cmd_vel`
+**终端2中 `rl_sim` 启动后**，将加载 Go2W policy 并开启键盘监听。
 
-**RL控制器FSM状态机**：
-| 状态 | 说明 | 触发条件 |
-|------|------|----------|
-| Passive | 关节自由，无控制 | 启动初始状态 |
-| GetUp | 从趴下姿态站起 | 按键/手柄触发 |
-| RLLocomotion | RL策略控制行走 | 站起后自动进入 |
-| GetDown | 从站立姿态趴下 | 按键/手柄触发 |
+**RL控制器操作方式**
+
+##### FSM状态机流程
+
+```
+Passive → (按 0) → GetUp → (按 1) → RLLocomotion (RL行走)
+                        ↑                    ↓
+                        ← (按 0 或 9) ← ─────┘
+                                              ↓ (按 9)
+                                          GetDown → Passive
+```
+
+##### 键盘控制（在运行 `rl_sim` 的终端中按键）
+
+| 按键 | 功能 |
+|------|------|
+| **0** | 切换到 GetUp（从 Passive 站起） |
+| **1** | 切换到 RLLocomotion（RL 行走模式） |
+| **9** | 切换到 GetDown（趴下） |
+| **P** | 切换到 Passive（被动模式，关节阻尼） |
+| **N** | 切换导航模式（启用/禁用 `/cmd_vel` 话题控制） |
+| **W/S** | 前进/后退（x 轴速度 ±0.1） |
+| **A/D** | 左移/右移（y 轴速度 ±0.1） |
+| **Q/E** | 左转/右转（偏航角速度 ±0.1） |
+| **Space** | 清零速度指令 |
+| **R** | 重置仿真 |
+| **Enter** | 暂停/恢复仿真 |
+
+##### 通过 `/cmd_vel` 话题控制
+
+**重要**：使用 `/cmd_vel` 话题控制前，需要先按 **N 键** 启用导航模式。
+
+```bash
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {z: 0.3}}"
+```
+
+**导航模式说明**：
+- 默认模式：使用键盘 WASD+QE 控制移动
+- 导航模式：使用 `/cmd_vel` 话题控制（按 N 键切换）
+- 按 N 键可在两种模式间切换，控制台会显示当前模式状态
+
+##### 启动后操作步骤
+
+1. 启动模拟后，机器人处于 **Passive** 状态（关节阻尼，瘫软在地）
+2. 按 **0** → 机器人执行 **GetUp**（先过渡到预备姿态，再站起到默认站立姿态）
+3. 站起完成后按 **1** → 进入 **RLLocomotion**（RL 策略接管控制）
+4. 用 **WASD+QE** 控制移动方向，**Space** 停止
+5. 按 **9** → 机器人趴下，回到 Passive
 
 **更换RL策略模型**：
 ```bash
@@ -437,179 +480,7 @@ cd ~/3d_dog_navi_ros2_ws/src/pct_planner_ros2
 ros2 run pct_planner_ros2 plan_node --ros-args -p use_cpp:=true
 ```
 
----
 
-## 故障排除与调试
-
-### 机器狗专用故障排除
-
-#### 1. **机器狗无法站立或移动**
-- **问题**：机器狗在Gazebo中无法站立或响应控制命令
-- **解决方案**：
-  ```bash
-  # 检查控制器状态
-  ros2 node list | grep controller
-  
-  # 重启控制器
-  ros2 service call /controller_manager/switch_controller controller_manager_msgs/srv/SwitchController "{start_controllers: ['joint_group_effort_controller'], stop_controllers: [], strictness: 1}"
-  ```
-
-#### 2. **SLAM定位漂移或丢失**
-- **问题**：FAST-LIO2定位不准确或丢失
-- **解决方案**：
-  ```bash
-  # 检查传感器数据
-  ros2 topic echo /livox/lidar --no-arr | head -5
-  ros2 topic echo /livox/imu --no-arr | head -5
-  
-  # 重启SLAM节点
-  ros2 lifecycle set /fast_lio2_dog_odom configure
-  ros2 lifecycle set /fast_lio2_dog_odom activate
-  ```
-
-#### 3. **路径规划失败**
-- **问题**：Ego-planner无法找到可行路径
-- **解决方案**：
-  ```bash
-  # 检查地图数据
-  ros2 topic echo /grid_map/occupancy_inflate --no-arr | head -3
-  
-  # 调整规划参数
-  ros2 param set /drone_0_ego_planner_node grid_map/obstacles_inflation 0.15
-  ```
-
-### 通用故障排除
-
-#### 1. **Gazebo无法启动**
-   ```bash
-   # 检查Gazebo安装
-   gazebo --version
-   
-   # 重置Gazebo模型数据库
-   rm -rf ~/.gazebo/
-   ```
-
-#### 2. **ROS2节点无法通信**
-   ```bash
-   # 检查ROS2环境
-   echo $ROS_DISTRO
-   
-   # 重新source环境
-   source /opt/ros/humble/setup.bash
-   source ~/3d_dog_navi_ros2/install/setup.bash
-   ```
-
-### 调试工具
-
-使用ROS2内置工具进行调试：
-
-```bash
-# 查看节点状态
-ros2 node list
-
-# 查看话题列表
-ros2 topic list
-
-# 监控机器狗关键话题
-ros2 topic echo /odom                    # 里程计数据
-ros2 topic echo /livox/lidar --no-arr    # 激光雷达数据（简化输出）
-ros2 topic echo /cmd_vel                 # 控制命令
-ros2 topic echo /planning/bspline        # 规划轨迹
-
-# 查看节点图
-rqt_graph
-```
-
-### 已知问题与解决方案
-
-1. **包名验证错误："'package.xml' is not a valid package name"**
-   - **问题**：启动时出现包名验证错误
-   - **原因**：包索引目录中存在错误的文件名
-   - **解决方案**：
-     ```bash
-     # 检查并修复包索引文件
-     cd ~/3d_dog_navi_ros2/install
-     find . -name "package.xml" -path "*/ament_index/resource_index/packages/*"
-     
-     # 如果发现错误的文件，重命名为正确的包名
-     mv pct_planner_ros2/share/ament_index/resource_index/packages/package.xml \
-        pct_planner_ros2/share/ament_index/resource_index/packages/pct_planner_ros2
-     ```
-
-2. **FindPackageShare对象类型错误**
-   - **问题**：启动时出现"expected str, bytes or os.PathLike object, not FindPackageShare"错误
-   - **原因**：FindPackageShare对象被错误地传递给os.path.join()函数
-   - **解决方案**：使用PathJoinSubstitution替代os.path.join()
-
-3. **机器狗话题映射错误**
-   - **问题**：节点间话题通信失败
-   - **原因**：话题名称不匹配
-   - **解决方案**：检查并更新启动文件中的话题映射配置
-
-4. **Gazebo Harmonic插件加载失败**
-   - **问题**：gz_ros2_control插件无法加载，提示"library does not contain requested plugin"
-   - **原因**：插件编译版本与Gazebo版本不匹配
-   - **解决方案**：
-     ```bash
-     # 重新编译gz_ros2_control插件以支持Gazebo Garden
-     export GZ_VERSION=garden
-     colcon build --symlink-install --packages-select gz_ros2_control
-     ```
-
-5. **机器狗轮子在Gazebo中不可见**
-   - **问题**：Gazebo中看不到机器狗轮子，但RViz中可见
-   - **原因**：SDF文件中脚的视觉模型使用了错误的mesh文件
-   - **解决方案**：检查并修正go2w.sdf中的视觉模型配置，确保使用正确的轮子模型（left_wheel.dae/right_wheel.dae）
-
-6. **XTDrone2传感器错误**
-   - **问题**：PX4仿真中出现"Compass Sensor 0 missing"或"ekf2 missing data"错误
-   - **原因**：Gazebo模型中缺少磁力计传感器配置
-   - **解决方案**：
-     ```bash
-     # 在PX4 Gazebo模型中添加磁力计传感器
-     # 启用PX4磁力计支持：param set-default EKF2_MAG_TYPE 3
-     # 添加ROS-Gazebo磁力计数据桥接
-     ```
-
-7. **topic_tools包缺失**
-   - **问题**：启动时出现"package 'topic_tools' not found"错误
-   - **原因**：缺少ROS2 topic_tools包
-   - **解决方案**：
-     ```bash
-     sudo apt install ros-humble-topic-tools
-     ```
-
-8. **IMU数据无法转发**
-   - **问题**：ROS2中`/imu/data`话题无数据，但Gazebo中有数据
-   - **原因**：ros_gz_bridge版本与Gazebo版本不匹配
-   - **解决方案**：
-     ```bash
-     # 检查Gazebo版本
-     gz sim --versions
-     
-     # 安装正确的bridge包
-     # 对于Gazebo Garden (7.x)
-     sudo apt install ros-humble-ros-gzgarden-bridge
-     
-     # 对于Gazebo Harmonic (8.x)
-     sudo apt install ros-humble-ros-gzharmonic-bridge
-     
-     # 确认launch文件使用正确的包名
-     # Gazebo Garden: package='ros_gzgarden_bridge'
-     # Gazebo Harmonic: package='ros_gzharmonic_bridge'
-     ```
-
-9. **Bridge版本不匹配**
-   - **问题**：bridge无法连接Gazebo，提示库版本错误
-   - **原因**：使用Ignition版本的bridge连接Gazebo Garden
-   - **解决方案**：
-     ```bash
-     # 卸载旧版本
-     sudo apt remove ros-humble-ros-gz-bridge
-     
-     # 安装Gazebo Garden专用bridge
-     sudo apt install ros-humble-ros-gzgarden-bridge
-     ```
 
 ---
 

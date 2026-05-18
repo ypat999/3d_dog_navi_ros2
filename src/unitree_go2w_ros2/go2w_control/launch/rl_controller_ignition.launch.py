@@ -9,7 +9,11 @@ from launch.actions import (
 )
 import os
 from ament_index_python.packages import get_package_share_directory
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, Command
+from launch.substitutions import FindExecutable
+from launch_ros.substitutions import FindPackageShare
+from launch_ros.actions import Node
+from pathlib import Path
 
 
 def generate_launch_description():
@@ -27,14 +31,19 @@ def generate_launch_description():
     bridge_config = os.path.join(pkg_go2w_control, "config", "ignition_bridge.yaml")
 
     robot_sdf = os.path.join(model_dir, "go2w", "go2w_rl.sdf")
-    robot_urdf = os.path.join(
-        pkg_go2w_description, "urdf", "go2w_description.urdf"
-    )
 
     declare_world = DeclareLaunchArgument(
         name="world",
-        default_value="Building.world",
+        # default_value="Building.world",
+        default_value="rubicon.sdf",
         description="World file name",
+    )
+
+    declare_world_name = DeclareLaunchArgument(
+        name="world_name",
+        # default_value="tower",
+        default_value="challenge",
+        description="World name in SDF file",
     )
 
     declare_robot_name = DeclareLaunchArgument(
@@ -58,7 +67,7 @@ def generate_launch_description():
     )
 
     declare_z = DeclareLaunchArgument(
-        name="z", default_value="0.4", description="Initial z position"
+        name="z", default_value="1.5", description="Initial z position"
     )
 
     declare_camera_x = DeclareLaunchArgument(
@@ -103,6 +112,7 @@ def generate_launch_description():
     gazebo_process = OpaqueFunction(function=generate_gazebo_command)
 
     def generate_spawn_command(context, *args, **kwargs):
+        world_name = LaunchConfiguration("world_name").perform(context)
         robot_name = LaunchConfiguration("robot_name").perform(context)
         x = LaunchConfiguration("x").perform(context)
         y = LaunchConfiguration("y").perform(context)
@@ -111,7 +121,7 @@ def generate_launch_description():
             ExecuteProcess(
                 cmd=[
                     "gz", "service",
-                    "-s", "/world/tower/create",
+                    "-s", f"/world/{world_name}/create",
                     "--reqtype", "gz.msgs.EntityFactory",
                     "--reptype", "gz.msgs.Boolean",
                     "--timeout", "30000",
@@ -127,23 +137,27 @@ def generate_launch_description():
 
     spawn_robot = OpaqueFunction(function=generate_spawn_command)
 
-    def generate_camera_command(context, *args, **kwargs):
-        camera_x = LaunchConfiguration("camera_x").perform(context)
-        camera_y = LaunchConfiguration("camera_y").perform(context)
-        camera_z = LaunchConfiguration("camera_z").perform(context)
-        camera_cmd = (
-            f"gz camera -c gzclient_camera "
-            f"--pos {camera_x} {camera_y} {camera_z}"
-        )
-        return [
-            ExecuteProcess(
-                cmd=["bash", "-c", camera_cmd],
-                output="screen",
-                shell=False,
-            )
-        ]
+    # def generate_camera_command(context, *args, **kwargs):
+    #     camera_x = LaunchConfiguration("camera_x").perform(context)
+    #     camera_y = LaunchConfiguration("camera_y").perform(context)
+    #     camera_z = LaunchConfiguration("camera_z").perform(context)
+    #     camera_cmd = (
+    #         f"gz camera -c gzclient_camera "
+    #         f"--pos {camera_x} {camera_y} {camera_z}"
+    #     )
+    #     return [
+    #         ExecuteProcess(
+    #             cmd=["bash", "-c", camera_cmd],
+    #             output="screen",
+    #             shell=False,
+    #         )
+    #     ]
 
-    set_camera = OpaqueFunction(function=generate_camera_command)
+    # set_camera = OpaqueFunction(function=generate_camera_command)
+
+    xacro_file = os.path.join(
+        pkg_go2w_description, "urdf", "go2w_description_gz.urdf.xacro"
+    )
 
     robot_state_publisher_node = Node(
         package="robot_state_publisher",
@@ -152,7 +166,9 @@ def generate_launch_description():
         output="screen",
         parameters=[
             {
-                "robot_description": open(robot_urdf).read(),
+                "robot_description": Command(
+                    [FindExecutable(name="xacro"), " ", xacro_file]
+                ),
                 "use_sim_time": True,
             }
         ],
@@ -243,6 +259,7 @@ def generate_launch_description():
         [
             *env_vars,
             declare_world,
+            declare_world_name,
             declare_robot_name,
             declare_verbose,
             declare_x,
@@ -253,7 +270,7 @@ def generate_launch_description():
             declare_camera_z,
             gazebo_process,
             TimerAction(period=3.0, actions=[spawn_robot]),
-            TimerAction(period=4.0, actions=[set_camera]),
+            # TimerAction(period=4.0, actions=[set_camera]),
             robot_state_publisher_node,
             param_node,
             TimerAction(period=4.5, actions=[ignition_bridge]),
@@ -262,7 +279,6 @@ def generate_launch_description():
             TimerAction(
                 period=6.0, actions=[spawner_joint_state_broadcaster]
             ),
-            TimerAction(period=7.0, actions=[rl_sim_node]),
             world_to_odom_tf,
             livox_frame_tf,
         ]

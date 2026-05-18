@@ -317,12 +317,14 @@
       <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
     </inertial>
   </link>
+
   <joint name="imu_joint" type="fixed">
     <origin xyz="-0.02557 0 0.04232" rpy="0 0 0" />
     <parent link="body" />
     <child link="imu" />
     <axis xyz="0 0 0" />
   </joint>
+
   <link name="livox_frame">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -342,10 +344,11 @@
       </geometry>
     </collision>
   </link>
+  
   <joint name="livox_frame_joint" type="fixed">
     <parent link="body"/>
     <child link="livox_frame"/>
-    <origin xyz="0.3 0.0 0.10" rpy="0 0 3.1415926"/>
+    <origin xyz="0.3 0.0 0.10" rpy="0 -0.5236 ${PI}"/>
   </joint>
 
   <xacro:macro name="joint_ros2_control_gz" params="prefix">
@@ -386,6 +389,10 @@
     </joint>
 
     <joint name="${prefix}_foot_joint">
+      <command_interface name="effort">
+        <param name="min">${-foot_torque_max}</param>
+        <param name="max">${foot_torque_max}</param>
+      </command_interface>
       <command_interface name="velocity">
         <param name="min">${-foot_velocity_max}</param>
         <param name="max">${foot_velocity_max}</param>

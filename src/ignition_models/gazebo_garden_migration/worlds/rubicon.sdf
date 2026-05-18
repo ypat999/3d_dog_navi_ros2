@@ -1,15 +1,47 @@
 <sdf version="1.6">
   <world name="challenge">
     
+    <physics name="default_physics" default="true" type="ode">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+      <gravity>0 0 -9.8</gravity>
+    </physics>
+
     <scene>
       <ambient>.4 .4 .4</ambient>
       <sky></sky>
     </scene>
 
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 20 0 0 0</pose>
+      <diffuse>1.0 1.0 1.0 1</diffuse>
+      <specular>1.0 1.0 1.0 1</specular>
+      <attenuation>
+        <range>2000</range>
+        <constant>0.5</constant>
+        <linear>0.001</linear>
+        <quadratic>0.0001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
     <include>
       <name>Rubicon</name>
       <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Rubicon</uri>
     </include>
+
+    <!-- Gazebo Garden (gz-sim-7) 插件 -->
+    <plugin name='gz::sim::systems::Physics' filename='/usr/lib/x86_64-linux-gnu/gz-sim-7/plugins/libgz-sim7-physics-system.so'/>
+    <plugin name='gz::sim::systems::UserCommands' filename='/usr/lib/x86_64-linux-gnu/gz-sim-7/plugins/libgz-sim7-user-commands-system.so'/>
+    <plugin name='gz::sim::systems::SceneBroadcaster' filename='/usr/lib/x86_64-linux-gnu/gz-sim-7/plugins/libgz-sim7-scene-broadcaster-system.so'/>
+    <plugin name='gz::sim::systems::Contact' filename='/usr/lib/x86_64-linux-gnu/gz-sim-7/plugins/libgz-sim7-contact-system.so'/>
+    <plugin name='gz::sim::systems::Imu' filename='/usr/lib/x86_64-linux-gnu/gz-sim-7/plugins/libgz-sim7-imu-system.so'/>
+    <plugin name='gz::sim::systems::NavSat' filename='/usr/lib/x86_64-linux-gnu/gz-sim-7/plugins/libgz-sim7-navsat-system.so'/>
+    <plugin name='gz::sim::systems::Sensors' filename='/usr/lib/x86_64-linux-gnu/gz-sim-7/plugins/libgz-sim7-sensors-system.so'>
+      <render_engine>ogre2</render_engine>
+    </plugin>
 
   </world>
 </sdf>

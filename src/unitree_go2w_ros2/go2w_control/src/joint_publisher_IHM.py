@@ -64,7 +64,7 @@ class JointPublisher(Node):
         point.time_from_start.nanosec = 16666666
         msg.points.append(point)
         self.trajectory_publisher_.publish(msg)
-        self.get_logger().info(f'Trajectory message published: {positions}')
+        self.get_logger().debug(f'Trajectory message published: {positions}')
     
     def publish_velocity(self, velocities):
         msg = Float64MultiArray()
