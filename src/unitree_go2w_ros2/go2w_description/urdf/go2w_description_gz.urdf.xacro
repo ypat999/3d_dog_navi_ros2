@@ -348,7 +348,7 @@
   <joint name="livox_frame_joint" type="fixed">
     <parent link="body"/>
     <child link="livox_frame"/>
-    <origin xyz="0.3 0.0 0.10" rpy="0 -0.5236 ${PI}"/>
+    <origin xyz="0.3 0.0 0.20" rpy="0 -0.5236 ${PI}"/>
   </joint>
 
   <xacro:macro name="joint_ros2_control_gz" params="prefix">
