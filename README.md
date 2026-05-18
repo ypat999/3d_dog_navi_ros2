@@ -93,7 +93,7 @@
 - **操作系统**: Ubuntu 22.04 LTS
 - **ROS版本**: ROS2 Humble
 - **Gazebo**: Gazebo Garden 8.10.0+ (推荐) 或 Gazebo 11
-- **CUDA**: 11.0+ (推荐，用于PCT-planner和控制器)
+- **CUDA**: 12.1 (推荐，用于rl_sar GPU推理和PCT-planner)
 - **Python**: 3.10
 - **Bridge包**: ros-humble-ros-gzgarden-bridge (针对Gazebo Garden)
 
@@ -117,14 +117,28 @@ sudo apt install ros-humble-ros-gzgarden-bridge
 pip3 install numpy scipy pybind11
 ```
 
-3. **配置CUDA和libtorch**（如需要）
+3. **配置CUDA和LibTorch**（如需要）
 ```bash
-# 安装CUDA工具包
-sudo apt install nvidia-cuda-toolkit
+# 安装CUDA Toolkit 12.1（WSL2环境）
+wget https://developer.download.nvidia.com/compute/cuda/repos/wsl-ubuntu/x86_64/cuda-keyring_1.1-1_all.deb
+sudo dpkg -i cuda-keyring_1.1-1_all.deb
+sudo apt update
+sudo apt install -y cuda-toolkit-12-1
 
-# 下载libtorch
-wget https://download.pytorch.org/libtorch/cu118/libtorch-cxx11-abi-shared-with-deps-2.0.1%2Bcu118.zip
-unzip libtorch*.zip -d /opt/
+# 添加环境变量到 ~/.bashrc
+echo 'export PATH=/usr/local/cuda-12.1/bin:$PATH' >> ~/.bashrc
+echo 'export LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64:$LD_LIBRARY_PATH' >> ~/.bashrc
+source ~/.bashrc
+
+# 验证CUDA安装
+nvcc --version
+
+# 下载LibTorch GPU版本（cu121）到rl_sar
+cd ~/git/3d_dog_navi_ros2/src/rl_sar/library/inference_runtime
+rm -rf libtorch  # 删除旧的CPU版本（如果有）
+wget https://download.pytorch.org/libtorch/cu121/libtorch-cxx11-abi-shared-with-deps-2.3.0%2Bcu121.zip
+unzip libtorch-cxx11-abi-shared-with-deps-2.3.0%2Bcu121.zip
+rm libtorch-cxx11-abi-shared-with-deps-2.3.0%2Bcu121.zip
 ```
 
 ### 项目编译
