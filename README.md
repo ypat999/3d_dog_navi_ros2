@@ -114,6 +114,7 @@ sudo apt install ros-humble-robot-localization
 sudo apt install python3-colcon-common-extensions python3-pip liblcm-dev
 sudo apt install ros-humble-topic-tools
 sudo apt install ros-humble-ros-gzgarden-bridge
+sudo apt install ros-humble-demo-nodes-cpp
 pip3 install numpy scipy pybind11
 ```
 
@@ -148,6 +149,20 @@ rm libtorch-cxx11-abi-shared-with-deps-2.3.0%2Bcu121.zip
 cd ~/git/3d_dog_navi_ros2
 source /opt/ros/humble/setup.bash
 ```
+
+> **注意**：编译前需先构建第三方库（OSQP），否则 `planning_core` 包会因找不到 `osqp` 而编译失败：
+> ```bash
+> cd ~/3d_dog_navi_ros2/src/pct_planner/planner/lib/3rdparty/osqp
+> rm -rf build install
+> mkdir build install && cd build
+> cmake .. -DCMAKE_INSTALL_PREFIX="../install" -DCMAKE_BUILD_TYPE=Release
+> make -j4 && make install
+> ```
+> 也可使用一键脚本（包含 GTSAM + OSQP）：
+> ```bash
+> cd ~/3d_dog_navi_ros2/src/pct_planner/planner
+> bash build_thirdparty.sh
+> ```
 
 # 编译特定包：
 ```bash
@@ -368,27 +383,76 @@ ros2 launch go2w_control hybrid_controller_ignition.launch.py compensation_gain:
 
 ## 高级功能
 
-### 断层摄影环境建模
+### PCT Planner 多楼层全局规划
 
-PCT规划器集成了先进的断层摄影技术，用于环境的三维建模：
+PCT Planner 基于 TMECH 论文 *"Efficient Global Navigational Planning in 3-D Structures Based on Point Cloud Tomography"*，通过点云断层扫描实现多层 3D 环境的全局路径规划，支持楼梯、坡道、过桥等多楼层场景。
+
+**核心流程**：点云 → GPU 断层扫描（Tomography）→ 多层 2D 可通行性栅格 → A* 搜索 + GPMP 轨迹优化 → 3D 轨迹
+
+**CUDA 依赖说明**：Tomography 阶段需要 CUDA（CuPy GPU 核函数），路径规划阶段不需要。可在有 GPU 的机器上预生成 tomogram pickle 文件，再拷贝到无 GPU 机器上规划。
+
+#### 安装与编译
 
 ```bash
-# 生成环境断层图
-cd ~/git/3d_dog_navi_ros2/src/pct_planner/tomography/scripts
+# 1. 安装 Python 依赖
+pip install cupy-cuda12x open3d numpy scipy
+
+# 2. 编译第三方库（GTSAM 4.1.1 + OSQP，约 5-10 分钟）
+cd ~/3d_dog_navi_ros2/src/pct_planner/planner
+bash build_thirdparty.sh
+
+# 3. 编译 pybind11 模块
+cd ~/3d_dog_navi_ros2/src/pct_planner/planner
+bash build.sh
+```
+
+#### 环境变量
+
+添加到 `~/.bashrc`：
+```bash
+export LD_LIBRARY_PATH=~/3d_dog_navi_ros2/src/pct_planner/planner/lib/3rdparty/gtsam-4.1.1/install/lib:~/3d_dog_navi_ros2/src/pct_planner/planner/lib/build/src/common/smoothing:$LD_LIBRARY_PATH
+export PYTHONPATH=~/3d_dog_navi_ros2/src/pct_planner/planner/lib:$PYTHONPATH
+```
+
+#### 使用方式
+
+**方式一：交互式 RViz2 规划（推荐）**
+
+```bash
+# 1. 生成断层图（首次或场景变更时运行，需要 GPU）
+cd ~/3d_dog_navi_ros2/src/pct_planner/tomography/scripts
+python3 run_standalone.py --scene Clinic
+
+# 2. 启动交互式节点 + RViz2
+cd ~/3d_dog_navi_ros2/src/pct_planner
+./launch_ros2.sh --skip-tomo
+```
+
+在 RViz2 中选择 "Publish Point" 工具，第一次点击设置起点（绿色球），第二次点击设置终点（红色球），自动规划并显示路径。
+
+**方式二：命令行离线规划**
+
+```bash
+# 生成断层图
+cd ~/3d_dog_navi_ros2/src/pct_planner/tomography/scripts
 python3 run_standalone.py --scene Building
 
 # 路径规划
-cd ~/git/3d_dog_navi_ros2/src/pct_planner/planner/scripts
-python3 plan_standalone.py --tomo building2_9 --start -5 -3 --end 5 3
+cd ~/3d_dog_navi_ros2/src/pct_planner/planner/scripts
+python3 plan_standalone.py --scene Building
 ```
 
-**PCT Planner 环境变量设置**（添加到 ~/.bashrc）：
-```bash
-export LD_LIBRARY_PATH=~/git/3d_dog_navi_ros2/src/pct_planner/planner/lib/3rdparty/gtsam-4.1.1/install/lib:~/git/3d_dog_navi_ros2/src/pct_planner/planner/lib/build/src/common/smoothing:$LD_LIBRARY_PATH
-export PYTHONPATH=~/git/3d_dog_navi_ros2/src/pct_planner/planner/lib:$PYTHONPATH
-```
+#### ROS2 话题
 
-**PCT Planner 与机器狗系统集成**：
+| 话题 | 类型 | 内容 |
+|------|------|------|
+| `/global_points` | `sensor_msgs/PointCloud2` | 原始点云 |
+| `/tomogram` | `sensor_msgs/PointCloud2` | 可通行性断层图（intensity = 代价） |
+| `/pct_path` | `nav_msgs/Path` | 规划轨迹 |
+| `/pct_marker` | `visualization_msgs/Marker` | 起终点球体、路径航点 |
+
+#### 与机器狗系统集成
+
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │   PCT Planner   │     │  EGO Planner    │     │   机器狗控制    │
@@ -401,7 +465,29 @@ export PYTHONPATH=~/git/3d_dog_navi_ros2/src/pct_planner/planner/lib:$PYTHONPATH
    (nav_msgs/Path)        → 转换为/cmd_vel
 ```
 
-**PCT Planner 性能指标**：
+#### 关键参数
+
+**Tomography 参数**（修改后需重新运行断层扫描，文件：`tomography/config/scene_clinic.py`）：
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| `map.resolution` | 0.10 m | 栅格分辨率，越小越精细但越慢 |
+| `map.slice_dh` | 0.5 m | 楼层切片高度间隔 |
+| `trav.safe_margin` | 0.4 m | 碰撞膨胀距离（机器人半径） |
+| `trav.inflation` | 0.2 m | 软代价膨胀区域 |
+| `trav.slope_max` | 0.40 rad (~23°) | 最大可爬坡度 |
+| `trav.step_max` | 0.17 m | 最大可跨越台阶高度 |
+| `trav.interval_min` | 0.50 m | 最小通行净空高度 |
+
+**Planner 参数**（修改后下次规划即生效，文件：`planner/config/param.py`）：
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| `use_quintic` | True | 使用五次样条轨迹优化（更平滑） |
+| `max_heading_rate` | 10 | 最大航向角变化率 |
+
+#### 性能指标
+
 | 指标 | 数值 |
 |------|------|
 | 断层图生成 | ~40ms (85万点) |
@@ -409,32 +495,16 @@ export PYTHONPATH=~/git/3d_dog_navi_ros2/src/pct_planner/planner/lib:$PYTHONPATH
 | 轨迹优化 | ~375ms |
 | 输出航点 | 1000+ |
 
-### 自定义场景配置
+#### 自定义场景
 
-项目支持多种预定义场景，也可自定义场景配置：
-
-```yaml
-# 在pct_planner_ros2/config/目录下创建自定义场景
-scene_config:
-  pcd:
-    file_name: "custom_scene.pcd"
-  map:
-    resolution: 0.1
-    ground_h: 0.0
-    slice_dh: 0.5
-```
-
-### 性能优化
-
-对于高性能需求，可启用C++加速：
+在 `tomography/config/` 下创建场景配置文件（参考 `scene_clinic.py`），将 PCD 文件放入 `rsc/pcd/`，然后：
 
 ```bash
-# 编译C++组件
-cd ~/3d_dog_navi_ros2_ws/src/pct_planner_ros2
-./build_cpp.sh
+cd tomography/scripts
+python3 run_standalone.py --scene YourScene
 
-# 使用C++加速版本
-ros2 run pct_planner_ros2 plan_node --ros-args -p use_cpp:=true
+cd ../../
+python3 run_ros2_interactive.py --skip-tomo
 ```
 
 ---
