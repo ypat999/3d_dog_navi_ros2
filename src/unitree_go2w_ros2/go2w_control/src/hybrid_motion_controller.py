@@ -75,7 +75,7 @@ class HybridMotionController(Node):
         
         if is_uphill:
             # 上坡模式：轮子和腿部同时前进
-            self.get_logger().info(f'上坡模式: pitch={self.pitch_angle:.2f}度')
+            self.get_logger().debug(f'上坡模式: pitch={self.pitch_angle:.2f}度')
             
             # 发送完整的速度命令给Quadruped Controller（包括x方向）
             full_msg = Twist()

@@ -979,7 +979,7 @@
     
     <!-- Mid360 Livox -->
     <link name="livox_frame">
-      <pose>0.0 0 0.10 0 0 3.14159</pose>
+      <pose>0.3 0 0.20 0 -0.5236 3.14159</pose>
       <inertial>
         <mass>0.4</mass>
         <pose>0 0 0 0 0 0</pose>
