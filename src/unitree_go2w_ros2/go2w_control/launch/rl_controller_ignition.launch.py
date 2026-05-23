@@ -34,15 +34,15 @@ def generate_launch_description():
 
     declare_world = DeclareLaunchArgument(
         name="world",
-        # default_value="Building.world",
-        default_value="rubicon.sdf",
+        default_value="Building.world",
+        # default_value="rubicon.sdf",
         description="World file name",
     )
 
     declare_world_name = DeclareLaunchArgument(
         name="world_name",
-        # default_value="tower",
-        default_value="challenge",
+        default_value="tower",
+        # default_value="challenge",
         description="World name in SDF file",
     )
 
@@ -234,14 +234,32 @@ def generate_launch_description():
         output="screen",
     )
 
-    world_to_odom_tf = Node(
+    map_to_odom_tf = Node(
         package="tf2_ros",
         executable="static_transform_publisher",
-        name="world_to_odom_tf",
-        arguments=["0", "0", "0", "0", "0", "0", "world", "odom"],
+        name="map_to_odom_tf",
+        arguments=["0", "0", "0", "0", "0", "0", "map", "odom"],
         parameters=[{"use_sim_time": True}],
         output="screen",
     )
+
+    odom_to_world_tf = Node(
+        package="tf2_ros",
+        executable="static_transform_publisher",
+        name="odom_to_world_tf",
+        arguments=["0", "0", "0", "0", "0", "0", "odom", "world"],
+        parameters=[{"use_sim_time": True}],
+        output="screen",
+    )
+    world_to_base_tf = Node(
+        package="tf2_ros",
+        executable="static_transform_publisher",
+        name="world_to_base_tf",
+        arguments=["0", "0", "0", "0", "0", "0", "world", "base"],
+        parameters=[{"use_sim_time": True}],
+        output="screen",
+    )
+
 
     livox_frame_tf = Node(
         package="tf2_ros",
@@ -279,7 +297,9 @@ def generate_launch_description():
             TimerAction(
                 period=6.0, actions=[spawner_joint_state_broadcaster]
             ),
-            world_to_odom_tf,
+            map_to_odom_tf,
+            odom_to_world_tf,
+            world_to_base_tf,
             livox_frame_tf,
         ]
     )
