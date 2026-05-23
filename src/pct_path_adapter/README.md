@@ -191,3 +191,87 @@ PCT Planner → PCT Path Adapter → /plan + /goal_pose
 - **Traversability Layer**: 从点云中提取3D可通行性信息，写入nav2 costmap
 - **PCT Path Adapter**: 将3D全局路径适配为2D局部路径，引导MPPI跟随三维轨迹
 - **MPPI Controller**: 基于costmap进行局部避障，输出cmd_vel
+
+## Gazebo World → PCD 转换
+
+PCT Planner需要PCD点云作为输入。对于Gazebo仿真环境，可以使用 `mesh_to_pcd.py` 将建筑模型转换为PCD。
+
+### 转换脚本
+
+脚本位置：`pct_planner/scripts/mesh_to_pcd.py`
+
+```bash
+# 自动模式：从world文件读取pose偏移和scale，自动定位mesh文件
+python3 ~/git/3d_dog_navi_ros2/src/pct_planner/scripts/mesh_to_pcd.py \
+    --world ~/git/3d_dog_navi_ros2/src/ignition_models/gazebo_garden_migration/worlds/Building.world \
+    --output ~/git/3d_dog_navi_ros2/src/pct_planner/rsc/pcd/building_sim.pcd \
+    --num_points 500000 --voxel_size 0.05 --add_ground
+
+# 手动模式：指定mesh、pose、scale
+python3 ~/git/3d_dog_navi_ros2/src/pct_planner/scripts/mesh_to_pcd.py \
+    --input Building.dae --output building_sim.pcd \
+    --pose 5 3 0 0 0 1.57 --scale 1 1 0.7 \
+    --num_points 500000 --add_ground --visualize
+```
+
+自动模式会从 `.world` 文件中解析 `<include><pose>` 获取模型偏移，从 `model.sdf` 中解析 `<mesh><scale>` 获取缩放因子，并自动定位mesh文件路径。当模型不在原点时，点云会自动应用偏移变换，确保与Gazebo世界坐标对齐。
+
+### 参数说明
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| `--world` / `-w` | - | Gazebo .world文件（自动读取pose+scale+mesh路径） |
+| `--input` / `-i` | 自动 | 输入mesh文件，使用--world时自动检测 |
+| `--output` / `-o` | 必需 | 输出PCD文件路径 |
+| `--pose` | `0 0 0 0 0 0` | 模型位姿 x y z roll pitch yaw，使用--world时自动读取 |
+| `--scale` | `1 1 1` | 缩放因子，使用--world时自动从model.sdf读取 |
+| `--num_points` / `-n` | 500000 | 采样点数 |
+| `--voxel_size` / `-v` | 0.05 | 体素降采样尺寸(m)，0=不降采样 |
+| `--add_ground` | false | 添加地面平面点 |
+| `--ground_density` | 100 | 地面点密度(点/m²) |
+| `--method` | surface | 采样方法（surface/uniform） |
+| `--visualize` | false | Open3D可视化结果 |
+
+### 场景配置
+
+生成PCD后，需在PCT Planner中注册场景：
+
+1. 创建场景配置 `tomography/config/scene_building_sim.py`
+2. 在 `tomography/config/__init__.py` 中导入
+3. 在 `run_ros2_interactive.py` 的 SCENES 字典中注册
+
+```bash
+# 使用BuildingSim场景运行PCT Planner
+ros2 run pct_planner run_ros2_interactive.py --scene BuildingSim
+```
+
+### 坐标对齐
+
+**PCT Planner轨迹与Gazebo世界坐标是对齐的**。使用 `--world` 参数时，脚本自动完成以下对齐：
+
+1. **自动读取pose偏移**：从 `.world` 文件的 `<include><pose>` 解析模型在世界中的位置
+2. **自动读取scale**：从 `model.sdf` 的 `<mesh><scale>` 解析缩放因子
+3. **自动应用变换**：采样点经scale缩放后，再应用pose的平移和旋转变换
+
+坐标变换链：
+```
+mesh本地坐标
+  → apply_scale(scale)        → 缩放后坐标
+  → apply_transform(pose)     → Gazebo世界坐标
+  = PCD坐标
+  = PCT Planner路径坐标 (transTrajGrid2Map还原到PCD坐标系)
+  = map frame (PCT Planner发布frame_id='map')
+  = nav2 MPPI输入 (使用map frame)
+```
+
+无论模型在world中是否位于原点，使用 `--world` 参数都能自动对齐。手动模式需确保 `--pose` 和 `--scale` 与world/sdf文件一致。
+
+### 方案对比
+
+| 方案 | 保真度 | 耗时 | 适用场景 |
+|------|--------|------|----------|
+| Mesh表面采样（mesh_to_pcd.py） | 中（无遮挡） | ~3秒 | 快速验证PCT planner |
+| Gazebo仿真+FAST-LIO2扫描 | 高（真实LiDAR） | ~10分钟 | 最终联调验证 |
+| 虚拟LiDAR射线投射 | 中高（有遮挡） | ~1分钟 | 中等保真度需求 |
+
+Mesh表面采样的局限：没有遮挡效果，墙体背面也有采样点。如果PCT planner规划效果不理想，建议使用Gazebo仿真+FAST-LIO2获取真实点云。
