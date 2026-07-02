@@ -4,6 +4,6 @@
 [submodule "src/rl_sar"]
 	path = src/rl_sar
 	url = https://github.com/ypat999/rl_sar.git
-[submodule "src/OctoPlanner3D-ROS"]
-	path = src/OctoPlanner3D-ROS
+[submodule "src/OctoPlanner3D-ROS2"]
+	path = src/OctoPlanner3D-ROS2
 	url = https://github.com/JackJu-HIT/OctoPlanner3D-ROS2.git
