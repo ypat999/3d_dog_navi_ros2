@@ -1,5 +1,5 @@
 # 3D Dog Navigation ROS2 项目
-# 建设中，目前只有手动控制
+# 暂停更新，目前在此仓库进行三维定位规划+二维控制混合实现三维导航能力工作：https://github.com/ypat999/dog_slam
 
 ## 项目介绍
 
